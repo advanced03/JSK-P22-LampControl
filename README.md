@@ -20,6 +20,10 @@ npm run build
 The build creates a portable Windows x64 executable in `dist/`. Electron Builder embeds the app icon; the executable is
 not digitally signed.
 
+## Screenshots
+
+<!-- Add screenshots here, for example: ![Main window](screenshots/main-window.png) -->
+
 ## Notes
 
 - Change the language and optionally enable system-tray mode in Settings. With tray mode enabled, closing the window
@@ -41,3 +45,7 @@ are written without response; there is no encryption or handshake. Examples: pow
 Schedule timers use `7E 08 82 h m 00 mode weeks EF` (`mode`: 0 = on, 1 = off). In `weeks`, bit 7 enables the timer
 and bits 0–6 represent Monday through Sunday. To read a timer, send `FF FF FF` for the time, wait about half a second,
 then read the characteristic.
+
+## AI disclosure
+
+AI assistance was used to implement the power-status interface and edit this documentation.
