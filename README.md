@@ -22,7 +22,14 @@ not digitally signed.
 
 ## Screenshots
 
-<!-- Add screenshots here, for example: ![Main window](screenshots/main-window.png) -->
+<img width="989" height="718" alt="{3CC36F63-38E9-45DC-B24B-7D523B326EE6}" src="https://github.com/user-attachments/assets/a3f45ba4-8c3a-4ec5-80f5-1cb25b8fda35" />
+
+<img width="971" height="734" alt="{942C493A-DF83-4595-9B31-7369EFE2122A}" src="https://github.com/user-attachments/assets/d4f4925d-2a89-4c77-9f69-08416ccd7cb4" />
+
+<img width="971" height="723" alt="{44BD69E5-CA6D-4CA1-83CE-8CEDBBBE29DA}" src="https://github.com/user-attachments/assets/660574ff-abe0-4aab-8adf-e2d1832713e1" />
+
+<img width="975" height="725" alt="{23978387-298A-45BB-A731-7D25EB0A8320}" src="https://github.com/user-attachments/assets/1c7f3424-2bcf-4d80-a1e1-9165eb9f6dbb" />
+
 
 ## Notes
 
@@ -48,4 +55,4 @@ then read the characteristic.
 
 ## AI disclosure
 
-AI assistance was used to implement the power-status interface and edit this documentation.
+The "Magic Lantern" app was decompiled and this project was made with AI.
