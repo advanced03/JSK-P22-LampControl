@@ -53,6 +53,6 @@ Schedule timers use `7E 08 82 h m 00 mode weeks EF` (`mode`: 0 = on, 1 = off). I
 and bits 0–6 represent Monday through Sunday. To read a timer, send `FF FF FF` for the time, wait about half a second,
 then read the characteristic.
 
-## AI disclosure
+## AI usage
 
 The "Magic Lantern" app was decompiled and this project was made with AI.
