@@ -432,7 +432,7 @@
       busy = false
     }
     // Color wheel: angle = hue, distance from centre = saturation
-    const cv = $('wheel'), cx = cv.getContext('2d'), R = 130
+    const cv = $('wheel'), R = 130
     function hsv2rgb(h, s, v) {
       const f = (n) => {
         const k = (n + h / 60) % 6
@@ -440,19 +440,6 @@
       }
       return [f(5), f(3), f(1)].map((x) => Math.round(x * 255))
     }
-    ;(function draw() {
-      const im = cx.createImageData(260, 260)
-      for (let y = 0; y < 260; y++) {
-        for (let x = 0; x < 260; x++) {
-          const dx = x - R, dy = y - R, d = Math.hypot(dx, dy), i = (y * 260 + x) * 4
-          if (d <= R) {
-            const h = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360, [r, g, b] = hsv2rgb(h, d / R, 1)
-            im.data.set([r, g, b, 255], i)
-          }
-        }
-      }
-      cx.putImageData(im, 0, 0)
-    })()
     const hex2 = (n) => n.toString(16).padStart(2, '0')
     function applyRGB(r, g, b, fromHex) {
       const hex = '#' + [r, g, b].map(hex2).join('').toUpperCase()
