@@ -67,8 +67,14 @@
           <div class="card" style="margin-top:12px">
             <div
               class="search"><i style="color:var(--ink3)">&#xE721;</i><input type="text" id="q" data-i18n-attr="placeholder:effects.search;aria-label:effects.search" placeholder="Search effects" aria-label="Search effects" disabled></div>
-            <div id="cats" role="tablist" data-i18n-attr="aria-label:effects.categories"
-              aria-label="Effect categories"></div>
+            <div id="category-nav">
+              <button class="cat-scroll" id="catsLeft" type="button" data-i18n-attr="aria-label:effects.scrollLeft"
+                aria-label="Scroll categories left">&#xE76B;</button>
+              <div id="cats" role="tablist" data-i18n-attr="aria-label:effects.categories"
+                aria-label="Effect categories"></div>
+              <button class="cat-scroll" id="catsRight" type="button" data-i18n-attr="aria-label:effects.scrollRight"
+                aria-label="Scroll categories right">&#xE76C;</button>
+            </div>
             <div id="cols" data-i18n-attr="aria-label:effects.colors" aria-label="Filter by color"></div>
             <div id="fx"></div>
           </div>
@@ -528,6 +534,25 @@
       )
     }
     renderCategories()
+    function updateCategoryArrows() {
+      const categories = $('cats')
+      $('catsLeft').disabled = categories.scrollLeft <= 0
+      $('catsRight').disabled = categories.scrollLeft + categories.clientWidth >= categories.scrollWidth - 1
+    }
+    $('catsLeft').onclick = () => $('cats').scrollBy({
+      left: -Math.max(160, $('cats').clientWidth * 0.75),
+      behavior: 'smooth',
+    })
+    $('catsRight').onclick = () => $('cats').scrollBy({
+      left: Math.max(160, $('cats').clientWidth * 0.75),
+      behavior: 'smooth',
+    })
+    $('cats').addEventListener('scroll', updateCategoryArrows)
+    window.addEventListener('resize', updateCategoryArrows)
+    document.querySelector('.nav[data-page="pFx"]').addEventListener('click', () => {
+      requestAnimationFrame(updateCategoryArrows)
+    })
+    requestAnimationFrame(updateCategoryArrows)
     $('q').oninput = () => render()
     let curKey = null, colF = null
     const colOK = (n) => {
@@ -872,6 +897,19 @@
       else connect()
     }
     const trayPreference = localStorage.getItem('lamp-keep-in-tray') === 'true'
+    function updateTrayLabels() {
+      window.api.setTrayLabels({
+        open: i18n.t('tray.open'),
+        startSync: i18n.t('tray.startSync'),
+        stopSync: i18n.t('tray.stopSync'),
+        disconnect: i18n.t('tray.disconnect'),
+        connect: i18n.t('tray.connect'),
+        turnOn: i18n.t('tray.turnOn'),
+        turnOff: i18n.t('tray.turnOff'),
+        quit: i18n.t('tray.quit'),
+      })
+    }
+    updateTrayLabels()
     $('keepInTray').checked = trayPreference
     window.api.setTray(trayPreference)
     $('keepInTray').addEventListener('change', () => {
@@ -881,9 +919,11 @@
     window.api.onTrayToggle(() => $('connect').click())
     window.api.onTrayPower(power)
     document.addEventListener('languagechange', () => {
+      updateTrayLabels()
       renderCategories()
       renderColorFilters()
       render()
+      updateCategoryArrows()
       renderPower()
       renderMic()
       renderEqOptions()

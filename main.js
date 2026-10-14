@@ -81,6 +81,16 @@ let tray = null
 let trayOn = false
 let quitting = false
 let appState = { status: 'Not connected', running: false, connected: false }
+let trayLabels = {
+  open: 'Open app',
+  startSync: 'Start sync',
+  stopSync: 'Stop sync',
+  disconnect: 'Disconnect from lamp',
+  connect: 'Open to connect',
+  turnOn: 'Turn lamp on',
+  turnOff: 'Turn lamp off',
+  quit: 'Quit',
+}
 
 function showWin() {
   if (!win) return
@@ -107,11 +117,11 @@ function buildTray() {
   const appName = MODE === 'sync' ? 'Lamp Ambilight' : 'JSK-P22 Lamp Control'
   tray.setToolTip(appName + ': ' + appState.status)
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Open ' + appName, click: showWin },
+    { label: trayLabels.open, click: showWin },
     {
       label: MODE === 'sync'
-        ? appState.running ? 'Stop sync' : 'Start sync'
-        : appState.connected ? 'Disconnect from lamp' : 'Open to connect',
+        ? appState.running ? trayLabels.stopSync : trayLabels.startSync
+        : appState.connected ? trayLabels.disconnect : trayLabels.connect,
       click: () => {
         if (MODE !== 'sync' && !appState.connected) showWin()
         else if (win) win.webContents.send('tray-toggle')
@@ -120,19 +130,19 @@ function buildTray() {
     ...(MODE === 'control' ? [
       { type: 'separator' },
       {
-        label: 'Turn lamp on',
+        label: trayLabels.turnOn,
         enabled: appState.connected,
         click: () => win && win.webContents.send('tray-power', true),
       },
       {
-        label: 'Turn lamp off',
+        label: trayLabels.turnOff,
         enabled: appState.connected,
         click: () => win && win.webContents.send('tray-power', false),
       },
     ] : []),
     { type: 'separator' },
     {
-      label: 'Quit',
+      label: trayLabels.quit,
       click: () => {
         quitting = true
         app.quit()
@@ -248,6 +258,11 @@ app.whenReady().then(() => {
   ipcMain.on('tray', (_event, enabled) => {
     trayOn = !!enabled
     buildTray()
+  })
+  ipcMain.on('tray-labels', (_event, labels) => {
+    if (!labels || typeof labels !== 'object') return
+    trayLabels = { ...trayLabels, ...labels }
+    if (tray) buildTray()
   })
   ipcMain.on('state', (_event, state) => {
     appState = state

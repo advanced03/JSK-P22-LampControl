@@ -16,6 +16,9 @@ contextBridge.exposeInMainWorld('api', {
   setTray(enabled) {
     ipcRenderer.send('tray', enabled)
   },
+  setTrayLabels(labels) {
+    ipcRenderer.send('tray-labels', labels)
+  },
   state(appState) {
     ipcRenderer.send('state', appState)
   },
