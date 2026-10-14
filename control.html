@@ -415,6 +415,14 @@
       scene: (n) => [0x7e, 5, 0x31, n, 7, 0xff, 0xff, 1, 0xef],
       speed: (n) => [0x7e, 4, 2, n, 0xff, 0xff, 0xff, 0, 0xef],
     }
+    // Every GATT read and write goes through one queue, so two operations never overlap
+    // (overlapping ones fail with "GATT operation already in progress").
+    let gattQueue = Promise.resolve()
+    function gatt(operation) {
+      const result = gattQueue.then(operation)
+      gattQueue = result.catch(() => {})
+      return result
+    }
     async function send(bytes) {
       pending = bytes
       if (busy || !ch) return
@@ -423,7 +431,7 @@
         while (pending) {
           const b = pending
           pending = null
-          await ch.writeValueWithoutResponse(new Uint8Array(b))
+          await gatt(() => ch.writeValueWithoutResponse(new Uint8Array(b)))
           await new Promise((r) => setTimeout(r, 40))
         }
       } catch (e) {
@@ -826,9 +834,12 @@
         try {
           let ok = false
           for (let tries = 0; tries < 2 && !ok && ch; tries++) {
-            await ch.writeValueWithoutResponse(new Uint8Array([0x7e, 8, 0x82, 255, 255, 255, mode, 0, 0xef]))
-            await sleep(tries ? 900 : 450)
-            const dv = await ch.readValue(), v = new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength)
+            const v = await gatt(async () => {
+              await ch.writeValueWithoutResponse(new Uint8Array([0x7e, 8, 0x82, 255, 255, 255, mode, 0, 0xef]))
+              await sleep(tries ? 900 : 450)
+              const dv = await ch.readValue()
+              return new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength)
+            })
             if (v.length >= 9 && v[0] === 0x7e && v[1] === 8 && v[2] === 0x82 && v[8] === 0xef && v[6] === mode) {
               t.show(v[3], v[4], v[7])
               ok = true
@@ -853,20 +864,25 @@
       setTimeout(readTimers, 900)
     }
 
+    function onDisconnected() {
+      ch = null
+      pending = null
+      setEnabled(false)
+      resetStates()
+      setConnectionButton('connection.reconnect')
+      setConnectionStatus('connection.disconnectedStatus')
+    }
     async function connect() {
       if (!navigator.bluetooth) {
         $('status').textContent = i18n.t('connection.noBluetooth')
         return
       }
+      const reconnecting = !!dev
       try {
-        dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [SERVICE] })
-        dev.addEventListener('gattserverdisconnected', () => {
-          ch = null
-          setEnabled(false)
-          resetStates()
-          setConnectionButton('connection.reconnect')
-          setConnectionStatus('connection.disconnectedStatus')
-        })
+        if (!dev) {
+          dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [SERVICE] })
+          dev.addEventListener('gattserverdisconnected', onDisconnected)
+        }
         setConnectionStatus('connection.connecting')
         const svc = await (await dev.gatt.connect()).getPrimaryService(SERVICE)
         ch = await svc.getCharacteristic(CHAR)
@@ -876,7 +892,14 @@
         afterConnect()
       } catch (e) {
         if (e.name === 'NotFoundError') setConnectionStatus('connection.noDevice')
-        else setConnectionStatus('connection.failed', { message: e.message })
+        else {
+          setConnectionStatus('connection.failed', { message: e.message })
+          if (reconnecting) {
+            // The lamp did not answer: forget it, so the next click opens the picker again.
+            dev = null
+            setConnectionButton('connection.connect')
+          }
+        }
       }
     }
     $('connect').onclick = () => {
