@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title data-i18n-title="app.title">JSK-P22 Lamp Control</title>
+    <link rel="stylesheet" href="fluent.css">
+  </head>
+  <body>
+    <div class="titlebar"><i>&#xEA80;</i><span data-i18n="app.title">JSK-P22 Lamp Control</span></div>
+    <div class="app">
+      <nav class="pane">
+        <div class="items" role="tablist">
+          <button class="nav sel" data-page="pColor"><i>&#xE790;</i><span data-i18n="nav.color">Color</span></button>
+          <button class="nav" data-page="pFx"><i>&#xE8B1;</i><span data-i18n="nav.effects">Effects</span></button>
+          <button class="nav" data-page="pMic"><i>&#xE720;</i><span data-i18n="nav.music">Music</span></button>
+          <button class="nav" data-page="pTime"><i>&#xE787;</i><span data-i18n="nav.schedule">Schedule</span></button>
+          <button class="nav" data-page="pSettings"><i>&#xE713;</i><span data-i18n="nav.settings">Settings</span></button>
+        </div>
+        <div class="conn">
+          <div class="cs"><i>&#xE702;</i><span id="status">Not connected</span></div>
+          <button class="accent" id="connect" data-i18n="connection.connect">Connect</button>
+        </div>
+      </nav>
+      <main class="content">
+        <section class="page on" id="pColor">
+          <h1 data-i18n="nav.color">Color</h1>
+          <div class="card sc">
+            <div>
+              <div class="t" data-i18n="power.title">Power</div>
+              <div class="d" data-i18n="power.description">Turn the lamp on or off</div>
+            </div>
+            <div
+              class="ctl"><span class="badge" id="powerState">Unknown</span><button id="on" disabled data-i18n="power.on">On</button><button id="off" disabled data-i18n="power.off">Off</button></div>
+          </div>
+          <div class="card sc">
+            <div>
+              <div class="t" data-i18n="brightness.title">Brightness</div>
+              <div class="d" data-i18n="brightness.description">Lamp output level</div>
+            </div>
+            <div
+              class="ctl"><input type="range" id="bright" min="0" max="100" value="100" disabled><span class="val" id="bv">100</span></div>
+          </div>
+          <h2 data-i18n="color.pick">Pick a color</h2>
+          <div class="card">
+            <div class="wheelrow">
+              <canvas id="wheel" width="260" height="260" tabindex="0" data-i18n-attr="aria-label:color.wheelLabel"
+                aria-label="Color wheel: drag to choose hue and saturation"></canvas>
+              <div
+                class="hexcol"><div class="chip" id="chip"></div><input type="text" id="hex" value="#FF3B6B" maxlength="7" data-i18n-attr="aria-label:color.hexLabel" aria-label="Hex color" disabled><div class="d" data-i18n="color.help" style="font-size:12px;color:var(--ink2)">Drag on the wheel or type a hex code. The center is white.</div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="pFx">
+          <h1 data-i18n="effects.title">Effects</h1>
+          <div
+            class="card sc"><div><div class="t" data-i18n="effects.nowPlaying">Now playing</div><div class="d" data-i18n="effects.colorStops">Picking a color stops the running effect</div></div><span class="badge" id="cur">none</span></div>
+          <div class="card sc">
+            <div>
+              <div class="t" data-i18n="effects.speed">Effect speed</div>
+              <div class="d" data-i18n="effects.speedDescription">How fast the effect runs</div>
+            </div>
+            <div
+              class="ctl"><input type="range" id="speed" min="0" max="100" value="50" disabled><span class="val" id="sv">50</span></div>
+          </div>
+          <div class="card" style="margin-top:12px">
+            <div
+              class="search"><i style="color:var(--ink3)">&#xE721;</i><input type="text" id="q" data-i18n-attr="placeholder:effects.search;aria-label:effects.search" placeholder="Search effects" aria-label="Search effects" disabled></div>
+            <div id="cats" role="tablist" data-i18n-attr="aria-label:effects.categories"
+              aria-label="Effect categories"></div>
+            <div id="cols" data-i18n-attr="aria-label:effects.colors" aria-label="Filter by color"></div>
+            <div id="fx"></div>
+          </div>
+        </section>
+
+        <section class="page" id="pMic">
+          <h1 data-i18n="music.title">Music</h1>
+          <div class="card sc">
+            <div>
+              <div class="t" data-i18n="music.sync">Music sync</div>
+              <div class="d" data-i18n="music.description">Lights follow sound from the lamp's built-in microphone</div>
+            </div>
+            <div
+              class="ctl"><span class="badge" id="micState">Unknown</span><button id="micOn" class="accent needs mic" disabled data-i18n="music.start">Start</button><button id="micOff" class="needs mic" disabled data-i18n="music.stop">Stop</button></div>
+          </div>
+          <div
+            class="card sc"><div><div class="t" data-i18n="music.mode">Mode</div><div class="d" data-i18n="music.modeDescription">How the lamp reacts to sound</div></div><select id="eq" class="needs mic" disabled></select></div>
+          <div class="card sc">
+            <div>
+              <div class="t" data-i18n="music.sensitivity">Sensitivity</div>
+              <div class="d" data-i18n="music.sensitivityDescription">Higher reacts to quieter sounds</div>
+            </div>
+            <div
+              class="ctl"><input type="range" id="sens" class="needs mic" min="0" max="100" value="50" disabled><span class="val" id="mv">50</span></div>
+          </div>
+          <div
+            class="info"><i>&#xE946;</i><span id="micNote" data-i18n="music.note">Uses the lamp's built-in microphone. The lamp doesn't report its state, so this shows what was last sent.</span></div>
+        </section>
+
+        <section class="page" id="pTime">
+          <h1 data-i18n="schedule.title">Schedule</h1>
+          <div
+            class="card sc"><div><div class="t" data-i18n="schedule.clock">Lamp clock</div><div class="d" data-i18n="schedule.clockDescription">Schedules need the correct time. It is set automatically when you connect.</div></div><button id="setClock" class="needs" disabled data-i18n="schedule.setClock">Set to this PC's time</button></div>
+          <div
+            class="card sc"><div><div class="t" data-i18n="schedule.readTitle">Read from lamp</div><div class="d" data-i18n="schedule.readDescription">Loads the timers stored on the lamp. This also happens when you connect.</div></div><button id="readTm" class="needs" disabled data-i18n="schedule.read">Read</button></div>
+          <h2 data-i18n="schedule.timers">Timers</h2>
+          <div class="tm" id="tm"></div>
+          <div
+            class="info"><i>&#xE946;</i><span data-i18n="schedule.note">Timers are read back from the lamp. Changes apply immediately. Turning one off keeps its time and days. The read-back follows the original app's code but is untested on a real lamp.</span></div>
+        </section>
+
+        <section class="page" id="pSettings">
+          <h1 data-i18n="settings.title">Settings</h1>
+          <div class="card sc">
+            <div>
+              <div class="t" data-i18n="language">Language</div>
+              <div class="d" data-i18n="settings.languageDescription">Choose the language used by the application.</div>
+            </div>
+            <select id="language" data-i18n-attr="aria-label:language" aria-label="Language"></select>
+          </div>
+          <label class="card sc setting-toggle">
+            <div>
+              <div class="t" data-i18n="settings.trayTitle">Keep in tray</div>
+              <div class="d" data-i18n="settings.trayDescription">Closing the window hides the app in the system tray. Use the tray menu to open the app, disconnect from the lamp, or quit.</div>
+            </div>
+            <input id="keepInTray" type="checkbox" data-i18n-attr="aria-label:settings.trayTitle" aria-label="Keep in tray">
+          </label>
+        </section>
+      </main>
+    </div>
+    <script src="i18n.js"></script>
+    <script>
+    const G = [['Special', [['Auto play', 0], ['Magic', 1], ['Magic reverse', 2], ['Energy', 212]]], ['Jump & strobe', [
+      ['Jump: multicolor', 193],
+      ['Jump: red, green, blue', 194],
+      ['Jump: yellow, cyan, purple', 195],
+      ['Strobe: multicolor', 196],
+      ['Strobe: red, green, blue', 197],
+      ['Strobe: yellow, cyan, purple', 198],
+    ]], ['Fade & transition', [
+      ['Fade: multicolor', 199],
+      ['Fade: red and yellow', 200],
+      ['Fade: red and purple', 201],
+      ['Fade: green and cyan', 202],
+      ['Fade: green and yellow', 203],
+      ['Fade: blue and purple', 204],
+      ['Transition: multicolor', 3],
+      ['Transition reverse: multicolor', 4],
+      ['Transition: red, green, blue', 5],
+      ['Transition reverse: red, green, blue', 6],
+      ['Transition: yellow, cyan, purple', 7],
+      ['Transition reverse: yellow, cyan, purple', 8],
+      ['Transition: six colors to red', 9],
+      ['Transition reverse: six colors to red', 10],
+      ['Transition: six colors to green', 11],
+      ['Transition reverse: six colors to green', 12],
+      ['Transition: six colors to blue', 13],
+      ['Transition reverse: six colors to blue', 14],
+      ['Transition: six colors to cyan', 15],
+      ['Transition reverse: six colors to cyan', 16],
+      ['Transition: six colors to yellow', 17],
+      ['Transition reverse: six colors to yellow', 18],
+      ['Transition: six colors to purple', 19],
+      ['Transition reverse: six colors to purple', 20],
+      ['Transition: six colors to white', 21],
+      ['Transition reverse: six colors to white', 22],
+    ]], ['Marquee', [
+      ['Marquee: red', 205],
+      ['Marquee: green', 206],
+      ['Marquee: blue', 207],
+      ['Marquee: yellow', 208],
+      ['Marquee: cyan', 209],
+      ['Marquee: purple', 210],
+      ['Marquee: white', 211],
+    ]], ['Race & wave', [
+      ['Race: multicolor', 77],
+      ['Race reverse: multicolor', 78],
+      ['Race: red, green, blue', 79],
+      ['Race reverse: red, green, blue', 80],
+      ['Race: yellow, cyan, purple', 81],
+      ['Race reverse: yellow, cyan, purple', 82],
+      ['Wave: multicolor', 83],
+      ['Wave reverse: multicolor', 84],
+      ['Wave: red, green, blue', 85],
+      ['Wave reverse: red, green, blue', 86],
+      ['Wave: yellow, cyan, purple', 87],
+      ['Wave reverse: yellow, cyan, purple', 88],
+    ]], ['Flush & curtain', [
+      ['Flush: multicolor', 181],
+      ['Flush reverse: multicolor', 182],
+      ['Flush: red, green, blue', 183],
+      ['Flush reverse: red, green, blue', 184],
+      ['Flush: yellow, cyan, purple', 185],
+      ['Flush reverse: yellow, cyan, purple', 186],
+      ['Flush close: multicolor', 187],
+      ['Flush open: multicolor', 188],
+      ['Flush close: red, green, blue', 189],
+      ['Flush open: red, green, blue', 190],
+      ['Flush close: yellow, cyan, purple', 191],
+      ['Flush open: yellow, cyan, purple', 192],
+      ['Curtain close: multicolor', 57],
+      ['Curtain open: multicolor', 58],
+      ['Curtain close: red, green, blue', 59],
+      ['Curtain open: red, green, blue', 60],
+      ['Curtain close: yellow, cyan, purple', 61],
+      ['Curtain open: yellow, cyan, purple', 62],
+      ['Curtain close: red', 63],
+      ['Curtain open: red', 64],
+      ['Curtain close: green', 65],
+      ['Curtain open: green', 66],
+      ['Curtain close: blue', 67],
+      ['Curtain open: blue', 68],
+      ['Curtain close: yellow', 69],
+      ['Curtain open: yellow', 70],
+      ['Curtain close: cyan', 71],
+      ['Curtain open: cyan', 72],
+      ['Curtain close: purple', 73],
+      ['Curtain open: purple', 74],
+      ['Curtain close: white', 75],
+      ['Curtain open: white', 76],
+    ]], ['Water', [
+      ['Water: multicolor', 39],
+      ['Water reverse: multicolor', 40],
+      ['Water: red, green, blue', 41],
+      ['Water reverse: red, green, blue', 42],
+      ['Water: yellow, cyan, purple', 43],
+      ['Water reverse: yellow, cyan, purple', 44],
+      ['Water: red and green', 45],
+      ['Water reverse: red and green', 46],
+      ['Water: green and blue', 47],
+      ['Water reverse: green and blue', 48],
+      ['Water: yellow and blue', 49],
+      ['Water reverse: yellow and blue', 50],
+      ['Water: yellow and cyan', 51],
+      ['Water reverse: yellow and cyan', 52],
+      ['Water: cyan and purple', 53],
+      ['Water reverse: cyan and purple', 54],
+      ['Water: white', 55],
+      ['Water reverse: white', 56],
+    ]], ['Flow', [
+      ['Flow: white, red, white', 143],
+      ['Flow reverse: white, red, white', 144],
+      ['Flow: white, green, white', 145],
+      ['Flow reverse: white, green, white', 146],
+      ['Flow: white, blue, white', 147],
+      ['Flow reverse: white, blue, white', 148],
+      ['Flow: white, yellow, white', 149],
+      ['Flow reverse: white, yellow, white', 150],
+      ['Flow: white, cyan, white', 151],
+      ['Flow reverse: white, cyan, white', 152],
+      ['Flow: white, purple, white', 153],
+      ['Flow reverse: white, purple, white', 154],
+      ['Flow: red, white, red', 155],
+      ['Flow reverse: red, white, red', 156],
+      ['Flow: green, white, green', 157],
+      ['Flow reverse: green, white, green', 158],
+      ['Flow: blue, white, blue', 159],
+      ['Flow reverse: blue, white, blue', 160],
+      ['Flow: yellow, white, yellow', 161],
+      ['Flow reverse: yellow, white, yellow', 162],
+      ['Flow: cyan, white, cyan', 163],
+      ['Flow reverse: cyan, white, cyan', 164],
+      ['Flow: purple, white, purple', 165],
+      ['Flow reverse: purple, white, purple', 166],
+    ]], ['Tail', [
+      ['Tail: multicolor', 23],
+      ['Tail reverse: multicolor', 24],
+      ['Tail: red', 25],
+      ['Tail reverse: red', 26],
+      ['Tail: green', 27],
+      ['Tail reverse: green', 28],
+      ['Tail: blue', 29],
+      ['Tail reverse: blue', 30],
+      ['Tail: yellow', 31],
+      ['Tail reverse: yellow', 32],
+      ['Tail: cyan', 33],
+      ['Tail reverse: cyan', 34],
+      ['Tail: purple', 35],
+      ['Tail reverse: purple', 36],
+      ['Tail: white', 37],
+      ['Tail reverse: white', 38],
+    ]], ['Running', [
+      ['Running: red', 89],
+      ['Running: green', 91],
+      ['Running: blue', 93],
+      ['Running: yellow', 95],
+      ['Running: cyan', 97],
+      ['Running: purple', 99],
+      ['Running: white', 101],
+      ['Running: multicolor', 103],
+      ['Running: red, green, blue', 105],
+      ['Running: yellow, cyan, purple', 107],
+      ['Running: blue, purple, cyan, yellow', 109],
+      ['Running: blue, green, cyan, yellow', 111],
+      ['Running: red dot on white', 113],
+      ['Running: green dot on red', 115],
+      ['Running: blue dot on green', 117],
+      ['Running: yellow dot on blue', 119],
+      ['Running: cyan dot on yellow', 121],
+      ['Running: purple dot on cyan', 123],
+      ['Running: white dot on purple', 125],
+      ['Running: white dot on red', 127],
+      ['Running: multicolor on red', 129],
+      ['Running: multicolor on green', 131],
+      ['Running: multicolor on blue', 133],
+      ['Running: multicolor on yellow', 135],
+      ['Running: multicolor on cyan', 137],
+      ['Running: multicolor on purple', 139],
+      ['Running: multicolor on white', 141],
+      ['Running: green dot on blue', 167],
+      ['Running: green dot on red (alt)', 169],
+      ['Running: red dot on blue', 171],
+      ['Running: cyan dot on yellow (alt)', 173],
+      ['Running: yellow dot on purple', 175],
+      ['Running: white dot on yellow', 177],
+      ['Running: yellow dot on white', 179],
+    ]], ['Running reverse', [
+      ['Running reverse: red', 90],
+      ['Running reverse: green', 92],
+      ['Running reverse: blue', 94],
+      ['Running reverse: yellow', 96],
+      ['Running reverse: cyan', 98],
+      ['Running reverse: purple', 100],
+      ['Running reverse: white', 102],
+      ['Running reverse: multicolor', 104],
+      ['Running reverse: red, green, blue', 106],
+      ['Running reverse: yellow, cyan, purple', 108],
+      ['Running reverse: blue, purple, cyan, yellow', 110],
+      ['Running reverse: blue, green, cyan, yellow', 112],
+      ['Running reverse: red dot on white', 114],
+      ['Running reverse: green dot on red', 116],
+      ['Running reverse: blue dot on green', 118],
+      ['Running reverse: yellow dot on blue', 120],
+      ['Running reverse: cyan dot on yellow', 122],
+      ['Running reverse: purple dot on cyan', 124],
+      ['Running reverse: white dot on purple', 126],
+      ['Running reverse: white dot on red', 128],
+      ['Running reverse: multicolor on red', 130],
+      ['Running reverse: multicolor on green', 132],
+      ['Running reverse: multicolor on blue', 134],
+      ['Running reverse: multicolor on yellow', 136],
+      ['Running reverse: multicolor on cyan', 138],
+      ['Running reverse: multicolor on purple', 140],
+      ['Running reverse: multicolor on white', 142],
+      ['Running reverse: green dot on blue', 168],
+      ['Running reverse: green dot on red (alt)', 170],
+      ['Running reverse: red dot on blue', 172],
+      ['Running reverse: cyan dot on yellow (alt)', 174],
+      ['Running reverse: yellow dot on purple', 176],
+      ['Running reverse: white dot on yellow', 178],
+      ['Running reverse: yellow dot on white', 180],
+    ]], ['Scenes', [
+      ['Sunrise', 1],
+      ['Sunset', 2],
+      ['Birthday', 3],
+      ['Candlelight', 4],
+      ['Fireworks', 5],
+      ['Party', 6],
+      ['Destiny', 7],
+      ['Starry sky', 8],
+      ['Romantic', 9],
+      ['Disco', 10],
+      ['Rainbow', 11],
+      ['Movie', 12],
+      ['Christmas', 13],
+      ['Flowing', 14],
+      ['Sleeping', 15],
+      ['Ocean', 16],
+      ['Forest', 17],
+      ['Reading', 18],
+      ['Working', 19],
+      ['Dazzle', 20],
+      ['Gentle', 21],
+      ['Wedding', 22],
+      ['Snow', 23],
+      ['Fire', 24],
+      ['Lightning', 25],
+      ["Valentine's Day", 26],
+      ['Halloween', 27],
+      ['Warning', 28],
+    ]]]
+    const SERVICE = 0xfff0, CHAR = 0xfff3, $ = (id) => document.getElementById(id)
+    let ch = null, dev = null, busy = false, pending = null
+    let connectionStatusKey = 'connection.disconnected', connectionStatusValues = {}
+    let connectionButtonKey = 'connection.connect'
+    function setConnectionStatus(key, values = {}) {
+      connectionStatusKey = key
+      connectionStatusValues = values
+      const status = i18n.t(key, values)
+      $('status').textContent = status
+      window.api.state({ status, connected: !!ch })
+    }
+    function setConnectionButton(key) {
+      connectionButtonKey = key
+      $('connect').textContent = i18n.t(key)
+    }
+    setConnectionStatus(connectionStatusKey)
+    const ctl = ['on', 'off', 'hex', 'bright', 'speed', 'q']
+    const setEnabled = (v) => {
+      ctl.forEach((i) => $(i).disabled = !v)
+      document.querySelectorAll('.needs').forEach((b) => b.disabled = !v)
+    }
+    const cmd = {
+      power: (o) => [0x7e, 4, 4, +o, 0, +o, 0xff, 0, 0xef],
+      color: (r, g, b) => [0x7e, 7, 5, 3, r, g, b, 0x10, 0xef],
+      bright: (l) => [0x7e, 4, 1, l, 0xff, 0xff, 0xff, 0, 0xef],
+      mode: (n) => [0x7e, 5, 3, n, 6, 0xff, 0xff, 0, 0xef],
+      scene: (n) => [0x7e, 5, 0x31, n, 7, 0xff, 0xff, 1, 0xef],
+      speed: (n) => [0x7e, 4, 2, n, 0xff, 0xff, 0xff, 0, 0xef],
+    }
+    async function send(bytes) {
+      pending = bytes
+      if (busy || !ch) return
+      busy = true
+      try {
+        while (pending) {
+          const b = pending
+          pending = null
+          await ch.writeValueWithoutResponse(new Uint8Array(b))
+          await new Promise((r) => setTimeout(r, 40))
+        }
+      } catch (e) {
+        setConnectionStatus('connection.writeFailed', { message: e.message })
+      }
+      busy = false
+    }
+    // Color wheel: angle = hue, distance from centre = saturation
+    const cv = $('wheel'), cx = cv.getContext('2d'), R = 130
+    function hsv2rgb(h, s, v) {
+      const f = (n) => {
+        const k = (n + h / 60) % 6
+        return v - v * s * Math.max(0, Math.min(k, 4 - k, 1))
+      }
+      return [f(5), f(3), f(1)].map((x) => Math.round(x * 255))
+    }
+    ;(function draw() {
+      const im = cx.createImageData(260, 260)
+      for (let y = 0; y < 260; y++) {
+        for (let x = 0; x < 260; x++) {
+          const dx = x - R, dy = y - R, d = Math.hypot(dx, dy), i = (y * 260 + x) * 4
+          if (d <= R) {
+            const h = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360, [r, g, b] = hsv2rgb(h, d / R, 1)
+            im.data.set([r, g, b, 255], i)
+          }
+        }
+      }
+      cx.putImageData(im, 0, 0)
+    })()
+    const hex2 = (n) => n.toString(16).padStart(2, '0')
+    function applyRGB(r, g, b, fromHex) {
+      const hex = '#' + [r, g, b].map(hex2).join('').toUpperCase()
+      if (!fromHex) $('hex').value = hex
+      document.documentElement.style.setProperty('--glow', hex)
+      act(cmd.color(r, g, b))
+      setActive(null)
+    }
+    function pick(e) {
+      const rc = cv.getBoundingClientRect(), k = 260 / rc.width
+      let dx = (e.clientX - rc.left) * k - R, dy = (e.clientY - rc.top) * k - R
+      const d = Math.min(Math.hypot(dx, dy), R), h = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360
+      const [r, g, b] = hsv2rgb(h, d / R, 1)
+      applyRGB(r, g, b)
+    }
+    let drag = false
+    cv.onpointerdown = (e) => {
+      if (!ch) return
+      drag = true
+      cv.setPointerCapture(e.pointerId)
+      pick(e)
+    }
+    cv.onpointermove = (e) => {
+      if (drag) pick(e)
+    }
+    cv.onpointerup = () => drag = false
+    $('hex').oninput = (e) => {
+      const v = e.target.value.trim()
+      if (/^#?[0-9a-fA-F]{6}$/.test(v)) {
+        const h = v.replace('#', '')
+        applyRGB(...[0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)), true)
+      }
+    }
+
+    $('bright').oninput = (e) => {
+      $('bv').textContent = e.target.value
+      send(cmd.bright(+e.target.value))
+    }
+    $('speed').oninput = (e) => {
+      $('sv').textContent = e.target.value
+      send(cmd.speed(+e.target.value))
+    }
+    $('on').onclick = () => power(true)
+    $('off').onclick = () => power(false)
+
+    // Effects: names and ids come from the vendor app's resources
+    const ALL = G.flatMap((g, gi) => g[1].map(([n, id]) => ({ n, id, sc: gi === G.length - 1 })))
+    const categoryKeys = [
+      'category.special',
+      'category.jump',
+      'category.fade',
+      'category.marquee',
+      'category.race',
+      'category.flush',
+      'category.water',
+      'category.flow',
+      'category.tail',
+      'category.running',
+      'category.runningReverse',
+      'category.scenes',
+    ]
+    let gi = -1
+    function renderCategories() {
+      $('cats').replaceChildren()
+      ;[[i18n.t('effects.all'), ALL.length], ...G.map((g, index) => [i18n.t(categoryKeys[index]), g[1].length])].forEach(
+        ([name, count], i) => {
+          const b = document.createElement('button')
+          b.setAttribute('role', 'tab')
+          b.innerHTML = name + '<small>' + count + '</small>'
+          b.onclick = () => {
+            gi = i - 1
+            document.querySelectorAll('#cats button').forEach((x) => x.classList.remove('sel'))
+            b.classList.add('sel')
+            render()
+          }
+          if (i === gi + 1) b.classList.add('sel')
+          $('cats').appendChild(b)
+        },
+      )
+    }
+    renderCategories()
+    $('q').oninput = () => render()
+    let curKey = null, colF = null
+    const colOK = (n) => {
+      if (!colF) return true
+      n = n.toLowerCase()
+      return colF === 'multi' ? /multicolor|six colors/.test(n) : n.includes(colF)
+    }
+    const colorFilters = [
+      ['multi', 'conic-gradient(#f33,#fd0,#3e6,#1cf,#a4f,#f33)', 'effects.multicolor'],
+      ['red', '#ff2d2d'],
+      ['green', '#2ee66b'],
+      ['blue', '#2d6bff'],
+      ['yellow', '#ffd60a'],
+      ['cyan', '#18d0ff'],
+      ['purple', '#a64dff'],
+      ['white', '#f2f2f2'],
+    ]
+    function renderColorFilters() {
+      $('cols').replaceChildren()
+      colorFilters.forEach(([key, background, labelKey]) => {
+        const b = document.createElement('button')
+        b.style.background = background
+        b.setAttribute('aria-label', i18n.t('effects.onlyColor', { color: i18n.effect(i18n.t(labelKey || key)) }))
+        if (colF === key) b.classList.add('sel')
+        b.onclick = () => {
+          colF = colF === key ? null : key
+          renderColorFilters()
+          render()
+        }
+        $('cols').appendChild(b)
+      })
+    }
+    renderColorFilters()
+    function setActive() {
+      curKey = null
+      $('cur').textContent = i18n.t('effects.none')
+      $('fx').querySelectorAll('.on').forEach((x) => x.classList.remove('on'))
+    }
+    function render() {
+      const q = $('q').value.trim().toLowerCase(), box = $('fx')
+      box.innerHTML = ''
+      const list = gi < 0 ? ALL : G[gi][1].map(([n, id]) => ({ n, id, sc: gi === G.length - 1 }))
+      const hits = list.filter((e) =>
+        (e.n.toLowerCase().includes(q) || i18n.effect(e.n).toLowerCase().includes(q)) && colOK(e.n)
+      )
+      hits.forEach((e) => {
+        const key = (e.sc ? 's' : 'm') + e.id, b = document.createElement('button')
+        b.textContent = i18n.effect(e.n)
+        if (key === curKey) b.className = 'on'
+        b.onclick = () => {
+          act(e.sc ? cmd.scene(e.id) : cmd.mode(e.id))
+          box.querySelectorAll('.on').forEach((x) => x.classList.remove('on'))
+          b.classList.add('on')
+          curKey = key
+          $('cur').textContent = i18n.effect(e.n)
+        }
+        box.appendChild(b)
+      })
+      if (!hits.length) box.textContent = i18n.t('effects.noMatches')
+    }
+    render()
+
+    // Mic, clock and schedule (commands decoded from the vendor app)
+    const sendMany = (l) => {
+      let i = 0
+      ;(function n() {
+        if (i < l.length) {
+          send(l[i++])
+          setTimeout(n, 120)
+        }
+      })()
+    }
+    const clk = () => {
+      const d = new Date()
+      return [0x7e, 7, 0x83, d.getHours(), d.getMinutes(), d.getSeconds(), d.getDay(), 0xff, 0xef]
+    }
+    const micOnOff = (v) => [0x7e, 4, 7, +v, 0xff, 0xff, 0xff, 0, 0xef],
+      eqCmd = (n) => [0x7e, 7, 3, n + 128, 4, 0xff, 0xff, 0, 0xef],
+      sensCmd = (n) => [0x7e, 4, 6, n, 0xff, 0xff, 0xff, 0, 0xef]
+    const eqKeys = [
+      'music.eqEnergetic',
+      'music.eqRhythm',
+      'music.eqSpectrum',
+      'music.eqRolling',
+      'music.eqEnergetic2',
+      'music.eqRhythm2',
+      'music.eqSpectrum2',
+      'music.eqRolling2',
+    ]
+    function renderEqOptions() {
+      const selected = $('eq').value
+      $('eq').replaceChildren(...eqKeys.map((key, index) => new Option(i18n.t(key), index)))
+      $('eq').value = selected || '3'
+    }
+    renderEqOptions()
+    $('eq').value = 3
+    let powerState = 'unknown'
+    function renderPower() {
+      const on = powerState === 'on'
+      $('powerState').classList.toggle('run', on)
+      $('powerState').textContent = powerState === 'unknown'
+        ? i18n.t('music.unknown')
+        : i18n.t('power.' + powerState)
+      $('on').disabled = !ch || on
+      $('off').disabled = !ch || powerState === 'off'
+    }
+    function setPower(v) {
+      powerState = v
+      renderPower()
+    }
+    function power(v) {
+      send(cmd.power(v))
+      setPower(v ? 'on' : 'off')
+    }
+    renderPower()
+    let micState = 'unknown', noMic = false
+    function renderMic() {
+      const on = micState === 'on'
+      $('micState').classList.toggle('run', on)
+      $('micState').textContent = on
+        ? i18n.t('music.running')
+        : micState === 'off'
+        ? i18n.t('music.stopped')
+        : i18n.t('music.unknown')
+      $('micOn').disabled = !ch || noMic || on
+      $('micOff').disabled = !ch || noMic || micState === 'off'
+    }
+    function setMic(v) {
+      micState = v
+      renderMic()
+    }
+    function act(b) {
+      if (micState === 'on') {
+        setMic('off')
+        sendMany([micOnOff(false), b])
+      } else send(b)
+    }
+    $('micOn').onclick = () => {
+      sendMany([micOnOff(true), eqCmd(+$('eq').value), sensCmd(+$('sens').value)])
+      setMic('on')
+    }
+    $('micOff').onclick = () => {
+      send(micOnOff(false))
+      setMic('off')
+    }
+    $('eq').onchange = () => {
+      if (micState === 'on') send(eqCmd(+$('eq').value))
+    }
+    function resetStates() {
+      setPower('unknown')
+      setMic('unknown')
+      timers.forEach((t) => t.reset())
+    }
+    $('sens').oninput = (e) => {
+      $('mv').textContent = e.target.value
+      send(sensCmd(+e.target.value))
+    }
+    $('setClock').onclick = () => send(clk())
+    const timers = []
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    const dayText = (w) => {
+      const n = [0, 1, 2, 3, 4, 5, 6].filter((i) => w >> i & 1).length
+      return n === 7
+        ? i18n.t('schedule.everyDay')
+        : n === 0
+        ? i18n.t('schedule.noDays')
+        : i18n.t('schedule.days', { count: n })
+    }
+    ;['schedule.on', 'schedule.off'].forEach((titleKey, mode) => {
+      const d = document.createElement('div')
+      d.className = 'card'
+      d.dataset.titleKey = titleKey
+      d.innerHTML = '<div class="tmh"><div class="t">' + i18n.t(titleKey) + '</div><span class="badge st">' +
+        i18n.t('music.unknown') +
+        '</span><label style="display:flex;gap:8px;align-items:center;color:var(--ink2);font-size:13px"><input type="checkbox" class="needs enb" disabled aria-label="' +
+        i18n.t(titleKey) + ' ' + i18n.t('schedule.enabled') + '"><span class="enabled-label">' +
+        i18n.t('schedule.enabled') +
+        '</span></label><input type="time" class="needs" disabled value="00:00"></div><div style="display:flex;align-items:center;gap:14px;margin-top:14px"><span class="repeat-label" style="color:var(--ink2);min-width:56px">' +
+        i18n.t('schedule.repeat') + '</span><div class="days"></div></div>'
+      const days = d.querySelector('.days'),
+        tm = d.querySelector('input[type=time]'),
+        enb = d.querySelector('.enb'),
+        st = d.querySelector('.st')
+      let statusKey = 'music.unknown', statusValues = {}
+      const renderStatus = () => {
+        const values = { ...statusValues }
+        if (values.dayCount !== undefined) {
+          values.days = dayText(values.dayCount)
+          delete values.dayCount
+        }
+        if (values.stateKey) {
+          values.state = i18n.t(values.stateKey)
+          delete values.stateKey
+        }
+        st.textContent = i18n.t(statusKey, values)
+      }
+      const say = (key, values = {}) => {
+        statusKey = key
+        statusValues = values
+        renderStatus()
+      }
+      DAYS.forEach((n, i) => {
+        const b = document.createElement('button')
+        b.dataset.dayIndex = i
+        b.textContent = i18n.t('schedule.short' + n)
+        b.setAttribute('aria-label', i18n.t('schedule.day' + n))
+        b.className = 'sel needs'
+        b.onclick = () => {
+          b.classList.toggle('sel')
+          if (!weeks()) {
+            b.classList.add('sel')
+            say('schedule.keepDay')
+            return
+          }
+          push()
+        }
+        b.disabled = !ch
+        days.appendChild(b)
+      })
+      const weeks = () => {
+        let w = 0
+        ;[...days.children].forEach((b, i) => {
+          if (b.classList.contains('sel')) w |= 1 << i
+        })
+        return w
+      }
+      // bit 7 of the weeks byte is the on/off flag, bits 0-6 are Monday to Sunday (decoded from the vendor app)
+      const push = () => {
+        const [h, m] = tm.value.split(':').map(Number), w = weeks()
+        if (!ch) {
+          say('schedule.connectFirst')
+          return
+        }
+        if (!tm.value || !w) {
+          say('schedule.chooseTime')
+          return
+        }
+        send([0x7e, 8, 0x82, h, m, 0, mode, w | (enb.checked ? 128 : 0), 0xef])
+        say('schedule.sent', {
+          time: tm.value,
+          dayCount: w,
+          stateKey: enb.checked ? 'schedule.onState' : 'schedule.offState',
+        })
+      }
+      enb.onchange = push
+      let tmr
+      tm.addEventListener('input', () => {
+        clearTimeout(tmr)
+        tmr = setTimeout(push, 400)
+      })
+      timers.push({
+        reset() {
+          say('music.unknown')
+        },
+        say,
+        refresh: renderStatus,
+        show(h, m, w) {
+          if (h > 23 || m > 59) {
+            say('schedule.notSet')
+            enb.checked = false
+            return
+          }
+          tm.value = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0')
+          ;[...days.children].forEach((b, i) => b.classList.toggle('sel', !!(w >> i & 1)))
+          enb.checked = !!(w & 128)
+          say('schedule.onLamp', {
+            time: tm.value,
+            dayCount: w & 127,
+            stateKey: enb.checked ? 'schedule.onState' : 'schedule.offState',
+          })
+        },
+      })
+      $('tm').appendChild(d)
+    })
+    // Reading: write an FF query for the timer, wait, then read the characteristic back (as the vendor app does)
+    let reading = false
+    async function readTimers() {
+      if (!ch || reading) return
+      reading = true
+      for (let mode = 0; mode < 2; mode++) {
+        const t = timers[mode]
+        t.say('schedule.reading')
+        try {
+          let ok = false
+          for (let tries = 0; tries < 2 && !ok && ch; tries++) {
+            await ch.writeValueWithoutResponse(new Uint8Array([0x7e, 8, 0x82, 255, 255, 255, mode, 0, 0xef]))
+            await sleep(tries ? 900 : 450)
+            const dv = await ch.readValue(), v = new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength)
+            if (v.length >= 9 && v[0] === 0x7e && v[1] === 8 && v[2] === 0x82 && v[8] === 0xef && v[6] === mode) {
+              t.show(v[3], v[4], v[7])
+              ok = true
+            }
+          }
+          if (!ok) t.say('schedule.noReport')
+        } catch (e) {
+          t.say('schedule.readFailed', { message: e.message })
+        }
+      }
+      reading = false
+    }
+    $('readTm').onclick = readTimers
+    function afterConnect() {
+      send(clk())
+      noMic = /^MELK-(OE|OB|TX)/i.test(dev.name || '')
+      if (noMic) {
+        document.querySelectorAll('.mic').forEach((x) => x.disabled = true)
+        $('micNote').textContent = i18n.t('music.noMicrophone')
+      }
+      resetStates()
+      setTimeout(readTimers, 900)
+    }
+
+    async function connect() {
+      if (!navigator.bluetooth) {
+        $('status').textContent = i18n.t('connection.noBluetooth')
+        return
+      }
+      try {
+        dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [SERVICE] })
+        dev.addEventListener('gattserverdisconnected', () => {
+          ch = null
+          setEnabled(false)
+          resetStates()
+          setConnectionButton('connection.reconnect')
+          setConnectionStatus('connection.disconnectedStatus')
+        })
+        setConnectionStatus('connection.connecting')
+        const svc = await (await dev.gatt.connect()).getPrimaryService(SERVICE)
+        ch = await svc.getCharacteristic(CHAR)
+        setEnabled(true)
+        setConnectionButton('connection.disconnect')
+        setConnectionStatus('connection.connected', { name: dev.name || 'device' })
+        afterConnect()
+      } catch (e) {
+        if (e.name === 'NotFoundError') setConnectionStatus('connection.noDevice')
+        else setConnectionStatus('connection.failed', { message: e.message })
+      }
+    }
+    $('connect').onclick = () => {
+      if (ch) dev.gatt.disconnect()
+      else connect()
+    }
+    const trayPreference = localStorage.getItem('lamp-keep-in-tray') === 'true'
+    $('keepInTray').checked = trayPreference
+    window.api.setTray(trayPreference)
+    $('keepInTray').addEventListener('change', () => {
+      localStorage.setItem('lamp-keep-in-tray', String($('keepInTray').checked))
+      window.api.setTray($('keepInTray').checked)
+    })
+    window.api.onTrayToggle(() => $('connect').click())
+    window.api.onTrayPower(power)
+    document.addEventListener('languagechange', () => {
+      renderCategories()
+      renderColorFilters()
+      render()
+      renderPower()
+      renderMic()
+      renderEqOptions()
+      document.querySelectorAll('#tm>.card').forEach((card) => {
+        card.querySelector('.tmh .t').textContent = i18n.t(card.dataset.titleKey)
+        card.querySelector('.enabled-label').textContent = i18n.t('schedule.enabled')
+        card.querySelector('.enb').setAttribute(
+          'aria-label',
+          i18n.t(card.dataset.titleKey) + ' ' + i18n.t('schedule.enabled'),
+        )
+        card.querySelector('.repeat-label').textContent = i18n.t('schedule.repeat')
+        card.querySelectorAll('.days button').forEach((button) => {
+          const day = DAYS[Number(button.dataset.dayIndex)]
+          button.textContent = i18n.t('schedule.short' + day)
+          button.setAttribute('aria-label', i18n.t('schedule.day' + day))
+        })
+      })
+      $('cur').textContent = curKey
+        ? i18n.effect((ALL.find((effect) => (effect.sc ? 's' : 'm') + effect.id === curKey) || {}).n || '')
+        : i18n.t('effects.none')
+      setConnectionButton(connectionButtonKey)
+      setConnectionStatus(connectionStatusKey, connectionStatusValues)
+      if (noMic) $('micNote').textContent = i18n.t('music.noMicrophone')
+      timers.forEach((timer) => timer.refresh())
+    })
+    </script>
+    <script src="fluent.js"></script>
+  </body>
+</html>

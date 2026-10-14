@@ -1,0 +1,46 @@
+{
+  "name": "jsk-p22-lamp-control",
+  "version": "1.0.0",
+  "description": "Desktop controller for the JSK-P22 / MELK Bluetooth LED lamp: color, effects, music sync, clock and schedules.",
+  "main": "main.js",
+  "appMode": "control",
+  "author": "lamp",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable --x64"
+  },
+  "devDependencies": {
+    "electron": "44.7.2",
+    "electron-builder": "26.15.3"
+  },
+  "overrides": {
+    "@electron/asar": "4.3.1",
+    "@electron/get": "5.1.0",
+    "glob": "13.0.6",
+    "rimraf": "6.0.1"
+  },
+  "build": {
+    "appId": "local.lamp.control",
+    "productName": "JSK-P22 Lamp Control",
+    "artifactName": "${productName}.${ext}",
+    "npmRebuild": false,
+    "files": [
+      "main.js",
+      "preload.js",
+      "i18n.js",
+      "picker.html",
+      "control.html",
+      "fluent.css",
+      "fluent.js",
+      "icon.png",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable",
+      "signAndEditExecutable": true
+    }
+  },
+  "allowScripts": {
+    "electron-winstaller@5.4.0": true
+  }
+}

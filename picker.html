@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title data-i18n-title="picker.title">Choose your lamp</title>
+    <link rel="stylesheet" href="fluent.css">
+    <script src="i18n.js"></script>
+    <style>
+    html[data-mica] body {
+      background: var(--bg) !important;
+    }
+
+    body {
+      min-height: 100%;
+      padding: 20px;
+      gap: 0;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font: 600 20px/28px "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+    }
+
+    .sub {
+      margin: 0 0 14px;
+      color: var(--ink2);
+      font-size: 13px;
+    }
+
+    #list {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    #list button {
+      padding: 10px 14px;
+      text-align: left;
+      background: var(--card);
+      border-radius: 4px;
+    }
+
+    #list button small {
+      display: block;
+      color: var(--ink3);
+      font-size: 12px;
+      line-height: 16px;
+      overflow-wrap: anywhere;
+    }
+
+    .foot {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 14px;
+    }
+
+    .empty {
+      padding: 18px 4px;
+      color: var(--ink2);
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding: 14px;
+      }
+
+      h1 {
+        font-size: 18px;
+      }
+    }
+    </style>
+  </head>
+  <body>
+    <h1 data-i18n="picker.title">Choose your lamp</h1>
+    <p class="sub" id="hint" data-i18n="picker.searchingHint">
+      Searching. Lamps are usually named MELK-
+    </p>
+    <div id="list"></div>
+    <div class="foot">
+      <button id="cancel" data-i18n="picker.cancel">Cancel</button>
+    </div>
+
+    <script>
+    const deviceList = document.getElementById('list')
+    const hint = document.getElementById('hint')
+    const cancelButton = document.getElementById('cancel')
+    let hasDevices = false
+
+    function prefersLamp(device) {
+      return device.name.toUpperCase().startsWith('MELK-')
+    }
+
+    function updateHint() {
+      const messageKey = hasDevices ? 'picker.pickHint' : 'picker.rangeHint'
+      hint.textContent = i18n.t(messageKey)
+    }
+
+    function createDeviceButton(device) {
+      const button = document.createElement('button')
+      const name = document.createElement('span')
+      const identifier = document.createElement('small')
+
+      name.textContent = device.name || i18n.t('picker.unnamed')
+      name.dataset.unnamed = String(!device.name)
+      identifier.textContent = device.id
+      button.append(name, identifier)
+      button.addEventListener('click', () => api.choose(device.id))
+
+      return button
+    }
+
+    function renderDevices(devices) {
+      hasDevices = devices.length > 0
+      devices.sort((first, second) =>
+        Number(prefersLamp(second)) - Number(prefersLamp(first)) ||
+        Number(Boolean(second.name)) - Number(Boolean(first.name))
+      )
+      deviceList.replaceChildren()
+
+      devices.forEach((device) => {
+        deviceList.appendChild(createDeviceButton(device))
+      })
+
+      if (!hasDevices) {
+        const emptyMessage = document.createElement('div')
+        emptyMessage.className = 'empty'
+        emptyMessage.textContent = i18n.t('picker.searching')
+        deviceList.appendChild(emptyMessage)
+      }
+
+      updateHint()
+    }
+
+    function updateDeviceNames() {
+      deviceList.querySelectorAll('button span[data-unnamed="true"]').forEach((name) => {
+        name.textContent = i18n.t('picker.unnamed')
+      })
+
+      const emptyMessage = deviceList.querySelector('.empty')
+      if (emptyMessage) {
+        emptyMessage.textContent = i18n.t('picker.searching')
+      }
+    }
+
+    api.onDevices(renderDevices)
+    cancelButton.addEventListener('click', () => api.choose(''))
+    document.addEventListener('languagechange', () => {
+      updateHint()
+      updateDeviceNames()
+    })
+    </script>
+  </body>
+</html>
