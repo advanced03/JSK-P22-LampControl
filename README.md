@@ -37,15 +37,12 @@ not digitally signed.
 ## Ambilight
 
 Open **Ambilight** in the sidebar, connect to the lamp with the app's shared **Connect** button, select a display, and
-choose **Start sync**. The app samples the selected screen and sends its average color to the lamp by default. You can
-switch to **Expressive** mode to give small, high-contrast regions more influence than large, mostly uniform areas.
-The preview shows the color before lamp calibration is applied.
+choose **Start sync**. The app samples the selected screen and sends its average color to the lamp. The preview shows
+the color before lamp calibration is applied.
 
 Ambilight settings let you:
 
 - Ignore black letterbox bars when calculating the screen color.
-- Choose average (default) or expressive screen-color sampling.
-- In Expressive mode, tune the contrast threshold and weighting strength.
 - Apply optional HDR correction for washed-out colors.
 - Calibrate red, green, and blue output independently; use the calibration wizard to compare test colors with the
   preview.

@@ -461,6 +461,9 @@
       $('wheel').parentElement.classList.toggle('effect-active', activeEffect)
       $('wheel').setAttribute('aria-disabled', String(activeEffect))
       $('wheel').tabIndex = activeEffect ? -1 : 0
+      $('effect-color-note').hidden = !activeEffect
+      $('wheel').title = activeEffect ? i18n.t('effects.colorDisabled') : ''
+      $('hex').title = activeEffect ? i18n.t('effects.colorDisabled') : ''
       $('stopEffect').hidden = !activeEffect
       $('stopEffect').disabled = !ch || !activeEffect
     }
@@ -902,6 +905,7 @@
       renderPower()
       renderMic()
       renderEqOptions()
+      renderEffectState()
       document.querySelectorAll('#tm>.card').forEach((card) => {
         card.querySelector('.tmh .t').textContent = i18n.t(card.dataset.titleKey)
         card.querySelector('.enabled-label').textContent = i18n.t('schedule.enabled')

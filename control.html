@@ -52,6 +52,7 @@
               <div
                 class="hexcol"><div class="chip" id="chip"></div><input type="text" id="hex" value="#FFFFFF" maxlength="7" data-i18n-attr="aria-label:color.hexLabel" aria-label="Hex color" disabled></div>
             </div>
+            <p id="effect-color-note" class="d effect-color-note" role="status" aria-live="polite" data-i18n="effects.colorDisabled" hidden>The color picker is disabled while an effect is playing.</p>
           </div>
         </section>
 
@@ -130,36 +131,6 @@
           </div>
           <div class="card sc">
             <div>
-              <div class="t" data-ambi-i18n="capture.method">Color mode</div>
-              <div class="d" data-ambi-i18n="capture.methodDescription">Expressive mode gives more influence to small, high-contrast areas.</div>
-            </div>
-            <select id="ambi-captureMode" aria-label="Color mode" data-ambi-i18n-aria-label="capture.methodAria">
-              <option value="average" data-ambi-i18n="capture.average">Average</option>
-              <option value="expressive" data-ambi-i18n="capture.expressive">Expressive</option>
-            </select>
-          </div>
-          <div class="card sc expressive-setting" id="ambi-expressive-sensitivity-card" hidden>
-            <div>
-              <div class="t" data-ambi-i18n="capture.sensitivity">Contrast sensitivity</div>
-              <div class="d" data-ambi-i18n="capture.sensitivityDescription">Ignore smaller color differences when weighting pixels.</div>
-            </div>
-            <div class="ctl">
-              <input type="range" id="ambi-expressiveSensitivity" min="0" max="100" aria-label="Expressive contrast sensitivity" data-ambi-i18n-aria-label="capture.sensitivityAria">
-              <output for="ambi-expressiveSensitivity"></output>
-            </div>
-          </div>
-          <div class="card sc expressive-setting" id="ambi-expressive-strength-card" hidden>
-            <div>
-              <div class="t" data-ambi-i18n="capture.strength">Expressive strength</div>
-              <div class="d" data-ambi-i18n="capture.strengthDescription">Control how strongly high-contrast pixels affect the result.</div>
-            </div>
-            <div class="ctl">
-              <input type="range" id="ambi-expressiveStrength" min="0" max="100" aria-label="Expressive weighting strength" data-ambi-i18n-aria-label="capture.strengthAria">
-              <output for="ambi-expressiveStrength"></output>
-            </div>
-          </div>
-          <div class="card sc">
-            <div>
               <div class="t" data-ambi-i18n="capture.ignoreBars">Ignore black bars</div>
               <div class="d" data-ambi-i18n="capture.ignoreBarsDescription">Optionally exclude letterbox bars from the average.</div>
             </div>
@@ -227,7 +198,10 @@
             <div class="ctl"><input type="range" id="ambi-bright" min="5" max="100" aria-label="Brightness" data-ambi-i18n-aria-label="response.brightnessAria"><output for="ambi-bright"></output></div>
           </div>
           <div class="card sc">
-            <div><div class="t" data-ambi-i18n="response.minimumBrightness">Minimum brightness</div></div>
+            <div>
+              <div class="t" data-ambi-i18n="response.minimumBrightness">Minimum brightness</div>
+              <div class="d" data-ambi-i18n="response.minimumBrightnessDescription">Sets the lamp’s output floor in dark scenes; 0% allows it to turn off.</div>
+            </div>
             <div class="ctl"><input type="range" id="ambi-minimumBrightness" min="0" max="10" aria-label="Minimum brightness" data-ambi-i18n-aria-label="response.minimumBrightnessAria"><output for="ambi-minimumBrightness"></output></div>
           </div>
         </section>

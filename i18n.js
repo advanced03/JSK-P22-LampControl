@@ -48,6 +48,7 @@
       'effects.title': 'Effects',
       'effects.nowPlaying': 'Now playing',
       'effects.stop': 'Stop effect',
+      'effects.colorDisabled': 'The color picker is disabled while an effect is playing.',
       'effects.none': 'none',
       'effects.speed': 'Effect speed',
       'effects.speedDescription': 'How fast the effect runs',
@@ -256,6 +257,7 @@
       'effects.title': 'Effecten',
       'effects.nowPlaying': 'Nu actief',
       'effects.stop': 'Effect stoppen',
+      'effects.colorDisabled': 'De kleurenkiezer is uitgeschakeld zolang er een effect actief is.',
       'effects.none': 'geen',
       'effects.speed': 'Effectsnelheid',
       'effects.speedDescription': 'Hoe snel het effect wordt afgespeeld',
@@ -464,6 +466,7 @@
       'effects.title': '效果',
       'effects.nowPlaying': '当前效果',
       'effects.stop': '停止效果',
+      'effects.colorDisabled': '效果播放时，颜色选择器不可用。',
       'effects.none': '无',
       'effects.speed': '效果速度',
       'effects.speedDescription': '效果播放速度',
@@ -689,6 +692,7 @@ color.hexLabel|Code couleur hexadécimal
 effects.title|Effets
 effects.nowPlaying|Effet en cours
 effects.stop|Arrêter l’effet
+effects.colorDisabled|Le sélecteur de couleur est désactivé pendant la lecture d’un effet.
 effects.none|aucun
 effects.speed|Vitesse de l’effet
 effects.speedDescription|Vitesse de lecture de l’effet
@@ -896,6 +900,7 @@ color.hexLabel|Hex-Farbwert
 effects.title|Effekte
 effects.nowPlaying|Aktueller Effekt
 effects.stop|Effekt stoppen
+effects.colorDisabled|Während ein Effekt läuft, ist die Farbauswahl deaktiviert.
 effects.none|kein
 effects.speed|Effektgeschwindigkeit
 effects.speedDescription|Wie schnell der Effekt abläuft
@@ -1103,6 +1108,7 @@ color.hexLabel|Código de color hexadecimal
 effects.title|Efectos
 effects.nowPlaying|Efecto actual
 effects.stop|Detener efecto
+effects.colorDisabled|El selector de color está desactivado mientras se reproduce un efecto.
 effects.none|ninguno
 effects.speed|Velocidad del efecto
 effects.speedDescription|Velocidad a la que se reproduce el efecto
@@ -1310,6 +1316,7 @@ color.hexLabel|Codice colore esadecimale
 effects.title|Effetti
 effects.nowPlaying|Effetto in corso
 effects.stop|Interrompi effetto
+effects.colorDisabled|Il selettore colore è disattivato mentre è in esecuzione un effetto.
 effects.none|nessuno
 effects.speed|Velocità dell’effetto
 effects.speedDescription|Velocità di riproduzione dell’effetto
@@ -1517,6 +1524,7 @@ color.hexLabel|Código de cor hexadecimal
 effects.title|Efeitos
 effects.nowPlaying|Efeito atual
 effects.stop|Parar efeito
+effects.colorDisabled|O seletor de cores fica desativado enquanto um efeito está em execução.
 effects.none|nenhum
 effects.speed|Velocidade do efeito
 effects.speedDescription|Velocidade de reprodução do efeito

@@ -18,6 +18,8 @@
       const name = document.createElement('span')
       const identifier = document.createElement('small')
 
+      button.type = 'button'
+      button.dataset.deviceId = device.id
       name.textContent = device.name || i18n.t('picker.unnamed')
       name.dataset.unnamed = String(!device.name)
       identifier.textContent = device.id
@@ -28,14 +30,23 @@
     }
 
     function renderDevices(devices) {
+      const scrollTop = deviceList.scrollTop
+      const listTop = deviceList.getBoundingClientRect().top
+      const visibleDevice = [...deviceList.querySelectorAll('button[data-device-id]')].find((button) => (
+        button.getBoundingClientRect().bottom > listTop
+      ))
+      const anchorDeviceId = visibleDevice?.dataset.deviceId
+      const anchorOffset = visibleDevice
+        ? visibleDevice.getBoundingClientRect().top - listTop
+        : 0
       hasDevices = devices.length > 0
-      devices.sort((first, second) =>
+      const orderedDevices = [...devices].sort((first, second) =>
         Number(prefersLamp(second)) - Number(prefersLamp(first)) ||
         Number(Boolean(second.name)) - Number(Boolean(first.name))
       )
       deviceList.replaceChildren()
 
-      devices.forEach((device) => {
+      orderedDevices.forEach((device) => {
         deviceList.appendChild(createDeviceButton(device))
       })
 
@@ -46,6 +57,14 @@
         deviceList.appendChild(emptyMessage)
       }
 
+      const anchoredDevice = anchorDeviceId
+        && [...deviceList.querySelectorAll('button[data-device-id]')].find(
+          (button) => button.dataset.deviceId === anchorDeviceId
+        )
+      deviceList.scrollTop = anchoredDevice
+        ? scrollTop + anchoredDevice.getBoundingClientRect().top
+          - deviceList.getBoundingClientRect().top - anchorOffset
+        : scrollTop
       updateHint()
     }
 

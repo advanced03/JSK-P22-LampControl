@@ -17,9 +17,6 @@ const defaultSettings = {
   bright: 100,
   minimumBrightness: 0,
   screen: '',
-  captureMode: 'average',
-  expressiveSensitivity: 0,
-  expressiveStrength: 40,
   hdr: false,
   hdramt: 50,
   calRed: 100,
@@ -32,6 +29,9 @@ function loadSettings() {
     const saved = JSON.parse(localStorage.getItem('cfg') || '{}');
     if (saved && typeof saved === 'object') {
       delete saved.mode;
+      delete saved.captureMode;
+      delete saved.expressiveSensitivity;
+      delete saved.expressiveStrength;
     }
     return { ...defaultSettings, ...saved };
   } catch (error) {
@@ -41,16 +41,7 @@ function loadSettings() {
 }
 
 const settings = loadSettings();
-if (!['average', 'expressive'].includes(settings.captureMode)) {
-  settings.captureMode = defaultSettings.captureMode;
-}
 for (const settingName of ['calRed', 'calGreen', 'calBlue']) {
-  const value = Number(settings[settingName]);
-  settings[settingName] = Number.isFinite(value)
-    ? Math.max(0, Math.min(100, value))
-    : defaultSettings[settingName];
-}
-for (const settingName of ['expressiveSensitivity', 'expressiveStrength']) {
   const value = Number(settings[settingName]);
   settings[settingName] = Number.isFinite(value)
     ? Math.max(0, Math.min(100, value))
@@ -126,7 +117,7 @@ function setCalibrationValue(settingName, value) {
 
 function bindSettings() {
   const settingIds = [
-    'bars', 'captureMode', 'expressiveSensitivity', 'expressiveStrength',
+    'bars',
     'fps', 'smooth', 'vivid', 'bright', 'minimumBrightness', 'hdr', 'hdramt'
   ];
 
@@ -134,13 +125,7 @@ function bindSettings() {
     const input = $(id);
     const isCheckbox = input.type === 'checkbox';
     const output = input.parentElement.querySelector('output');
-    const outputSuffix = [
-      'expressiveSensitivity',
-      'expressiveStrength',
-      'minimumBrightness'
-    ].includes(id)
-      ? '%'
-      : '';
+    const outputSuffix = id === 'minimumBrightness' ? '%' : '';
 
     if (isCheckbox) {
       input.checked = settings[id];
@@ -164,9 +149,6 @@ function bindSettings() {
 
     input.addEventListener('input', updateSetting);
     input.addEventListener('change', updateSetting);
-    if (id === 'captureMode') {
-      input.addEventListener('change', updateExpressiveControls);
-    }
   }
 
   for (const [id, settingName] of calibrationControls) {
@@ -199,15 +181,20 @@ function bindSettings() {
 
 }
 
-function frameColor(
-  data,
-  width,
-  height,
-  ignoreBars,
-  mode = 'average',
-  sensitivity = 0,
-  strength = 40
-) {
+function frameColor(data, width, height, ignoreBars) {
+  if (!ignoreBars) {
+    let red = 0;
+    let green = 0;
+    let blue = 0;
+    const pixelCount = width * height;
+    for (let index = 0; index < data.length; index += 4) {
+      red += data[index];
+      green += data[index + 1];
+      blue += data[index + 2];
+    }
+    return [red / pixelCount, green / pixelCount, blue / pixelCount];
+  }
+
   let left = 0;
   let right = width - 1;
   let top = 0;
@@ -256,41 +243,7 @@ function frameColor(
     return [0, 0, 0];
   }
 
-  const average = [red / pixelCount, green / pixelCount, blue / pixelCount];
-  if (mode !== 'expressive') {
-    return average;
-  }
-  if (isNearNeutral(average)) {
-    return average;
-  }
-
-  const weighted = [0, 0, 0];
-  let totalWeight = 0;
-  const sensitivityThreshold = sensitivity / 100;
-  const weightMultiplier = strength / 5;
-  for (let y = top; y <= bottom; y++) {
-    for (let x = left; x <= right; x++) {
-      const index = (y * width + x) * 4;
-      const redDifference = data[index] - average[0];
-      const greenDifference = data[index + 1] - average[1];
-      const blueDifference = data[index + 2] - average[2];
-      const normalizedDistance = Math.sqrt((
-        redDifference * redDifference
-        + greenDifference * greenDifference
-        + blueDifference * blueDifference
-      ) / (3 * 255 * 255));
-      const contrast = sensitivityThreshold === 1
-        ? 0
-        : Math.max(0, (normalizedDistance - sensitivityThreshold) / (1 - sensitivityThreshold));
-      const weight = 1 + weightMultiplier * contrast * contrast;
-      weighted[0] += data[index] * weight;
-      weighted[1] += data[index + 1] * weight;
-      weighted[2] += data[index + 2] * weight;
-      totalWeight += weight;
-    }
-  }
-
-  return weighted.map(channel => channel / totalWeight);
+  return [red / pixelCount, green / pixelCount, blue / pixelCount];
 }
 
 function isNearNeutral(rgb) {
@@ -339,16 +292,42 @@ function vividify([red, green, blue], amount) {
   const low = value * (1 - saturation);
   const descending = value * (1 - fraction * saturation);
   const ascending = value * (1 - (1 - fraction) * saturation);
-  const rgbBySector = [
-    [value, ascending, low],
-    [descending, value, low],
-    [low, value, ascending],
-    [low, descending, value],
-    [ascending, low, value],
-    [value, low, descending]
-  ];
-
-  return rgbBySector[sector % 6].map(channel => channel * 255);
+  let outputRed;
+  let outputGreen;
+  let outputBlue;
+  switch (sector % 6) {
+    case 0:
+      outputRed = value;
+      outputGreen = ascending;
+      outputBlue = low;
+      break;
+    case 1:
+      outputRed = descending;
+      outputGreen = value;
+      outputBlue = low;
+      break;
+    case 2:
+      outputRed = low;
+      outputGreen = value;
+      outputBlue = ascending;
+      break;
+    case 3:
+      outputRed = low;
+      outputGreen = descending;
+      outputBlue = value;
+      break;
+    case 4:
+      outputRed = ascending;
+      outputGreen = low;
+      outputBlue = value;
+      break;
+    default:
+      outputRed = value;
+      outputGreen = low;
+      outputBlue = descending;
+      break;
+  }
+  return [outputRed * 255, outputGreen * 255, outputBlue * 255];
 }
 
 // Windows exposes a simplified SDR version of HDR content, which can look washed out.
@@ -616,10 +595,7 @@ async function syncLoop() {
         image.data,
         192,
         108,
-        settings.bars,
-        settings.captureMode,
-        settings.expressiveSensitivity,
-        settings.expressiveStrength
+        settings.bars
       );
 
       if (settings.hdr) {
@@ -723,12 +699,6 @@ function updateHdrControls() {
   $('hdramt').disabled = !settings.hdr;
 }
 
-function updateExpressiveControls() {
-  const expressive = settings.captureMode === 'expressive';
-  $('expressive-sensitivity-card').hidden = !expressive;
-  $('expressive-strength-card').hidden = !expressive;
-}
-
 function updateConnection(connected, status) {
   $('connection-status').textContent = status;
   $('start').disabled = !connected;
@@ -775,7 +745,6 @@ async function populateScreens() {
 
 bindSettings();
 updateHdrControls();
-updateExpressiveControls();
 $('hdr').addEventListener('change', updateHdrControls);
 $('hdrnote').textContent = i18n.translate('hdr.manualNote');
 
