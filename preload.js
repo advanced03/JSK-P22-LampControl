@@ -13,6 +13,9 @@ contextBridge.exposeInMainWorld('api', {
   screens() {
     return ipcRenderer.invoke('screens')
   },
+  captureSource() {
+    return ipcRenderer.invoke('capture-source')
+  },
   setScreen(index) {
     ipcRenderer.send('setScreen', index)
   },
@@ -27,6 +30,9 @@ contextBridge.exposeInMainWorld('api', {
   },
   onTrayToggle(callback) {
     ipcRenderer.on('tray-toggle', () => callback())
+  },
+  onTraySyncToggle(callback) {
+    ipcRenderer.on('tray-sync-toggle', () => callback())
   },
   onTrayPower(callback) {
     ipcRenderer.on('tray-power', (_event, enabled) => callback(enabled))

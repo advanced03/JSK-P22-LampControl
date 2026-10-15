@@ -1,9 +1,8 @@
 {
   "name": "jsk-p22-lamp-control",
   "version": "1.0.0",
-  "description": "Desktop controller for the JSK-P22 / MELK Bluetooth LED lamp: color, effects, music sync, clock and schedules.",
+  "description": "Desktop controller for the JSK-P22 / MELK Bluetooth LED lamp: color, effects, music sync, schedules and screen-based Ambilight.",
   "main": "main.js",
-  "appMode": "control",
   "author": "lamp",
   "scripts": {
     "start": "electron .",
@@ -30,6 +29,9 @@
       "i18n.js",
       "picker.html",
       "control.html",
+      "ambilight.js",
+      "ambilight-i18n.js",
+      "ambilight.css",
       "fluent.css",
       "fluent.js",
       "icon.png",

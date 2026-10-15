@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title data-i18n-title="app.title">JSK-P22 Lamp Control</title>
     <link rel="stylesheet" href="fluent.css">
+    <link rel="stylesheet" href="ambilight.css">
   </head>
   <body>
     <div class="titlebar"><i>&#xEA80;</i><span data-i18n="app.title">JSK-P22 Lamp Control</span></div>
@@ -15,6 +16,7 @@
           <button class="nav" data-page="pFx"><i>&#xE8B1;</i><span data-i18n="nav.effects">Effects</span></button>
           <button class="nav" data-page="pMic"><i>&#xE720;</i><span data-i18n="nav.music">Music</span></button>
           <button class="nav" data-page="pTime"><i>&#xE787;</i><span data-i18n="nav.schedule">Schedule</span></button>
+          <button class="nav" data-page="pAmbi"><i>&#xE7F4;</i><span data-i18n="nav.ambilight">Ambilight</span></button>
           <button class="nav" data-page="pSettings"><i>&#xE713;</i><span data-i18n="nav.settings">Settings</span></button>
         </div>
         <div class="conn">
@@ -113,6 +115,93 @@
           <div class="tm" id="tm"></div>
         </section>
 
+        <section class="page ambilight-page" id="pAmbi">
+          <h1 data-ambi-i18n="sync.heading">Ambilight</h1>
+          <div id="ambi-sw" role="img" aria-label="Current lamp color" data-ambi-i18n-aria-label="sync.preview"></div>
+          <div class="ambi-top">
+            <div class="cs"><i>&#xE702;</i><span id="ambi-connection-status">Not connected</span></div>
+            <span id="ambi-sync-status" class="badge" data-ambi-i18n="status.notConnected">Not connected</span>
+            <button class="accent" id="ambi-start" disabled data-ambi-i18n="button.startSync">Start sync</button>
+          </div>
+
+          <h2 data-ambi-i18n="section.capture">Capture</h2>
+          <div class="card sc">
+            <div>
+              <div class="t" data-ambi-i18n="capture.screen">Screen</div>
+              <div class="d" data-ambi-i18n="capture.screenDescription">Average the full screen of this display.</div>
+            </div>
+            <select id="ambi-screen" aria-label="Screen to follow" data-ambi-i18n-aria-label="capture.screenAria"></select>
+          </div>
+          <div class="card sc">
+            <div>
+              <div class="t" data-ambi-i18n="capture.ignoreBars">Ignore black bars</div>
+              <div class="d" data-ambi-i18n="capture.ignoreBarsDescription">Optionally exclude letterbox bars from the average.</div>
+            </div>
+            <input type="checkbox" id="ambi-bars" aria-label="Ignore black bars" data-ambi-i18n-aria-label="capture.ignoreBarsAria">
+          </div>
+
+          <h2 data-ambi-i18n="section.hdr">HDR</h2>
+          <div class="card sc">
+            <div>
+              <div class="t" data-ambi-i18n="hdr.display">Apply HDR correction</div>
+              <div class="d" id="ambi-hdrnote"></div>
+            </div>
+            <input type="checkbox" id="ambi-hdr" aria-label="Apply HDR correction" data-ambi-i18n-aria-label="hdr.displayAria">
+          </div>
+          <div class="card sc">
+            <div>
+              <div class="t" data-ambi-i18n="hdr.correction">Correction strength</div>
+              <div class="d" data-ambi-i18n="hdr.correctionDescription">Adjusts the gamma and color correction.</div>
+            </div>
+            <div class="ctl">
+              <input type="range" id="ambi-hdramt" min="0" max="100" aria-label="HDR correction strength" data-ambi-i18n-aria-label="hdr.correctionAria">
+              <output for="ambi-hdramt"></output>
+            </div>
+          </div>
+
+          <div class="ambi-section-heading">
+            <h2 data-ambi-i18n="section.calibration">Color calibration</h2>
+            <div class="ambi-actions">
+              <button id="ambi-open-calibration-wizard" type="button" data-ambi-i18n="wizard.open">Calibration wizard</button>
+              <button id="ambi-reset-calibration" type="button" data-ambi-i18n="button.reset">Reset</button>
+            </div>
+          </div>
+          <p class="d ambi-hint" data-ambi-i18n="calibration.description">Match the lamp to the preview. The preview won’t change.</p>
+          <div class="card sc">
+            <div><div class="t" data-ambi-i18n="calibration.red">Red output</div><div class="d" data-ambi-i18n="calibration.redDescription">0% turns red off; 100% leaves it unchanged.</div></div>
+            <div class="ctl"><input type="range" id="ambi-cal-red" min="0" max="100" aria-label="Red color calibration" data-ambi-i18n-aria-label="calibration.redAria"><output for="ambi-cal-red"></output></div>
+          </div>
+          <div class="card sc">
+            <div><div class="t" data-ambi-i18n="calibration.green">Green output</div><div class="d" data-ambi-i18n="calibration.greenDescription">0% turns green off; 100% leaves it unchanged.</div></div>
+            <div class="ctl"><input type="range" id="ambi-cal-green" min="0" max="100" aria-label="Green color calibration" data-ambi-i18n-aria-label="calibration.greenAria"><output for="ambi-cal-green"></output></div>
+          </div>
+          <div class="card sc">
+            <div><div class="t" data-ambi-i18n="calibration.blue">Blue output</div><div class="d" data-ambi-i18n="calibration.blueDescription">0% turns blue off; 100% leaves it unchanged.</div></div>
+            <div class="ctl"><input type="range" id="ambi-cal-blue" min="0" max="100" aria-label="Blue color calibration" data-ambi-i18n-aria-label="calibration.blueAria"><output for="ambi-cal-blue"></output></div>
+          </div>
+
+          <div class="ambi-section-heading">
+            <h2 data-ambi-i18n="section.response">Response</h2>
+            <button id="ambi-reset-response" type="button" data-ambi-i18n="response.reset">Reset</button>
+          </div>
+          <div class="card sc">
+            <div><div class="t" data-ambi-i18n="response.fps">Updates per second</div><div class="d" data-ambi-i18n="response.fpsDescription">Higher rates update faster but use more CPU and Bluetooth.</div></div>
+            <div class="ctl"><input type="range" id="ambi-fps" min="1" max="30" aria-label="Updates per second" data-ambi-i18n-aria-label="response.fpsAria"><output for="ambi-fps"></output></div>
+          </div>
+          <div class="card sc">
+            <div><div class="t" data-ambi-i18n="response.smoothing">Smoothing</div><div class="d" data-ambi-i18n="response.smoothingDescription">Higher values make transitions smoother and slower.</div></div>
+            <div class="ctl"><input type="range" id="ambi-smooth" min="0" max="100" aria-label="Smoothing" data-ambi-i18n-aria-label="response.smoothingAria"><output for="ambi-smooth"></output></div>
+          </div>
+          <div class="card sc">
+            <div><div class="t" data-ambi-i18n="response.vividness">Vividness</div><div class="d" data-ambi-i18n="response.vividnessDescription">Increase for richer colors; lower for a natural look.</div></div>
+            <div class="ctl"><input type="range" id="ambi-vivid" min="0" max="100" aria-label="Vividness" data-ambi-i18n-aria-label="response.vividnessAria"><output for="ambi-vivid"></output></div>
+          </div>
+          <div class="card sc">
+            <div><div class="t" data-ambi-i18n="response.brightness">Brightness</div><div class="d" data-ambi-i18n="response.brightnessDescription">Limits lamp brightness. The preview stays unchanged.</div></div>
+            <div class="ctl"><input type="range" id="ambi-bright" min="5" max="100" aria-label="Brightness" data-ambi-i18n-aria-label="response.brightnessAria"><output for="ambi-bright"></output></div>
+          </div>
+        </section>
+
         <section class="page" id="pSettings">
           <h1 data-i18n="settings.title">Settings</h1>
           <div class="card sc">
@@ -132,6 +221,27 @@
         </section>
       </main>
     </div>
+    <dialog id="ambi-calibration-wizard" aria-labelledby="ambi-wizard-title">
+      <h2 id="ambi-wizard-title" data-ambi-i18n="wizard.title">Color calibration wizard</h2>
+      <p class="d" data-ambi-i18n="wizard.intro">Sync pauses during the test and resumes when you close the wizard.</p>
+      <p id="ambi-wizard-status" class="wizard-status" role="status" aria-live="polite"></p>
+      <p id="ambi-wizard-progress" class="d" aria-live="polite"></p>
+      <h3 id="ambi-wizard-step-title"></h3>
+      <p id="ambi-wizard-step-description" class="d"></p>
+      <div class="wizard-swatches">
+        <div><span class="d" data-ambi-i18n="wizard.reference">Reference color</span><div id="ambi-wizard-reference" class="wizard-swatch" role="img"></div><output id="ambi-wizard-reference-value"></output></div>
+        <div><span class="d" data-ambi-i18n="wizard.sent">Color sent to lamp</span><div id="ambi-wizard-sent" class="wizard-swatch" role="img"></div><output id="ambi-wizard-sent-value"></output></div>
+      </div>
+      <p class="d" data-ambi-i18n="wizard.adjustHint">Adjust the channel controls until the lamp looks as close as possible to the reference.</p>
+      <div class="wizard-calibration">
+        <label for="ambi-wizard-cal-red" data-ambi-i18n="calibration.red">Red output</label><div class="ctl"><input type="range" id="ambi-wizard-cal-red" min="0" max="100"><output for="ambi-wizard-cal-red"></output></div>
+        <label for="ambi-wizard-cal-green" data-ambi-i18n="calibration.green">Green output</label><div class="ctl"><input type="range" id="ambi-wizard-cal-green" min="0" max="100"><output for="ambi-wizard-cal-green"></output></div>
+        <label for="ambi-wizard-cal-blue" data-ambi-i18n="calibration.blue">Blue output</label><div class="ctl"><input type="range" id="ambi-wizard-cal-blue" min="0" max="100"><output for="ambi-wizard-cal-blue"></output></div>
+      </div>
+      <div class="wizard-actions"><button id="ambi-wizard-cancel" type="button" data-ambi-i18n="wizard.cancel">Cancel</button><div><button id="ambi-wizard-previous" type="button" data-ambi-i18n="wizard.previous">Previous</button><button id="ambi-wizard-next" class="accent" type="button" data-ambi-i18n="wizard.next">Next</button></div></div>
+    </dialog>
+    <video id="ambi-video" muted playsinline style="display:none"></video>
+    <canvas id="ambi-cv" width="192" height="108" style="display:none"></canvas>
     <script src="i18n.js"></script>
     <script>
     const G = [['Special', [['Auto play', 0], ['Magic', 1], ['Magic reverse', 2], ['Energy', 212]]], ['Jump & strobe', [
@@ -385,6 +495,9 @@
     ]]]
     const SERVICE = 0xfff0, CHAR = 0xfff3, $ = (id) => document.getElementById(id)
     let ch = null, dev = null, busy = false, pending = null
+    let ambilightRunning = false
+    let ambilightSending = false
+    const ambilightConnectionListeners = new Set()
     let connectionStatusKey = 'connection.disconnected', connectionStatusValues = {}
     let connectionButtonKey = 'connection.connect'
     function setConnectionStatus(key, values = {}) {
@@ -393,7 +506,8 @@
       const status = i18n.t(key, values)
       $('status').textContent = status
       $('bluetoothSettings').hidden = key !== 'connection.bluetoothOff'
-      window.api.state({ status, connected: !!ch })
+      window.api.state({ status, connected: !!ch, running: ambilightRunning })
+      ambilightConnectionListeners.forEach((callback) => callback(!!ch, status))
     }
     function setConnectionButton(key) {
       connectionButtonKey = key
@@ -422,6 +536,9 @@
       return result
     }
     async function send(bytes) {
+      if (!ambilightSending && window.ambilight) {
+        window.ambilight.stop()
+      }
       pending = bytes
       if (busy || !ch) return
       busy = true
@@ -683,6 +800,38 @@
         sendMany([micOnOff(false), b])
       } else send(b)
     }
+    window.lampControl = {
+      get connected() {
+        return !!ch
+      },
+      sendColor(red, green, blue) {
+        if (!ch) return false
+        ambilightSending = true
+        try {
+          setActive(null)
+          if (micState === 'on') {
+            setMic('off')
+            send(micOnOff(false))
+          }
+          send(cmd.color(red, green, blue))
+        } finally {
+          ambilightSending = false
+        }
+        return true
+      },
+      onConnectionChange(callback) {
+        ambilightConnectionListeners.add(callback)
+        callback(!!ch, $('status').textContent)
+      },
+      setAmbilightRunning(running) {
+        ambilightRunning = running
+        window.api.state({
+          status: $('status').textContent,
+          connected: !!ch,
+          running: ambilightRunning,
+        })
+      },
+    }
     $('micOn').onclick = () => {
       sendMany([micOnOff(true), eqCmd(+$('eq').value), sensCmd(+$('sens').value)])
       setMic('on')
@@ -935,6 +1084,7 @@
       window.api.setTray($('keepInTray').checked)
     })
     window.api.onTrayToggle(() => $('connect').click())
+    window.api.onTraySyncToggle(() => $('ambi-start').click())
     window.api.onTrayPower(power)
     document.addEventListener('languagechange', () => {
       updateTrayLabels()
@@ -967,6 +1117,8 @@
       timers.forEach((timer) => timer.refresh())
     })
     </script>
+    <script src="ambilight-i18n.js"></script>
+    <script src="ambilight.js"></script>
     <script src="fluent.js"></script>
   </body>
 </html>

@@ -1,9 +1,9 @@
 # JSK-P22 Lamp Controller
 
 A Windows desktop app for controlling JSK-P22 / MELK Bluetooth LE lamps. Set colors and brightness, use effects and
-music sync, and manage the lamp clock and schedules. The resizable interface supports English, Dutch, Simplified Chinese,
-French, German, Spanish, Italian, and Brazilian Portuguese; the selected language is saved locally. Windows 11 may use
-Mica or Acrylic window materials.
+music sync, manage the lamp clock and schedules, and sync the lamp color to your screen with Ambilight. The resizable
+interface supports English, Dutch, Simplified Chinese, French, German, Spanish, Italian, and Brazilian Portuguese; the
+selected language is saved locally. Windows 11 may use Mica or Acrylic window materials.
 
 ## Requirements
 
@@ -36,12 +36,18 @@ not digitally signed.
 
 - Change the language and optionally enable system-tray mode in Settings. With tray mode enabled, closing the window
   hides the app; use the tray menu to reopen it, disconnect, or quit.
-- `appMode` in `package.json` selects the window mode (`control` by default); `LAMP_MODE` overrides it. Only
-  `control.html` is included, so the `sync` mode is unavailable.
+- Open **Ambilight** below **Schedule**, connect using the app's shared Connect button, choose a display, and start
+  sync. The Ambilight section includes black-bar filtering, optional HDR correction, color calibration, and response
+  controls. Sync shares the app's existing Bluetooth connection, so it does not open a competing lamp connection.
+  Manual lamp commands stop an active screen sync so effects, music sync, and chosen colors work as expected. The
+  system-tray menu has separate actions for starting or stopping Ambilight and for connecting or disconnecting.
+- Ambilight starts only when requested and stops if the lamp disconnects. Its capture and calibration preferences are
+  saved locally; the shared app language and tray settings remain in Settings.
 - Connect to the lamp whose Bluetooth name starts with `MELK`. Close other apps connected to it first; the lamp
   typically accepts only one connection at a time.
-- `main.js` creates the windows, `preload.js` exposes the renderer API, `picker.html` displays Bluetooth devices, and
-  `fluent.css` / `fluent.js` provide styling and Windows theme handling.
+- `main.js` creates the window and handles display capture; `preload.js` exposes the renderer API; `picker.html`
+  displays Bluetooth devices; and `ambilight.js` adds screen-color processing and calibration. `fluent.css` /
+  `fluent.js` provide styling and Windows theme handling.
 
 ## Bluetooth protocol
 

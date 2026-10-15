@@ -8,6 +8,7 @@
       'nav.effects': 'Effects',
       'nav.music': 'Music',
       'nav.schedule': 'Schedule',
+      'nav.ambilight': 'Ambilight',
       'nav.settings': 'Settings',
       'settings.title': 'Settings',
       'settings.languageDescription': 'Choose the language used by the application.',
@@ -223,6 +224,7 @@
       'nav.effects': 'Effecten',
       'nav.music': 'Muziek',
       'nav.schedule': 'Schema',
+      'nav.ambilight': 'Ambilight',
       'nav.settings': 'Instellingen',
       'settings.title': 'Instellingen',
       'settings.languageDescription': 'Kies de taal die de toepassing gebruikt.',
@@ -439,6 +441,7 @@
       'nav.effects': '效果',
       'nav.music': '音乐',
       'nav.schedule': '定时',
+      'nav.ambilight': '氛围灯',
       'nav.settings': '设置',
       'settings.title': '设置',
       'settings.languageDescription': '选择应用程序使用的语言。',
@@ -671,6 +674,7 @@ nav.color|Couleur
 nav.effects|Effets
 nav.music|Musique
 nav.schedule|Programmation
+nav.ambilight|Ambilight
 nav.settings|Paramètres
 settings.title|Paramètres
 settings.languageDescription|Choisissez la langue de l’application.
@@ -885,6 +889,7 @@ nav.color|Farbe
 nav.effects|Effekte
 nav.music|Musik
 nav.schedule|Zeitplan
+nav.ambilight|Ambilight
 nav.settings|Einstellungen
 settings.title|Einstellungen
 settings.languageDescription|Wählen Sie die Sprache der Anwendung aus.
@@ -1099,6 +1104,7 @@ nav.color|Color
 nav.effects|Efectos
 nav.music|Música
 nav.schedule|Programación
+nav.ambilight|Luz ambiental
 nav.settings|Ajustes
 settings.title|Ajustes
 settings.languageDescription|Elige el idioma de la aplicación.
@@ -1313,6 +1319,7 @@ nav.color|Colore
 nav.effects|Effetti
 nav.music|Musica
 nav.schedule|Programmazione
+nav.ambilight|Luce ambientale
 nav.settings|Impostazioni
 settings.title|Impostazioni
 settings.languageDescription|Scegli la lingua dell’applicazione.
@@ -1527,6 +1534,7 @@ nav.color|Cor
 nav.effects|Efeitos
 nav.music|Música
 nav.schedule|Programação
+nav.ambilight|Luz ambiente
 nav.settings|Configurações
 settings.title|Configurações
 settings.languageDescription|Escolha o idioma do aplicativo.

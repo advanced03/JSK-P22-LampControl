@@ -6,6 +6,7 @@ const {
   session,
   desktopCapturer,
   nativeTheme,
+  screen,
   systemPreferences,
   Tray,
   Menu,
@@ -13,8 +14,6 @@ const {
 } = require('electron')
 const path = require('path')
 const os = require('os')
-const MODE = process.env.LAMP_MODE || require('./package.json').appMode || 'control'
-
 app.commandLine.appendSwitch('enable-web-bluetooth')
 app.commandLine.appendSwitch('disable-renderer-backgrounding')
 app.commandLine.appendSwitch('disable-background-timer-throttling')
@@ -115,32 +114,33 @@ function buildTray() {
     tray.on('click', showWin)
   }
 
-  const appName = MODE === 'sync' ? 'Lamp Ambilight' : 'JSK-P22 Lamp Control'
-  tray.setToolTip(appName + ': ' + appState.status)
+  tray.setToolTip('JSK-P22 Lamp Control: ' + appState.status)
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: trayLabels.open, click: showWin },
     {
-      label: MODE === 'sync'
-        ? appState.running ? trayLabels.stopSync : trayLabels.startSync
-        : appState.connected ? trayLabels.disconnect : trayLabels.connect,
+      label: appState.running ? trayLabels.stopSync : trayLabels.startSync,
+      enabled: appState.connected,
+      click: () => win && win.webContents.send('tray-sync-toggle'),
+    },
+    { type: 'separator' },
+    {
+      label: appState.connected ? trayLabels.disconnect : trayLabels.connect,
       click: () => {
-        if (MODE !== 'sync' && !appState.connected) showWin()
+        if (!appState.connected) showWin()
         else if (win) win.webContents.send('tray-toggle')
       },
     },
-    ...(MODE === 'control' ? [
-      { type: 'separator' },
-      {
-        label: trayLabels.turnOn,
-        enabled: appState.connected,
-        click: () => win && win.webContents.send('tray-power', true),
-      },
-      {
-        label: trayLabels.turnOff,
-        enabled: appState.connected,
-        click: () => win && win.webContents.send('tray-power', false),
-      },
-    ] : []),
+    { type: 'separator' },
+    {
+      label: trayLabels.turnOn,
+      enabled: appState.connected,
+      click: () => win && win.webContents.send('tray-power', true),
+    },
+    {
+      label: trayLabels.turnOff,
+      enabled: appState.connected,
+      click: () => win && win.webContents.send('tray-power', false),
+    },
     { type: 'separator' },
     {
       label: trayLabels.quit,
@@ -160,7 +160,7 @@ let win = null
 let picker = null
 let pickCb = null
 let lastList = []
-let monitor = 0
+let selectedScreen = ''
 
 function sendDevices() {
   if (!picker) return
@@ -197,13 +197,12 @@ function openPicker() {
 }
 
 function createWindow() {
-  const sync = MODE === 'sync'
   win = new BrowserWindow(fluent('mica', {
-    width: sync ? 560 : 1000,
-    height: sync ? 900 : 740,
+    width: 1000,
+    height: 740,
     minWidth: 360,
     minHeight: 480,
-    title: sync ? 'Lamp Ambilight' : 'JSK-P22 Lamp Control',
+    title: 'JSK-P22 Lamp Control',
     icon: path.join(__dirname, 'icon.png'),
   }))
   win.on('close', (event) => {
@@ -212,7 +211,7 @@ function createWindow() {
       win.hide()
     }
   })
-  win.loadFile(sync ? 'sync.html' : 'control.html')
+  win.loadFile('control.html')
   win.webContents.on('select-bluetooth-device', (event, devices, callback) => {
     event.preventDefault()
     pickCb = callback
@@ -224,17 +223,21 @@ function createWindow() {
 
 app.whenReady().then(() => {
   const defaultSession = session.defaultSession
+  async function getScreenSources() {
+    return desktopCapturer.getSources({
+      types: ['screen'],
+      thumbnailSize: { width: 1, height: 1 },
+    })
+  }
+
   defaultSession.setPermissionCheckHandler(() => true)
   defaultSession.setPermissionRequestHandler(
     (_webContents, _permission, callback) => callback(true),
   )
   defaultSession.setDevicePermissionHandler(() => true)
   defaultSession.setDisplayMediaRequestHandler(async (_request, callback) => {
-    const sources = await desktopCapturer.getSources({
-      types: ['screen'],
-      thumbnailSize: { width: 1, height: 1 },
-    })
-    callback({ video: sources[Math.min(monitor, sources.length - 1)] })
+    const sources = await getScreenSources()
+    callback({ video: sources.find(({ id }) => id === selectedScreen) || sources[0] })
   })
 
   ipcMain.handle('env', () => env())
@@ -252,11 +255,33 @@ app.whenReady().then(() => {
   })
 
   ipcMain.handle('screens', async () => {
-    const sources = await desktopCapturer.getSources({
-      types: ['screen'],
-      thumbnailSize: { width: 1, height: 1 },
+    const sources = await getScreenSources()
+    const displaysById = new Map(
+      screen.getAllDisplays().map((display) => [String(display.id), display]),
+    )
+
+    return sources.map((source, index) => {
+      const display = displaysById.get(source.display_id)
+      const name = (source.name || `Display ${index + 1}`)
+        .replace(/:\s*\d+\s*x\s*\d+\s*$/i, '')
+      if (!display) {
+        return { id: source.id, label: name }
+      }
+
+      const width = Math.round(display.bounds.width * display.scaleFactor)
+      const height = Math.round(display.bounds.height * display.scaleFactor)
+      return { id: source.id, label: `${name} (${width} × ${height})` }
     })
-    return sources.map((source, index) => source.name || `Screen ${index + 1}`)
+  })
+
+  ipcMain.handle('capture-source', async () => {
+    const sources = await getScreenSources()
+    const source = sources.find(({ id }) => id === selectedScreen) || sources[0]
+    if (!source) {
+      throw new Error('No screen capture source is available.')
+    }
+    selectedScreen = source.id
+    return source.id
   })
 
   ipcMain.on('tray', (_event, enabled) => {
@@ -272,8 +297,12 @@ app.whenReady().then(() => {
     appState = state
     if (tray) buildTray()
   })
-  ipcMain.on('setScreen', (_event, index) => {
-    monitor = index
+  ipcMain.on('setScreen', (_event, screenId) => {
+    if (typeof screenId !== 'string') {
+      console.warn('Ignored an invalid screen selection.')
+      return
+    }
+    selectedScreen = screenId
   })
 
   createWindow()

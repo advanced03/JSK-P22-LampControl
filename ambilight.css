@@ -1,0 +1,154 @@
+#pAmbi #ambi-sw {
+  height: 120px;
+  margin-bottom: 12px;
+  border: 1px solid var(--stroke-b);
+  border-radius: 8px;
+  background: #000;
+  transition: background 0.08s;
+}
+
+#pAmbi .ambi-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+#pAmbi .ambi-top .cs {
+  flex: 1;
+}
+
+#pAmbi .ambi-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 32px 0 14px;
+}
+
+#pAmbi .ambi-section-heading h2 {
+  min-width: 0;
+  margin: 0;
+}
+
+#pAmbi .ambi-actions {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+
+#pAmbi .ambi-hint {
+  margin: 0 0 16px;
+}
+
+#pAmbi .card.sc {
+  min-height: 84px;
+  margin-bottom: 12px;
+  padding: 18px 22px;
+}
+
+#pAmbi .sc .ctl {
+  flex: 0 1 340px;
+  min-width: 180px;
+}
+
+#pAmbi .sc input[type="range"] {
+  width: 100%;
+  min-width: 0;
+}
+
+#ambi-calibration-wizard {
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 24px;
+  overflow-y: auto;
+  border: 1px solid var(--stroke-b);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.32);
+}
+
+#ambi-calibration-wizard::backdrop {
+  background: rgba(0, 0, 0, 0.48);
+}
+
+#ambi-calibration-wizard h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+#ambi-calibration-wizard .wizard-swatches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+#ambi-calibration-wizard .wizard-swatch {
+  height: 84px;
+  margin-top: 6px;
+  border: 1px solid var(--stroke-b);
+  border-radius: 8px;
+}
+
+#ambi-calibration-wizard .wizard-calibration {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) minmax(0, 1.5fr);
+  align-items: center;
+  gap: 8px;
+}
+
+#ambi-calibration-wizard .wizard-calibration .ctl,
+#ambi-calibration-wizard .wizard-actions > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#ambi-calibration-wizard .wizard-calibration input[type="range"] {
+  flex: 1;
+  min-width: 0;
+}
+
+#ambi-calibration-wizard .wizard-calibration output {
+  min-width: 42px;
+  color: var(--ink2);
+  text-align: right;
+}
+
+#ambi-calibration-wizard .wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+#ambi-calibration-wizard .wizard-status {
+  color: var(--ink2);
+  font-size: 12px;
+}
+
+@media (max-width: 620px) {
+  #pAmbi .ambi-top,
+  #pAmbi .ambi-section-heading {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  #pAmbi .ambi-top .cs {
+    flex-basis: 100%;
+  }
+
+  #pAmbi .ambi-actions {
+    flex-wrap: wrap;
+  }
+
+  #pAmbi .sc .ctl {
+    flex-basis: 260px;
+  }
+
+  #ambi-calibration-wizard {
+    padding: 18px;
+  }
+}

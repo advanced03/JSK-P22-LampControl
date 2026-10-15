@@ -362,26 +362,6 @@ input[type=checkbox]:active::before {
 input[type=checkbox]:checked:active::before {
   left: 19px;
 }
-.info {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  padding: 12px 14px;
-  border-radius: 4px;
-  border: 1px solid var(--stroke);
-  background: var(--info);
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--ink);
-  margin-top: 10px;
-}
-.info i {
-  color: var(--accent-t);
-  margin-top: 1px;
-}
-.info b {
-  font-weight: 600;
-}
 .badge {
   padding: 1px 10px;
   border-radius: 10px;
