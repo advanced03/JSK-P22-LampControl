@@ -58,7 +58,7 @@
         <section class="page" id="pFx">
           <h1 data-i18n="effects.title">Effects</h1>
           <div
-            class="card sc"><div><div class="t" data-i18n="effects.nowPlaying">Now playing</div><div class="d" data-i18n="effects.colorStops">Picking a color stops the running effect</div></div><span class="badge" id="cur">none</span></div>
+            class="card sc"><div class="t" data-i18n="effects.nowPlaying">Now playing</div><span class="badge" id="cur">none</span><button id="stopEffect" type="button" data-i18n="effects.stop" hidden disabled>Stop effect</button></div>
           <div class="card sc">
             <div>
               <div class="t" data-i18n="effects.speed">Effect speed</div>
@@ -225,6 +225,10 @@
           <div class="card sc">
             <div><div class="t" data-ambi-i18n="response.brightness">Brightness</div><div class="d" data-ambi-i18n="response.brightnessDescription">Limits lamp brightness. The preview stays unchanged.</div></div>
             <div class="ctl"><input type="range" id="ambi-bright" min="5" max="100" aria-label="Brightness" data-ambi-i18n-aria-label="response.brightnessAria"><output for="ambi-bright"></output></div>
+          </div>
+          <div class="card sc">
+            <div><div class="t" data-ambi-i18n="response.minimumBrightness">Minimum brightness</div></div>
+            <div class="ctl"><input type="range" id="ambi-minimumBrightness" min="0" max="10" aria-label="Minimum brightness" data-ambi-i18n-aria-label="response.minimumBrightnessAria"><output for="ambi-minimumBrightness"></output></div>
           </div>
         </section>
 

@@ -47,7 +47,7 @@
       'color.hexLabel': 'Hex color',
       'effects.title': 'Effects',
       'effects.nowPlaying': 'Now playing',
-      'effects.colorStops': 'Picking a color stops the running effect',
+      'effects.stop': 'Stop effect',
       'effects.none': 'none',
       'effects.speed': 'Effect speed',
       'effects.speedDescription': 'How fast the effect runs',
@@ -255,7 +255,7 @@
       'color.hexLabel': 'Hexkleur',
       'effects.title': 'Effecten',
       'effects.nowPlaying': 'Nu actief',
-      'effects.colorStops': 'Een kleur kiezen stopt het actieve effect',
+      'effects.stop': 'Effect stoppen',
       'effects.none': 'geen',
       'effects.speed': 'Effectsnelheid',
       'effects.speedDescription': 'Hoe snel het effect wordt afgespeeld',
@@ -463,7 +463,7 @@
       'color.hexLabel': '十六进制颜色',
       'effects.title': '效果',
       'effects.nowPlaying': '当前效果',
-      'effects.colorStops': '选择颜色会停止当前效果',
+      'effects.stop': '停止效果',
       'effects.none': '无',
       'effects.speed': '效果速度',
       'effects.speedDescription': '效果播放速度',
@@ -688,7 +688,7 @@ color.wheelLabel|Palette de couleurs : faites glisser pour choisir la teinte et 
 color.hexLabel|Code couleur hexadécimal
 effects.title|Effets
 effects.nowPlaying|Effet en cours
-effects.colorStops|Choisir une couleur arrête l’effet en cours
+effects.stop|Arrêter l’effet
 effects.none|aucun
 effects.speed|Vitesse de l’effet
 effects.speedDescription|Vitesse de lecture de l’effet
@@ -895,7 +895,7 @@ color.wheelLabel|Farbkreis: Ziehen Sie, um Farbton und Sättigung auszuwählen
 color.hexLabel|Hex-Farbwert
 effects.title|Effekte
 effects.nowPlaying|Aktueller Effekt
-effects.colorStops|Wenn Sie eine Farbe auswählen, wird der laufende Effekt beendet.
+effects.stop|Effekt stoppen
 effects.none|kein
 effects.speed|Effektgeschwindigkeit
 effects.speedDescription|Wie schnell der Effekt abläuft
@@ -1102,7 +1102,7 @@ color.wheelLabel|Rueda de color: arrastra para elegir el tono y la saturación
 color.hexLabel|Código de color hexadecimal
 effects.title|Efectos
 effects.nowPlaying|Efecto actual
-effects.colorStops|Al elegir un color se detiene el efecto actual
+effects.stop|Detener efecto
 effects.none|ninguno
 effects.speed|Velocidad del efecto
 effects.speedDescription|Velocidad a la que se reproduce el efecto
@@ -1309,7 +1309,7 @@ color.wheelLabel|Ruota dei colori: trascina per scegliere tonalità e saturazion
 color.hexLabel|Codice colore esadecimale
 effects.title|Effetti
 effects.nowPlaying|Effetto in corso
-effects.colorStops|Scegliendo un colore si interrompe l’effetto in corso
+effects.stop|Interrompi effetto
 effects.none|nessuno
 effects.speed|Velocità dell’effetto
 effects.speedDescription|Velocità di riproduzione dell’effetto
@@ -1516,7 +1516,7 @@ color.wheelLabel|Roda de cores: arraste para escolher o matiz e a saturação
 color.hexLabel|Código de cor hexadecimal
 effects.title|Efeitos
 effects.nowPlaying|Efeito atual
-effects.colorStops|Ao escolher uma cor, o efeito atual é interrompido
+effects.stop|Parar efeito
 effects.none|nenhum
 effects.speed|Velocidade do efeito
 effects.speedDescription|Velocidade de reprodução do efeito

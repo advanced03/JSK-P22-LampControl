@@ -250,6 +250,8 @@
     ]]]
     const SERVICE = 0xfff0, CHAR = 0xfff3, $ = (id) => document.getElementById(id)
     let ch = null, dev = null, busy = false, pending = null
+    let activeEffect = false
+    let selectedColor = [255, 255, 255]
     let ambilightRunning = false
     let ambilightSending = false
     const ambilightConnectionListeners = new Set()
@@ -273,6 +275,7 @@
     const setEnabled = (v) => {
       ctl.forEach((i) => $(i).disabled = !v)
       document.querySelectorAll('.needs').forEach((b) => b.disabled = !v)
+      renderEffectState()
     }
     const cmd = {
       power: (o) => [0x7e, 4, 4, +o, 0, +o, 0xff, 0, 0xef],
@@ -320,6 +323,7 @@
     }
     const hex2 = (n) => n.toString(16).padStart(2, '0')
     function applyRGB(r, g, b, fromHex) {
+      selectedColor = [r, g, b]
       const hex = '#' + [r, g, b].map(hex2).join('').toUpperCase()
       if (!fromHex) $('hex').value = hex
       document.documentElement.style.setProperty('--glow', hex)
@@ -335,16 +339,17 @@
     }
     let drag = false
     cv.onpointerdown = (e) => {
-      if (!ch) return
+      if (!ch || activeEffect) return
       drag = true
       cv.setPointerCapture(e.pointerId)
       pick(e)
     }
     cv.onpointermove = (e) => {
-      if (drag) pick(e)
+      if (drag && !activeEffect) pick(e)
     }
     cv.onpointerup = () => drag = false
     $('hex').oninput = (e) => {
+      if (activeEffect) return
       const v = e.target.value.trim()
       if (/^#?[0-9a-fA-F]{6}$/.test(v)) {
         const h = v.replace('#', '')
@@ -451,11 +456,27 @@
       })
     }
     renderColorFilters()
+    function renderEffectState() {
+      $('hex').disabled = !ch || activeEffect
+      $('wheel').parentElement.classList.toggle('effect-active', activeEffect)
+      $('wheel').setAttribute('aria-disabled', String(activeEffect))
+      $('wheel').tabIndex = activeEffect ? -1 : 0
+      $('stopEffect').hidden = !activeEffect
+      $('stopEffect').disabled = !ch || !activeEffect
+    }
     function setActive() {
       curKey = null
+      activeEffect = false
       $('cur').textContent = i18n.t('effects.none')
       $('fx').querySelectorAll('.on').forEach((x) => x.classList.remove('on'))
+      renderEffectState()
     }
+    function stopActiveEffect() {
+      if (!ch || !activeEffect) return
+      act(cmd.color(...selectedColor))
+      setActive()
+    }
+    $('stopEffect').addEventListener('click', stopActiveEffect)
     function render() {
       const q = $('q').value.trim().toLowerCase(), box = $('fx')
       box.innerHTML = ''
@@ -473,6 +494,8 @@
           b.classList.add('on')
           curKey = key
           $('cur').textContent = i18n.effect(e.n)
+          activeEffect = true
+          renderEffectState()
         }
         box.appendChild(b)
       })
@@ -531,6 +554,7 @@
     function power(v) {
       send(cmd.power(v))
       setPower(v ? 'on' : 'off')
+      if (!v) setActive()
     }
     renderPower()
     let micState = 'unknown', noMic = false
@@ -783,6 +807,7 @@
     function onDisconnected() {
       ch = null
       pending = null
+      setActive()
       setEnabled(false)
       resetStates()
       setConnectionButton('connection.reconnect')

@@ -392,6 +392,14 @@ canvas#wheel {
   box-shadow: 0 0 44px -8px var(--glow);
   -webkit-app-region: no-drag;
 }
+.wheelrow.effect-active {
+  opacity: .4;
+  filter: grayscale(1);
+}
+.wheelrow.effect-active canvas#wheel {
+  cursor: not-allowed;
+  pointer-events: none;
+}
 .hexcol {
   display: flex;
   flex-direction: column;

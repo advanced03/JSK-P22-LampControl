@@ -6,12 +6,16 @@ const commands = {
   color: (red, green, blue) => [0x7e, 7, 5, 3, red, green, blue, 0x10, 0xef]
 };
 
+const NEUTRAL_SATURATION_THRESHOLD = 0.15;
+const NEUTRAL_CHANNEL_SPREAD_THRESHOLD = 12;
+
 const defaultSettings = {
   bars: false,
   fps: 30,
   smooth: 35,
   vivid: 40,
   bright: 100,
+  minimumBrightness: 0,
   screen: '',
   captureMode: 'average',
   expressiveSensitivity: 0,
@@ -51,6 +55,12 @@ for (const settingName of ['expressiveSensitivity', 'expressiveStrength']) {
   settings[settingName] = Number.isFinite(value)
     ? Math.max(0, Math.min(100, value))
     : defaultSettings[settingName];
+}
+{
+  const value = Number(settings.minimumBrightness);
+  settings.minimumBrightness = Number.isFinite(value)
+    ? Math.max(0, Math.min(10, value))
+    : defaultSettings.minimumBrightness;
 }
 let statusKey = 'status.notConnected';
 let statusValues = {};
@@ -117,14 +127,18 @@ function setCalibrationValue(settingName, value) {
 function bindSettings() {
   const settingIds = [
     'bars', 'captureMode', 'expressiveSensitivity', 'expressiveStrength',
-    'fps', 'smooth', 'vivid', 'bright', 'hdr', 'hdramt'
+    'fps', 'smooth', 'vivid', 'bright', 'minimumBrightness', 'hdr', 'hdramt'
   ];
 
   for (const id of settingIds) {
     const input = $(id);
     const isCheckbox = input.type === 'checkbox';
     const output = input.parentElement.querySelector('output');
-    const outputSuffix = ['expressiveSensitivity', 'expressiveStrength'].includes(id)
+    const outputSuffix = [
+      'expressiveSensitivity',
+      'expressiveStrength',
+      'minimumBrightness'
+    ].includes(id)
       ? '%'
       : '';
 
@@ -173,7 +187,7 @@ function bindSettings() {
   });
 
   $('reset-response').addEventListener('click', () => {
-    for (const id of ['fps', 'smooth', 'vivid', 'bright']) {
+    for (const id of ['fps', 'smooth', 'vivid', 'bright', 'minimumBrightness']) {
       const input = $(id);
       const value = defaultSettings[id];
       settings[id] = value;
@@ -246,6 +260,9 @@ function frameColor(
   if (mode !== 'expressive') {
     return average;
   }
+  if (isNearNeutral(average)) {
+    return average;
+  }
 
   const weighted = [0, 0, 0];
   let totalWeight = 0;
@@ -276,6 +293,15 @@ function frameColor(
   return weighted.map(channel => channel / totalWeight);
 }
 
+function isNearNeutral(rgb) {
+  const maximum = Math.max(...rgb);
+  const minimum = Math.min(...rgb);
+  return maximum - minimum <= Math.max(
+    NEUTRAL_CHANNEL_SPREAD_THRESHOLD,
+    maximum * NEUTRAL_SATURATION_THRESHOLD
+  );
+}
+
 function vividify([red, green, blue], amount) {
   red /= 255;
   green /= 255;
@@ -287,6 +313,10 @@ function vividify([red, green, blue], amount) {
   const delta = maximum - minimum;
   let hue = 0;
   let saturation = maximum ? delta / maximum : 0;
+
+  if (isNearNeutral([red * 255, green * 255, blue * 255])) {
+    return [red, green, blue].map(channel => channel * 255);
+  }
 
   if (delta) {
     if (maximum === red) {
@@ -338,6 +368,19 @@ function calibrateColor([red, green, blue]) {
     green * settings.calGreen / 100,
     blue * settings.calBlue / 100
   ];
+}
+
+function applyMinimumBrightness(rgb) {
+  const floor = settings.minimumBrightness * 255 / 100;
+  const maximum = Math.max(...rgb);
+  if (maximum >= floor || floor === 0) {
+    return rgb;
+  }
+  if (maximum === 0) {
+    return [Math.round(floor), Math.round(floor), Math.round(floor)];
+  }
+  const scale = floor / maximum;
+  return rgb.map(channel => Math.round(channel * scale));
 }
 
 function clampByte(value) {
@@ -599,9 +642,9 @@ async function syncLoop() {
       const previewColor = currentColor.map(channel => (
         Math.max(0, Math.min(255, Math.round(channel * settings.bright / 100)))
       ));
-      const outputColor = calibrateColor(currentColor).map(channel => (
+      const outputColor = applyMinimumBrightness(calibrateColor(currentColor).map(channel => (
         Math.max(0, Math.min(255, Math.round(channel * settings.bright / 100)))
-      ));
+      )));
       $('sw').style.background = `rgb(${previewColor[0]}, ${previewColor[1]}, ${previewColor[2]})`;
 
       const changedEnough = !lastSentColor || outputColor.reduce(
