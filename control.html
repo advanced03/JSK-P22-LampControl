@@ -100,8 +100,6 @@
             <div
               class="ctl"><input type="range" id="sens" class="needs mic" min="0" max="100" value="50" disabled><span class="val" id="mv">50</span></div>
           </div>
-          <div
-            class="info"><i>&#xE946;</i><span id="micNote" data-i18n="music.note">Uses the lamp's built-in microphone. The lamp doesn't report its state, so this shows what was last sent.</span></div>
         </section>
 
         <section class="page" id="pTime">
@@ -112,8 +110,6 @@
             class="card sc"><div><div class="t" data-i18n="schedule.readTitle">Read from lamp</div><div class="d" data-i18n="schedule.readDescription">Loads the timers stored on the lamp. This also happens when you connect.</div></div><button id="readTm" class="needs" disabled data-i18n="schedule.read">Read</button></div>
           <h2 data-i18n="schedule.timers">Timers</h2>
           <div class="tm" id="tm"></div>
-          <div
-            class="info"><i>&#xE946;</i><span data-i18n="schedule.note">Timers are read back from the lamp. Changes apply immediately. Turning one off keeps its time and days. The read-back follows the original app's code but is untested on a real lamp.</span></div>
         </section>
 
         <section class="page" id="pSettings">
@@ -858,7 +854,6 @@
       noMic = /^MELK-(OE|OB|TX)/i.test(dev.name || '')
       if (noMic) {
         document.querySelectorAll('.mic').forEach((x) => x.disabled = true)
-        $('micNote').textContent = i18n.t('music.noMicrophone')
       }
       resetStates()
       setTimeout(readTimers, 900)
@@ -873,12 +868,16 @@
       setConnectionStatus('connection.disconnectedStatus')
     }
     async function connect() {
-      if (!navigator.bluetooth) {
-        $('status').textContent = i18n.t('connection.noBluetooth')
+      if (!navigator.bluetooth || typeof navigator.bluetooth.getAvailability !== 'function') {
+        setConnectionStatus('connection.noBluetooth')
         return
       }
       const reconnecting = !!dev
       try {
+        if (!await navigator.bluetooth.getAvailability()) {
+          setConnectionStatus('connection.bluetoothOff')
+          return
+        }
         if (!dev) {
           dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [SERVICE] })
           dev.addEventListener('gattserverdisconnected', onDisconnected)
@@ -956,7 +955,6 @@
         : i18n.t('effects.none')
       setConnectionButton(connectionButtonKey)
       setConnectionStatus(connectionStatusKey, connectionStatusValues)
-      if (noMic) $('micNote').textContent = i18n.t('music.noMicrophone')
       timers.forEach((timer) => timer.refresh())
     })
     </script>

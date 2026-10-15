@@ -1,8 +1,9 @@
 # JSK-P22 Lamp Controller
 
 A Windows desktop app for controlling JSK-P22 / MELK Bluetooth LE lamps. Set colors and brightness, use effects and
-music sync, and manage the lamp clock and schedules. The resizable interface supports English, Dutch, and Simplified
-Chinese; the selected language is saved locally. Windows 11 may use Mica or Acrylic window materials.
+music sync, and manage the lamp clock and schedules. The resizable interface supports English, Dutch, Simplified Chinese,
+French, German, Spanish, Italian, and Brazilian Portuguese; the selected language is saved locally. Windows 11 may use
+Mica or Acrylic window materials.
 
 ## Requirements
 
