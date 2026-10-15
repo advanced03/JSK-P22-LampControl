@@ -15,7 +15,7 @@ const defaultSettings = {
   smooth: 35,
   vivid: 40,
   bright: 100,
-  minimumBrightness: 0,
+  allowTurnOff: true,
   screen: '',
   hdr: false,
   hdramt: 50,
@@ -32,6 +32,7 @@ function loadSettings() {
       delete saved.captureMode;
       delete saved.expressiveSensitivity;
       delete saved.expressiveStrength;
+      delete saved.minimumBrightness;
     }
     return { ...defaultSettings, ...saved };
   } catch (error) {
@@ -46,12 +47,6 @@ for (const settingName of ['calRed', 'calGreen', 'calBlue']) {
   settings[settingName] = Number.isFinite(value)
     ? Math.max(0, Math.min(100, value))
     : defaultSettings[settingName];
-}
-{
-  const value = Number(settings.minimumBrightness);
-  settings.minimumBrightness = Number.isFinite(value)
-    ? Math.max(0, Math.min(10, value))
-    : defaultSettings.minimumBrightness;
 }
 let statusKey = 'status.notConnected';
 let statusValues = {};
@@ -72,6 +67,7 @@ let wizardStep = 0;
 let wizardPreviousOutput = null;
 let lastOutputColor = null;
 let calibrationRevision = 0;
+let minimumWhiteActive = false;
 
 function setStatus(key, values = {}) {
   statusKey = key;
@@ -118,14 +114,14 @@ function setCalibrationValue(settingName, value) {
 function bindSettings() {
   const settingIds = [
     'bars',
-    'fps', 'smooth', 'vivid', 'bright', 'minimumBrightness', 'hdr', 'hdramt'
+    'fps', 'smooth', 'vivid', 'bright', 'allowTurnOff', 'hdr', 'hdramt'
   ];
 
   for (const id of settingIds) {
     const input = $(id);
     const isCheckbox = input.type === 'checkbox';
     const output = input.parentElement.querySelector('output');
-    const outputSuffix = id === 'minimumBrightness' ? '%' : '';
+    const outputSuffix = '';
 
     if (isCheckbox) {
       input.checked = settings[id];
@@ -169,12 +165,16 @@ function bindSettings() {
   });
 
   $('reset-response').addEventListener('click', () => {
-    for (const id of ['fps', 'smooth', 'vivid', 'bright', 'minimumBrightness']) {
+    for (const id of ['fps', 'smooth', 'vivid', 'bright', 'allowTurnOff']) {
       const input = $(id);
       const value = defaultSettings[id];
       settings[id] = value;
-      input.value = value;
-      input.parentElement.querySelector('output').textContent = value;
+      if (input.type === 'checkbox') {
+        input.checked = value;
+      } else {
+        input.value = value;
+        input.parentElement.querySelector('output').textContent = value;
+      }
       input.dispatchEvent(new Event('input', { bubbles: true }));
     }
   });
@@ -349,19 +349,6 @@ function calibrateColor([red, green, blue]) {
   ];
 }
 
-function applyMinimumBrightness(rgb) {
-  const floor = settings.minimumBrightness * 255 / 100;
-  const maximum = Math.max(...rgb);
-  if (maximum >= floor || floor === 0) {
-    return rgb;
-  }
-  if (maximum === 0) {
-    return [Math.round(floor), Math.round(floor), Math.round(floor)];
-  }
-  const scale = floor / maximum;
-  return rgb.map(channel => Math.round(channel * scale));
-}
-
 function clampByte(value) {
   return Math.max(0, Math.min(255, Math.round(value)));
 }
@@ -395,7 +382,10 @@ function refreshWizardColors() {
     'aria-label',
     `${i18n.translate('wizard.sent')}: ${outputHex}`
   );
-  sendCommand(commands.color(...outputColor));
+  sendCommand(
+    commands.color(...outputColor),
+    minimumWhiteActive ? window.lampControl.brightness : null
+  );
 }
 
 function renderWizardStep() {
@@ -446,6 +436,7 @@ function closeCalibrationWizard() {
   }
 
   wizardActive = false;
+  minimumWhiteActive = false;
   if (!running && wizardPreviousOutput && window.lampControl.connected) {
     sendCommand(commands.color(...wizardPreviousOutput));
   }
@@ -482,8 +473,8 @@ let stream = null;
 
 const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
-function sendCommand(bytes) {
-  if (!window.lampControl.sendColor(...bytes.slice(4, 7))) {
+function sendCommand(bytes, brightness = null) {
+  if (!window.lampControl.sendColor(...bytes.slice(4, 7), brightness)) {
     setStatus('status.notConnected');
     return;
   }
@@ -547,6 +538,7 @@ function stopSync() {
   startGeneration++;
   starting = false;
   running = false;
+  minimumWhiteActive = false;
   stopCapture();
   $('start').textContent = i18n.translate('button.startSync');
   $('start').disabled = !window.lampControl.connected;
@@ -607,9 +599,10 @@ async function syncLoop() {
       if (recentColors.length > GLITCH_FILTER_FRAMES) {
         recentColors.shift();
       }
+      const targetColor = medianColor(recentColors);
       currentColor = smoothColor(
         currentColor,
-        medianColor(recentColors),
+        targetColor,
         (frameStart - previousFrameTime) / 1000,
         settings.smooth
       );
@@ -618,9 +611,22 @@ async function syncLoop() {
       const previewColor = currentColor.map(channel => (
         Math.max(0, Math.min(255, Math.round(channel * settings.bright / 100)))
       ));
-      const outputColor = applyMinimumBrightness(calibrateColor(currentColor).map(channel => (
+      let outputColor = calibrateColor(currentColor).map(channel => (
         Math.max(0, Math.min(255, Math.round(channel * settings.bright / 100)))
-      )));
+      ));
+      let outputBrightness = null;
+      const keepWhiteAtBlack = !settings.allowTurnOff
+        && targetColor.every(channel => channel === 0);
+      if (keepWhiteAtBlack) {
+        outputColor = [255, 255, 255];
+        if (!minimumWhiteActive) {
+          outputBrightness = 1;
+          minimumWhiteActive = true;
+        }
+      } else if (minimumWhiteActive) {
+        outputBrightness = window.lampControl.brightness;
+        minimumWhiteActive = false;
+      }
       $('sw').style.background = `rgb(${previewColor[0]}, ${previewColor[1]}, ${previewColor[2]})`;
 
       const changedEnough = !lastSentColor || outputColor.reduce(
@@ -634,8 +640,10 @@ async function syncLoop() {
         && frameStart - lastSendTime > 1500;
       const calibrationChanged = calibrationRevision !== lastCalibrationRevision;
 
-      if (window.lampControl.connected && (changedEnough || needsRefresh || calibrationChanged)) {
-        sendCommand(commands.color(...outputColor));
+      if (window.lampControl.connected && (
+        changedEnough || needsRefresh || calibrationChanged || outputBrightness !== null
+      )) {
+        sendCommand(commands.color(...outputColor), outputBrightness);
         lastSentColor = outputColor;
         lastSendTime = frameStart;
         lastCalibrationRevision = calibrationRevision;

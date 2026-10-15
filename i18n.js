@@ -14,6 +14,8 @@
       'settings.languageDescription': 'Choose the language used by the application.',
       'settings.trayTitle': 'Keep in tray',
       'settings.trayDescription': 'Closing the window hides the app in the system tray. Use the tray menu to open the app, disconnect from the lamp, or quit.',
+      'settings.autoConnectTitle': 'Connect to last device automatically',
+      'settings.autoConnectDescription': 'Reconnect to the last lamp when the app opens.',
       'tray.open': 'Open app',
       'tray.startSync': 'Start sync',
       'tray.stopSync': 'Stop sync',
@@ -223,6 +225,8 @@
       'settings.languageDescription': 'Kies de taal die de toepassing gebruikt.',
       'settings.trayTitle': 'In systeemvak houden',
       'settings.trayDescription': 'Bij het sluiten wordt de toepassing verborgen in het systeemvak. Gebruik het menu om de toepassing te openen, de verbinding met de lamp te verbreken of af te sluiten.',
+      'settings.autoConnectTitle': 'Automatisch verbinden met het laatst gebruikte apparaat',
+      'settings.autoConnectDescription': 'Verbind opnieuw met de laatst gebruikte lamp wanneer de app start.',
       'tray.open': 'App openen',
       'tray.startSync': 'Synchronisatie starten',
       'tray.stopSync': 'Synchronisatie stoppen',
@@ -432,6 +436,8 @@
       'settings.languageDescription': '选择应用程序使用的语言。',
       'settings.trayTitle': '最小化到系统托盘',
       'settings.trayDescription': '关闭窗口时，应用程序会隐藏到系统托盘。使用托盘菜单打开应用、断开灯具连接或退出应用。',
+      'settings.autoConnectTitle': '自动连接到上次使用的设备',
+      'settings.autoConnectDescription': '应用启动时重新连接到上次使用的灯具。',
       'tray.open': '打开应用',
       'tray.startSync': '开始同步',
       'tray.stopSync': '停止同步',
@@ -658,6 +664,8 @@ settings.title|Paramètres
 settings.languageDescription|Choisissez la langue de l’application.
 settings.trayTitle|Garder dans la zone de notification
 settings.trayDescription|À la fermeture, l’application est masquée dans la zone de notification. Utilisez son menu pour la rouvrir, déconnecter la lampe ou quitter.
+settings.autoConnectTitle|Se connecter automatiquement au dernier appareil
+settings.autoConnectDescription|Reconnexion à la dernière lampe au démarrage de l’application.
 tray.open|Ouvrir l’application
 tray.startSync|Démarrer la synchronisation
 tray.stopSync|Arrêter la synchronisation
@@ -866,6 +874,8 @@ settings.title|Einstellungen
 settings.languageDescription|Wählen Sie die Sprache der Anwendung aus.
 settings.trayTitle|Im Infobereich behalten
 settings.trayDescription|Beim Schließen wird die Anwendung im Infobereich ausgeblendet. Über das Infobereichsmenü können Sie die App öffnen, die Lampe trennen oder die App beenden.
+settings.autoConnectTitle|Automatisch mit dem letzten Gerät verbinden
+settings.autoConnectDescription|Beim Start der App erneut mit der zuletzt verwendeten Lampe verbinden.
 tray.open|App öffnen
 tray.startSync|Synchronisierung starten
 tray.stopSync|Synchronisierung stoppen
@@ -1074,6 +1084,8 @@ settings.title|Ajustes
 settings.languageDescription|Elige el idioma de la aplicación.
 settings.trayTitle|Mantener en la bandeja del sistema
 settings.trayDescription|Al cerrar la ventana, la aplicación se oculta en la bandeja del sistema. Usa su menú para abrirla, desconectar la lámpara o salir.
+settings.autoConnectTitle|Conectarse automáticamente al último dispositivo
+settings.autoConnectDescription|Volver a conectar con la última lámpara al abrir la aplicación.
 tray.open|Abrir aplicación
 tray.startSync|Iniciar sincronización
 tray.stopSync|Detener sincronización
@@ -1282,6 +1294,8 @@ settings.title|Impostazioni
 settings.languageDescription|Scegli la lingua dell’applicazione.
 settings.trayTitle|Mantieni nell’area di notifica
 settings.trayDescription|Quando chiudi la finestra, l’applicazione viene nascosta nell’area di notifica. Usa il menu per aprirla, disconnettere la lampada o uscire.
+settings.autoConnectTitle|Connetti automaticamente all’ultimo dispositivo
+settings.autoConnectDescription|Riconnetti all’ultima lampada all’avvio dell’app.
 tray.open|Apri applicazione
 tray.startSync|Avvia sincronizzazione
 tray.stopSync|Interrompi sincronizzazione
@@ -1490,6 +1504,8 @@ settings.title|Configurações
 settings.languageDescription|Escolha o idioma do aplicativo.
 settings.trayTitle|Manter na bandeja do sistema
 settings.trayDescription|Ao fechar a janela, o aplicativo fica oculto na bandeja do sistema. Use o menu para abrir o aplicativo, desconectar a lâmpada ou sair.
+settings.autoConnectTitle|Conectar automaticamente ao último dispositivo
+settings.autoConnectDescription|Reconectar à última lâmpada ao abrir o aplicativo.
 tray.open|Abrir aplicativo
 tray.startSync|Iniciar sincronização
 tray.stopSync|Parar sincronização

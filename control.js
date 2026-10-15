@@ -250,6 +250,7 @@
     ]]]
     const SERVICE = 0xfff0, CHAR = 0xfff3, $ = (id) => document.getElementById(id)
     let ch = null, dev = null, busy = false, pending = null
+    let automaticConnectPending = false
     let activeEffect = false
     let selectedColor = [255, 255, 255]
     let ambilightRunning = false
@@ -589,7 +590,10 @@
       get poweredOff() {
         return powerState === 'off'
       },
-      sendColor(red, green, blue) {
+      get brightness() {
+        return Number($('bright').value)
+      },
+      sendColor(red, green, blue, brightness = null) {
         if (!ch) return false
         ambilightSending = true
         try {
@@ -598,7 +602,19 @@
             setMic('off')
             send(micOnOff(false))
           }
-          send(cmd.color(red, green, blue))
+          if (brightness === null) {
+            send(cmd.color(red, green, blue))
+          } else {
+            const colorCommand = cmd.color(red, green, blue)
+            gatt(async () => {
+              await ch.writeValueWithoutResponse(new Uint8Array(cmd.bright(brightness)))
+              await new Promise((resolve) => setTimeout(resolve, 40))
+              await ch.writeValueWithoutResponse(new Uint8Array(colorCommand))
+              await new Promise((resolve) => setTimeout(resolve, 40))
+            }).catch((error) => {
+              setConnectionStatus('connection.writeFailed', { message: error.message })
+            })
+          }
         } finally {
           ambilightSending = false
         }
@@ -816,6 +832,13 @@
       setConnectionButton('connection.reconnect')
       setConnectionStatus('connection.disconnectedStatus')
     }
+    function rememberDevice(device) {
+      try {
+        localStorage.setItem('lamp-last-device-id', device.id)
+      } catch (error) {
+        console.error('Could not save the last Bluetooth device.', error)
+      }
+    }
     async function connect() {
       if (!navigator.bluetooth || typeof navigator.bluetooth.getAvailability !== 'function') {
         setConnectionStatus('connection.noBluetooth')
@@ -830,10 +853,12 @@
         if (!dev) {
           dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [SERVICE] })
           dev.addEventListener('gattserverdisconnected', onDisconnected)
+          rememberDevice(dev)
         }
         setConnectionStatus('connection.connecting')
         const svc = await (await dev.gatt.connect()).getPrimaryService(SERVICE)
         ch = await svc.getCharacteristic(CHAR)
+        rememberDevice(dev)
         setEnabled(true)
         setConnectionButton('connection.disconnect')
         setConnectionStatus('connection.connected', { name: dev.name || 'device' })
@@ -862,7 +887,31 @@
         }
       }
     }
+    async function connectToLastDevice() {
+      if (automaticConnectPending || ch || !navigator.bluetooth
+        || typeof navigator.bluetooth.getDevices !== 'function') return
+      automaticConnectPending = true
+      $('connect').disabled = true
+      try {
+        const deviceId = localStorage.getItem('lamp-last-device-id')
+        if (!deviceId) return
+        const devices = await navigator.bluetooth.getDevices()
+        const lastDevice = (dev && dev.id === deviceId ? dev : null)
+          || devices.find((device) => device.id === deviceId)
+        if (!lastDevice || !$('autoConnect').checked || ch) return
+        dev = lastDevice
+        dev.addEventListener('gattserverdisconnected', onDisconnected)
+        setConnectionButton('connection.reconnect')
+        await connect()
+      } catch (error) {
+        console.warn('Could not automatically reconnect to the last Bluetooth device.', error)
+      } finally {
+        automaticConnectPending = false
+        $('connect').disabled = false
+      }
+    }
     $('connect').onclick = () => {
+      if (automaticConnectPending) return
       if (ch) dev.gatt.disconnect()
       else connect()
     }
@@ -892,6 +941,12 @@
     $('keepInTray').addEventListener('change', () => {
       localStorage.setItem('lamp-keep-in-tray', String($('keepInTray').checked))
       window.api.setTray($('keepInTray').checked)
+    })
+    $('autoConnect').checked = localStorage.getItem('lamp-auto-connect') === 'true'
+    $('autoConnect').addEventListener('change', () => {
+      localStorage.setItem('lamp-auto-connect', String($('autoConnect').checked))
+      if ($('autoConnect').checked && ch) rememberDevice(dev)
+      else if ($('autoConnect').checked) connectToLastDevice()
     })
     window.api.onTrayToggle(() => $('connect').click())
     window.api.onTraySyncToggle(() => $('ambi-start').click())
@@ -927,4 +982,5 @@
       setConnectionStatus(connectionStatusKey, connectionStatusValues)
       timers.forEach((timer) => timer.refresh())
     })
+    if ($('autoConnect').checked) connectToLastDevice()
     

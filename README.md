@@ -47,7 +47,7 @@ Ambilight settings let you:
 - Calibrate red, green, and blue output independently; use the calibration wizard to compare test colors with the
   preview.
 - Tune update rate, smoothing, vividness, and brightness to balance responsiveness and appearance.
-- Set a minimum output brightness from 0% (off at black) to 10%.
+- Choose whether a black scene can turn the lamp fully off. If not, the app sets the lamp to white at 1% brightness.
 
 Settings are saved locally. Ambilight uses the app's existing Bluetooth connection; it does not open a separate lamp
 connection. Other lamp commands stop active screen sync, and disconnecting the lamp stops capture. When system-tray

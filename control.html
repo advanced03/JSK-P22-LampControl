@@ -199,10 +199,10 @@
           </div>
           <div class="card sc">
             <div>
-              <div class="t" data-ambi-i18n="response.minimumBrightness">Minimum brightness</div>
-              <div class="d" data-ambi-i18n="response.minimumBrightnessDescription">Sets the lamp’s output floor in dark scenes; 0% allows it to turn off.</div>
+              <div class="t" data-ambi-i18n="response.allowTurnOff">Allow light to fully turn off</div>
+              <div class="d" data-ambi-i18n="response.allowTurnOffDescription">When disabled, pure black scenes use white at the lamp’s lowest brightness.</div>
             </div>
-            <div class="ctl"><input type="range" id="ambi-minimumBrightness" min="0" max="10" aria-label="Minimum brightness" data-ambi-i18n-aria-label="response.minimumBrightnessAria"><output for="ambi-minimumBrightness"></output></div>
+            <input type="checkbox" id="ambi-allowTurnOff" aria-label="Allow light to fully turn off" data-ambi-i18n-aria-label="response.allowTurnOff">
           </div>
         </section>
 
@@ -221,6 +221,13 @@
               <div class="d" data-i18n="settings.trayDescription">Closing the window hides the app in the system tray. Use the tray menu to open the app, disconnect from the lamp, or quit.</div>
             </div>
             <input id="keepInTray" type="checkbox" data-i18n-attr="aria-label:settings.trayTitle" aria-label="Keep in tray">
+          </label>
+          <label class="card sc setting-toggle">
+            <div>
+              <div class="t" data-i18n="settings.autoConnectTitle">Connect to last device automatically</div>
+              <div class="d" data-i18n="settings.autoConnectDescription">Reconnect to the last lamp when the app opens.</div>
+            </div>
+            <input id="autoConnect" type="checkbox" data-i18n-attr="aria-label:settings.autoConnectTitle" aria-label="Connect to last device automatically">
           </label>
         </section>
       </main>
