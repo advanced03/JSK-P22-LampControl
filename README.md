@@ -31,18 +31,28 @@ not digitally signed.
 
 <img width="975" height="725" alt="{23978387-298A-45BB-A731-7D25EB0A8320}" src="https://github.com/user-attachments/assets/1c7f3424-2bcf-4d80-a1e1-9165eb9f6dbb" />
 
+## Ambilight
+
+Open **Ambilight** in the sidebar, connect to the lamp with the app's shared **Connect** button, select a display, and
+choose **Start sync**. The app samples the selected screen and sends its average color to the lamp. The preview shows
+the color before lamp calibration is applied.
+
+Ambilight settings let you:
+
+- Ignore black letterbox bars when calculating the screen's average color.
+- Apply optional HDR correction for washed-out colors.
+- Calibrate red, green, and blue output independently; use the calibration wizard to compare test colors with the
+  preview.
+- Tune update rate, smoothing, vividness, and brightness to balance responsiveness and appearance.
+
+Settings are saved locally. Ambilight uses the app's existing Bluetooth connection; it does not open a separate lamp
+connection. Other lamp commands stop active screen sync, and disconnecting the lamp stops capture. When system-tray
+mode is enabled, the tray menu can start or stop sync.
 
 ## Notes
 
 - Change the language and optionally enable system-tray mode in Settings. With tray mode enabled, closing the window
   hides the app; use the tray menu to reopen it, disconnect, or quit.
-- Open **Ambilight** below **Schedule**, connect using the app's shared Connect button, choose a display, and start
-  sync. The Ambilight section includes black-bar filtering, optional HDR correction, color calibration, and response
-  controls. Sync shares the app's existing Bluetooth connection, so it does not open a competing lamp connection.
-  Manual lamp commands stop an active screen sync so effects, music sync, and chosen colors work as expected. The
-  system-tray menu has separate actions for starting or stopping Ambilight and for connecting or disconnecting.
-- Ambilight starts only when requested and stops if the lamp disconnects. Its capture and calibration preferences are
-  saved locally; the shared app language and tray settings remain in Settings.
 - Connect to the lamp whose Bluetooth name starts with `MELK`. Close other apps connected to it first; the lamp
   typically accepts only one connection at a time.
 - `main.js` creates the window and handles display capture; `preload.js` exposes the renderer API; `picker.html`
