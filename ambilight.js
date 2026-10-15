@@ -8,6 +8,7 @@ const commands = {
 
 const NEUTRAL_SATURATION_THRESHOLD = 0.15;
 const NEUTRAL_CHANNEL_SPREAD_THRESHOLD = 12;
+const BLACK_SCENE_CHANNEL_THRESHOLD = 3;
 const previousDefaultSettings = { smooth: 35, hdramt: 50 };
 
 const defaultSettings = {
@@ -462,6 +463,10 @@ function medianColor(colors) {
   });
 }
 
+function isBlackScene(color) {
+  return color.every(channel => channel <= BLACK_SCENE_CHANNEL_THRESHOLD);
+}
+
 function smoothColor(current, target, elapsedSeconds, amount) {
   const timeConstant = amount / 100 * 1.2;
   const blend = timeConstant < 1e-3
@@ -576,6 +581,7 @@ async function syncLoop() {
   let lastSendTime = 0;
   let lastCalibrationRevision = calibrationRevision;
   let previousFrameTime = performance.now();
+  let blackSceneActive = false;
   const recentColors = [];
 
   while (running) {
@@ -607,12 +613,20 @@ async function syncLoop() {
         recentColors.shift();
       }
       const targetColor = medianColor(recentColors);
-      currentColor = smoothColor(
-        currentColor,
-        targetColor,
-        (frameStart - previousFrameTime) / 1000,
-        settings.smooth
-      );
+      if (isBlackScene(targetColor)) {
+        currentColor = [0, 0, 0];
+        blackSceneActive = true;
+      } else if (blackSceneActive) {
+        currentColor = targetColor;
+        blackSceneActive = false;
+      } else {
+        currentColor = smoothColor(
+          currentColor,
+          targetColor,
+          (frameStart - previousFrameTime) / 1000,
+          settings.smooth
+        );
+      }
       previousFrameTime = frameStart;
 
       const previewColor = currentColor.map(channel => (
@@ -623,7 +637,7 @@ async function syncLoop() {
       ));
       let outputBrightness = null;
       const keepWhiteAtBlack = !settings.allowTurnOff
-        && targetColor.every(channel => channel === 0);
+        && isBlackScene(targetColor);
       if (keepWhiteAtBlack) {
         outputColor = [255, 255, 255];
         if (!minimumWhiteActive) {
