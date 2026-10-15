@@ -11,11 +11,11 @@
       'nav.ambilight': 'Ambilight',
       'nav.settings': 'Settings',
       'settings.title': 'Settings',
-      'settings.languageDescription': 'Choose the language used by the application.',
-      'settings.trayTitle': 'Keep in tray',
-      'settings.trayDescription': 'Closing the window hides the app in the system tray. Use the tray menu to open the app, disconnect from the lamp, or quit.',
-      'settings.autoConnectTitle': 'Connect to last device automatically',
-      'settings.autoConnectDescription': 'Reconnect to the last lamp when the app opens.',
+      'settings.languageDescription': 'Choose the app language.',
+      'settings.trayTitle': 'Keep running in the system tray',
+      'settings.trayDescription': 'Closing the window keeps the app running in the system tray. Use the tray menu to reopen it or quit.',
+      'settings.autoConnectTitle': 'Automatically reconnect to the last lamp',
+      'settings.autoConnectDescription': 'The app tries to reconnect at startup and after an unexpected disconnection. Connect to the lamp once so the app can remember it.',
       'tray.open': 'Open app',
       'tray.startSync': 'Start sync',
       'tray.stopSync': 'Stop sync',
@@ -31,15 +31,19 @@
       'connection.connecting': 'Connecting…',
       'connection.connected': 'Connected to {name}',
       'connection.disconnectedStatus': 'Disconnected',
-      'connection.noBluetooth': 'Web Bluetooth is not available in this browser.',
+      'connection.noBluetooth': 'Bluetooth control is not available in this app.',
       'connection.bluetoothOff': 'Bluetooth is turned off. Turn it on in Windows Settings and try again.',
       'connection.openBluetoothSettings': 'Open Bluetooth settings',
       'connection.settingsFailed': 'Could not open Bluetooth settings: {message}',
-      'connection.noDevice': 'No device chosen, or it has no 0xFFF0 service. Check that Bluetooth is enabled and the lamp is on and nearby.',
+      'connection.noDevice': 'No lamp was selected, or it does not provide the required 0xFFF0 service. Make sure Bluetooth is on and the lamp is powered on and nearby.',
       'connection.failed': 'Could not connect: {message}',
+      'connection.autoConnectUnavailable': 'Automatic reconnection is not available in this app. Use Connect to choose your lamp.',
+      'connection.autoConnectNoDevice': 'Connect to a lamp once to enable automatic reconnection.',
+      'connection.autoConnectNotAuthorized': 'The last lamp is no longer available to reconnect. Use Connect to choose it again.',
+      'connection.autoConnectFailed': 'Could not reconnect automatically: {message}',
       'connection.writeFailed': 'Write failed: {message}',
       'power.title': 'Power',
-      'power.description': "Turn the lamp on or off. Status shows the last command sent; the lamp doesn't report its power state.",
+      'power.description': "Turn the lamp on or off. The status shows the last command sent because the lamp doesn't report its power state.",
       'power.on': 'On',
       'power.off': 'Off',
       'brightness.title': 'Brightness',
@@ -65,7 +69,7 @@
       'effects.multicolor': 'Multicolor',
       'music.title': 'Music',
       'music.sync': 'Music sync',
-      'music.description': 'The lamp responds to sound captured by its built-in microphone.',
+      'music.description': 'The lamp responds to sound picked up by its built-in microphone.',
       'music.unknown': 'Unknown',
       'music.running': 'Running',
       'music.stopped': 'Stopped',
@@ -82,7 +86,7 @@
       'music.eqSpectrum2': 'Spectrum 2',
       'music.eqRolling2': 'Rolling 2',
       'music.sensitivity': 'Sensitivity',
-      'music.sensitivityDescription': 'Higher values make the lamp respond to quieter sounds.',
+      'music.sensitivityDescription': 'Higher sensitivity makes the lamp respond to quieter sounds.',
       'music.noMicrophone': 'This model has no microphone.',
       'schedule.title': 'Schedule',
       'schedule.timers': 'Timers',
@@ -96,14 +100,14 @@
       'schedule.oneDay': '{count} day',
       'schedule.connectFirst': 'Connect to the lamp first',
       'schedule.chooseTime': 'Pick a time and at least one day',
-      'schedule.sent': 'Sent: {time}, {days}, {state}',
+      'schedule.sent': 'Schedule sent: {time}, {days}, {state}',
       'schedule.onState': 'on',
       'schedule.offState': 'off',
       'schedule.notSet': 'Not set',
-      'schedule.onLamp': 'On lamp: {time}, {days}, {state}',
+      'schedule.onLamp': 'Lamp schedule: {time}, {days}, {state}',
       'schedule.reading': 'Reading from lamp…',
-      'schedule.noReport': 'Lamp did not report a schedule',
-      'schedule.readFailed': 'Could not read: {message}',
+      'schedule.noReport': 'The lamp did not return any schedule information.',
+      'schedule.readFailed': 'Could not read the schedule: {message}',
       'schedule.dayMon': 'Monday',
       'schedule.dayTue': 'Tuesday',
       'schedule.dayWed': 'Wednesday',
@@ -131,8 +135,8 @@
       'category.runningReverse': 'Running reverse',
       'category.scenes': 'Scenes',
       'picker.title': 'Choose your lamp',
-      'picker.searchingHint': 'Looking for lamps, usually named MELK-.',
-      'picker.pickHint': 'Pick your lamp from the list.',
+      'picker.searchingHint': 'Looking for nearby lamps, often named MELK-…',
+      'picker.pickHint': 'Choose your lamp from the list.',
       'picker.rangeHint': 'Make sure the lamp is powered and in range.',
       'picker.cancel': 'Cancel',
       'picker.unnamed': 'Unnamed device',
@@ -225,8 +229,8 @@
       'settings.languageDescription': 'Kies de taal die de toepassing gebruikt.',
       'settings.trayTitle': 'In systeemvak houden',
       'settings.trayDescription': 'Bij het sluiten wordt de toepassing verborgen in het systeemvak. Gebruik het menu om de toepassing te openen, de verbinding met de lamp te verbreken of af te sluiten.',
-      'settings.autoConnectTitle': 'Automatisch verbinden met het laatst gebruikte apparaat',
-      'settings.autoConnectDescription': 'Verbind opnieuw met de laatst gebruikte lamp wanneer de app start.',
+      'settings.autoConnectTitle': 'Automatisch opnieuw verbinden met de laatst gebruikte lamp',
+      'settings.autoConnectDescription': 'De app probeert bij het opstarten en na een onverwachte verbreking opnieuw verbinding te maken. Verbind de lamp eerst één keer handmatig.',
       'tray.open': 'App openen',
       'tray.startSync': 'Synchronisatie starten',
       'tray.stopSync': 'Synchronisatie stoppen',
@@ -242,12 +246,16 @@
       'connection.connecting': 'Verbinden…',
       'connection.connected': 'Verbonden met {name}',
       'connection.disconnectedStatus': 'Verbinding verbroken',
-      'connection.noBluetooth': 'Web Bluetooth is niet beschikbaar in deze browser.',
+      'connection.noBluetooth': 'Bluetooth-bediening is niet beschikbaar in deze app.',
       'connection.bluetoothOff': 'Bluetooth is uitgeschakeld. Schakel Bluetooth in via de Windows-instellingen en probeer het opnieuw.',
       'connection.openBluetoothSettings': 'Bluetooth-instellingen openen',
       'connection.settingsFailed': 'Bluetooth-instellingen konden niet worden geopend: {message}',
       'connection.noDevice': 'Geen apparaat gekozen of het apparaat heeft geen 0xFFF0-service. Controleer of Bluetooth is ingeschakeld en de lamp aan en dichtbij is.',
       'connection.failed': 'Verbinden mislukt: {message}',
+      'connection.autoConnectUnavailable': 'Automatisch opnieuw verbinden is niet beschikbaar in deze app. Kies de lamp met de knop Verbinden.',
+      'connection.autoConnectNoDevice': 'Verbind een keer handmatig met een lamp om automatisch opnieuw verbinden in te schakelen.',
+      'connection.autoConnectNotAuthorized': 'De laatst gebruikte lamp is niet meer beschikbaar. Kies de lamp opnieuw met de knop Verbinden.',
+      'connection.autoConnectFailed': 'Automatisch opnieuw verbinden is mislukt: {message}',
       'connection.writeFailed': 'Schrijven mislukt: {message}',
       'power.title': 'Aan/uit',
       'power.description': 'Zet de lamp aan of uit. De status toont de laatst verzonden opdracht; de lamp meldt de voedingsstatus niet terug.',
@@ -436,8 +444,8 @@
       'settings.languageDescription': '选择应用程序使用的语言。',
       'settings.trayTitle': '最小化到系统托盘',
       'settings.trayDescription': '关闭窗口时，应用程序会隐藏到系统托盘。使用托盘菜单打开应用、断开灯具连接或退出应用。',
-      'settings.autoConnectTitle': '自动连接到上次使用的设备',
-      'settings.autoConnectDescription': '应用启动时重新连接到上次使用的灯具。',
+      'settings.autoConnectTitle': '自动重新连接到上次使用的灯具',
+      'settings.autoConnectDescription': '应用启动时以及意外断开后尝试重新连接。请先手动连接一次灯具。',
       'tray.open': '打开应用',
       'tray.startSync': '开始同步',
       'tray.stopSync': '停止同步',
@@ -459,6 +467,10 @@
       'connection.settingsFailed': '无法打开蓝牙设置：{message}',
       'connection.noDevice': '未选择设备或设备没有 0xFFF0 服务。请检查蓝牙是否已启用，并确认灯具已打开且在附近。',
       'connection.failed': '连接失败：{message}',
+      'connection.autoConnectUnavailable': '此应用不支持自动重新连接。请使用“连接”按钮选择灯具。',
+      'connection.autoConnectNoDevice': '请先手动连接一次灯具，以启用自动重新连接。',
+      'connection.autoConnectNotAuthorized': '无法再访问上次使用的灯具。请使用“连接”按钮重新选择。',
+      'connection.autoConnectFailed': '自动重新连接失败：{message}',
       'connection.writeFailed': '写入失败：{message}',
       'power.title': '电源',
       'power.description': '打开或关闭灯。状态显示最后发送的命令；灯具不会反馈电源状态。',
@@ -664,8 +676,8 @@ settings.title|Paramètres
 settings.languageDescription|Choisissez la langue de l’application.
 settings.trayTitle|Garder dans la zone de notification
 settings.trayDescription|À la fermeture, l’application est masquée dans la zone de notification. Utilisez son menu pour la rouvrir, déconnecter la lampe ou quitter.
-settings.autoConnectTitle|Se connecter automatiquement au dernier appareil
-settings.autoConnectDescription|Reconnexion à la dernière lampe au démarrage de l’application.
+settings.autoConnectTitle|Se reconnecter automatiquement à la dernière lampe
+settings.autoConnectDescription|La reconnexion est tentée au démarrage de l’application et après une déconnexion inattendue. Connectez d’abord la lampe manuellement.
 tray.open|Ouvrir l’application
 tray.startSync|Démarrer la synchronisation
 tray.stopSync|Arrêter la synchronisation
@@ -687,6 +699,10 @@ connection.openBluetoothSettings|Ouvrir les paramètres Bluetooth
 connection.settingsFailed|Impossible d’ouvrir les paramètres Bluetooth : {message}
 connection.noDevice|Aucun appareil sélectionné ou aucun service 0xFFF0. Vérifiez que le Bluetooth est activé et que la lampe est allumée et à proximité.
 connection.failed|Échec de la connexion : {message}
+connection.autoConnectUnavailable|La reconnexion automatique n’est pas disponible dans cette application. Utilisez le bouton Connecter pour choisir la lampe.
+connection.autoConnectNoDevice|Connectez d’abord une lampe manuellement pour activer la reconnexion automatique.
+connection.autoConnectNotAuthorized|La dernière lampe n’est plus accessible. Utilisez le bouton Connecter pour la sélectionner à nouveau.
+connection.autoConnectFailed|Échec de la reconnexion automatique : {message}
 connection.writeFailed|Échec de l’écriture : {message}
 power.title|Alimentation
 power.description|Allumez ou éteignez la lampe. L’état indique la dernière commande envoyée ; la lampe ne signale pas son état d’alimentation.
@@ -874,8 +890,8 @@ settings.title|Einstellungen
 settings.languageDescription|Wählen Sie die Sprache der Anwendung aus.
 settings.trayTitle|Im Infobereich behalten
 settings.trayDescription|Beim Schließen wird die Anwendung im Infobereich ausgeblendet. Über das Infobereichsmenü können Sie die App öffnen, die Lampe trennen oder die App beenden.
-settings.autoConnectTitle|Automatisch mit dem letzten Gerät verbinden
-settings.autoConnectDescription|Beim Start der App erneut mit der zuletzt verwendeten Lampe verbinden.
+settings.autoConnectTitle|Automatisch wieder mit der zuletzt verwendeten Lampe verbinden
+settings.autoConnectDescription|Die App versucht beim Start und nach einem unerwarteten Verbindungsabbruch, die Lampe erneut zu verbinden. Verbinde sie zuerst einmal manuell.
 tray.open|App öffnen
 tray.startSync|Synchronisierung starten
 tray.stopSync|Synchronisierung stoppen
@@ -897,6 +913,10 @@ connection.openBluetoothSettings|Bluetooth-Einstellungen öffnen
 connection.settingsFailed|Bluetooth-Einstellungen konnten nicht geöffnet werden: {message}
 connection.noDevice|Kein Gerät ausgewählt oder kein 0xFFF0-Dienst verfügbar. Prüfe, ob Bluetooth aktiviert und die Lampe eingeschaltet und in der Nähe ist.
 connection.failed|Verbindung fehlgeschlagen: {message}
+connection.autoConnectUnavailable|Die automatische Wiederverbindung wird von dieser App nicht unterstützt. Wähle die Lampe über „Verbinden“ aus.
+connection.autoConnectNoDevice|Verbinde zuerst einmal manuell eine Lampe, um die automatische Wiederverbindung zu aktivieren.
+connection.autoConnectNotAuthorized|Die zuletzt verwendete Lampe ist nicht mehr verfügbar. Wähle sie über „Verbinden“ erneut aus.
+connection.autoConnectFailed|Automatische Wiederverbindung fehlgeschlagen: {message}
 connection.writeFailed|Schreiben fehlgeschlagen: {message}
 power.title|Stromversorgung
 power.description|Schalten Sie die Lampe ein oder aus. Der Status zeigt den zuletzt gesendeten Befehl an; die Lampe meldet ihren Stromzustand nicht zurück.
@@ -1084,8 +1104,8 @@ settings.title|Ajustes
 settings.languageDescription|Elige el idioma de la aplicación.
 settings.trayTitle|Mantener en la bandeja del sistema
 settings.trayDescription|Al cerrar la ventana, la aplicación se oculta en la bandeja del sistema. Usa su menú para abrirla, desconectar la lámpara o salir.
-settings.autoConnectTitle|Conectarse automáticamente al último dispositivo
-settings.autoConnectDescription|Volver a conectar con la última lámpara al abrir la aplicación.
+settings.autoConnectTitle|Volver a conectarse automáticamente a la última lámpara
+settings.autoConnectDescription|La aplicación intentará reconectarse al iniciarse y tras una desconexión inesperada. Primero, conecta la lámpara manualmente.
 tray.open|Abrir aplicación
 tray.startSync|Iniciar sincronización
 tray.stopSync|Detener sincronización
@@ -1107,6 +1127,10 @@ connection.openBluetoothSettings|Abrir la configuración de Bluetooth
 connection.settingsFailed|No se pudo abrir la configuración de Bluetooth: {message}
 connection.noDevice|No se ha seleccionado ningún dispositivo o no ofrece el servicio 0xFFF0. Comprueba que Bluetooth esté activado y que la lámpara esté encendida y cerca.
 connection.failed|No se pudo conectar: {message}
+connection.autoConnectUnavailable|Esta aplicación no permite la reconexión automática. Usa el botón Conectar para elegir la lámpara.
+connection.autoConnectNoDevice|Conecta una lámpara manualmente una vez para activar la reconexión automática.
+connection.autoConnectNotAuthorized|La última lámpara ya no está disponible. Usa el botón Conectar para volver a elegirla.
+connection.autoConnectFailed|No se pudo reconectar automáticamente: {message}
 connection.writeFailed|Error al escribir: {message}
 power.title|Encendido
 power.description|Enciende o apaga la lámpara. El estado muestra el último comando enviado; la lámpara no informa de su estado de encendido.
@@ -1294,8 +1318,8 @@ settings.title|Impostazioni
 settings.languageDescription|Scegli la lingua dell’applicazione.
 settings.trayTitle|Mantieni nell’area di notifica
 settings.trayDescription|Quando chiudi la finestra, l’applicazione viene nascosta nell’area di notifica. Usa il menu per aprirla, disconnettere la lampada o uscire.
-settings.autoConnectTitle|Connetti automaticamente all’ultimo dispositivo
-settings.autoConnectDescription|Riconnetti all’ultima lampada all’avvio dell’app.
+settings.autoConnectTitle|Riconnetti automaticamente all’ultima lampada
+settings.autoConnectDescription|L’app proverà a riconnettersi all’avvio e dopo una disconnessione imprevista. Connetti prima la lampada una volta manualmente.
 tray.open|Apri applicazione
 tray.startSync|Avvia sincronizzazione
 tray.stopSync|Interrompi sincronizzazione
@@ -1317,6 +1341,10 @@ connection.openBluetoothSettings|Apri le impostazioni Bluetooth
 connection.settingsFailed|Impossibile aprire le impostazioni Bluetooth: {message}
 connection.noDevice|Nessun dispositivo selezionato o servizio 0xFFF0 non disponibile. Verifica che il Bluetooth sia attivo e che la lampada sia accesa e vicina.
 connection.failed|Connessione non riuscita: {message}
+connection.autoConnectUnavailable|La riconnessione automatica non è disponibile in questa app. Usa il pulsante Connetti per scegliere la lampada.
+connection.autoConnectNoDevice|Connetti una lampada manualmente una volta per attivare la riconnessione automatica.
+connection.autoConnectNotAuthorized|L’ultima lampada usata non è più disponibile. Usa il pulsante Connetti per selezionarla di nuovo.
+connection.autoConnectFailed|Riconnessione automatica non riuscita: {message}
 connection.writeFailed|Scrittura non riuscita: {message}
 power.title|Alimentazione
 power.description|Accendi o spegni la lampada. Lo stato indica l’ultimo comando inviato; la lampada non comunica lo stato dell’alimentazione.
@@ -1504,8 +1532,8 @@ settings.title|Configurações
 settings.languageDescription|Escolha o idioma do aplicativo.
 settings.trayTitle|Manter na bandeja do sistema
 settings.trayDescription|Ao fechar a janela, o aplicativo fica oculto na bandeja do sistema. Use o menu para abrir o aplicativo, desconectar a lâmpada ou sair.
-settings.autoConnectTitle|Conectar automaticamente ao último dispositivo
-settings.autoConnectDescription|Reconectar à última lâmpada ao abrir o aplicativo.
+settings.autoConnectTitle|Reconectar automaticamente à última lâmpada
+settings.autoConnectDescription|O aplicativo tentará reconectar ao iniciar e após uma desconexão inesperada. Conecte a lâmpada manualmente uma vez primeiro.
 tray.open|Abrir aplicativo
 tray.startSync|Iniciar sincronização
 tray.stopSync|Parar sincronização
@@ -1527,6 +1555,10 @@ connection.openBluetoothSettings|Abrir configurações de Bluetooth
 connection.settingsFailed|Não foi possível abrir as configurações de Bluetooth: {message}
 connection.noDevice|Nenhum dispositivo selecionado ou serviço 0xFFF0 indisponível. Verifique se o Bluetooth está ativado e se a lâmpada está ligada e próxima.
 connection.failed|Não foi possível conectar: {message}
+connection.autoConnectUnavailable|Este aplicativo não oferece reconexão automática. Use o botão Conectar para escolher a lâmpada.
+connection.autoConnectNoDevice|Conecte uma lâmpada manualmente uma vez para ativar a reconexão automática.
+connection.autoConnectNotAuthorized|A última lâmpada usada não está mais disponível. Use o botão Conectar para selecioná-la novamente.
+connection.autoConnectFailed|Não foi possível reconectar automaticamente: {message}
 connection.writeFailed|Falha ao gravar: {message}
 power.title|Energia
 power.description|Acenda ou apague a lâmpada. O status mostra o último comando enviado; a lâmpada não informa o próprio estado de energia.

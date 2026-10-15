@@ -8,17 +8,18 @@ const commands = {
 
 const NEUTRAL_SATURATION_THRESHOLD = 0.15;
 const NEUTRAL_CHANNEL_SPREAD_THRESHOLD = 12;
+const previousDefaultSettings = { smooth: 35, hdramt: 50 };
 
 const defaultSettings = {
   bars: false,
   fps: 30,
-  smooth: 35,
+  smooth: 50,
   vivid: 40,
   bright: 100,
   allowTurnOff: true,
   screen: '',
   hdr: false,
-  hdramt: 50,
+  hdramt: 10,
   calRed: 100,
   calGreen: 100,
   calBlue: 100
@@ -28,6 +29,12 @@ function loadSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem('cfg') || '{}');
     if (saved && typeof saved === 'object') {
+      if (saved.smooth === previousDefaultSettings.smooth) {
+        saved.smooth = defaultSettings.smooth;
+      }
+      if (saved.hdramt === previousDefaultSettings.hdramt) {
+        saved.hdramt = defaultSettings.hdramt;
+      }
       delete saved.mode;
       delete saved.captureMode;
       delete saved.expressiveSensitivity;

@@ -249,8 +249,14 @@
       ['Warning', 28],
     ]]]
     const SERVICE = 0xfff0, CHAR = 0xfff3, $ = (id) => document.getElementById(id)
+    const LAST_DEVICE_ID_KEY = 'lamp-last-device-id'
+    const AUTO_RECONNECT_MAX_ATTEMPTS = 3
+    const AUTO_RECONNECT_BASE_DELAY = 1500
     let ch = null, dev = null, busy = false, pending = null
     let automaticConnectPending = false
+    let automaticReconnectAttempts = 0
+    let automaticReconnectTimer = null
+    let manualDisconnectRequested = false
     let activeEffect = false
     let selectedColor = [255, 255, 255]
     let ambilightRunning = false
@@ -823,7 +829,20 @@
       setTimeout(readTimers, 900)
     }
 
+    function scheduleAutomaticReconnect() {
+      if (!$('autoConnect').checked || automaticReconnectTimer
+        || automaticReconnectAttempts >= AUTO_RECONNECT_MAX_ATTEMPTS) return
+
+      const delay = AUTO_RECONNECT_BASE_DELAY * (2 ** automaticReconnectAttempts)
+      automaticReconnectAttempts++
+      automaticReconnectTimer = setTimeout(() => {
+        automaticReconnectTimer = null
+        connectToLastDevice()
+      }, delay)
+    }
     function onDisconnected() {
+      const wasManuallyDisconnected = manualDisconnectRequested
+      manualDisconnectRequested = false
       ch = null
       pending = null
       setActive()
@@ -831,28 +850,35 @@
       resetStates()
       setConnectionButton('connection.reconnect')
       setConnectionStatus('connection.disconnectedStatus')
+      if (!wasManuallyDisconnected) scheduleAutomaticReconnect()
     }
     function rememberDevice(device) {
       try {
-        localStorage.setItem('lamp-last-device-id', device.id)
+        localStorage.setItem(LAST_DEVICE_ID_KEY, device.id)
       } catch (error) {
         console.error('Could not save the last Bluetooth device.', error)
       }
     }
-    async function connect() {
-      if (!navigator.bluetooth || typeof navigator.bluetooth.getAvailability !== 'function') {
+    async function isBluetoothAvailable() {
+      if (!navigator.bluetooth) {
         setConnectionStatus('connection.noBluetooth')
-        return
+        return false
       }
+      if (typeof navigator.bluetooth.getAvailability !== 'function') return true
+      if (await navigator.bluetooth.getAvailability()) return true
+      setConnectionStatus('connection.bluetoothOff')
+      return false
+    }
+    function watchDeviceDisconnect(device) {
+      device.addEventListener('gattserverdisconnected', onDisconnected)
+    }
+    async function connect() {
       const reconnecting = !!dev
       try {
-        if (!await navigator.bluetooth.getAvailability()) {
-          setConnectionStatus('connection.bluetoothOff')
-          return
-        }
+        if (!await isBluetoothAvailable()) return false
         if (!dev) {
           dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [SERVICE] })
-          dev.addEventListener('gattserverdisconnected', onDisconnected)
+          watchDeviceDisconnect(dev)
           rememberDevice(dev)
         }
         setConnectionStatus('connection.connecting')
@@ -863,48 +889,66 @@
         setConnectionButton('connection.disconnect')
         setConnectionStatus('connection.connected', { name: dev.name || 'device' })
         afterConnect()
+        clearTimeout(automaticReconnectTimer)
+        automaticReconnectTimer = null
+        automaticReconnectAttempts = 0
+        manualDisconnectRequested = false
+        return true
       } catch (e) {
         let bluetoothOff = false
         try {
-          bluetoothOff = !await navigator.bluetooth.getAvailability()
+          bluetoothOff = navigator.bluetooth
+            && typeof navigator.bluetooth.getAvailability === 'function'
+            && !await navigator.bluetooth.getAvailability()
         } catch (availabilityError) {
           console.warn('Could not determine Bluetooth availability after a connection error.', availabilityError)
         }
         if (bluetoothOff) {
           setConnectionStatus('connection.bluetoothOff')
-          return
+          return false
         }
         if (e.name === 'NotFoundError') {
           setConnectionStatus('connection.noDevice')
-          return
+          return false
         }
 
         setConnectionStatus('connection.failed', { message: e.message })
-        if (reconnecting) {
-          // The lamp did not answer: forget it, so the next click opens the picker again.
-          dev = null
-          setConnectionButton('connection.connect')
-        }
+        setConnectionButton(reconnecting ? 'connection.reconnect' : 'connection.connect')
+        return false
       }
     }
     async function connectToLastDevice() {
-      if (automaticConnectPending || ch || !navigator.bluetooth
-        || typeof navigator.bluetooth.getDevices !== 'function') return
+      if (automaticConnectPending || ch || !$('autoConnect').checked) return
+      if (!navigator.bluetooth || typeof navigator.bluetooth.getDevices !== 'function') {
+        setConnectionStatus('connection.autoConnectUnavailable')
+        return
+      }
       automaticConnectPending = true
       $('connect').disabled = true
       try {
-        const deviceId = localStorage.getItem('lamp-last-device-id')
-        if (!deviceId) return
+        const deviceId = localStorage.getItem(LAST_DEVICE_ID_KEY)
+        if (!deviceId) {
+          setConnectionStatus('connection.autoConnectNoDevice')
+          return
+        }
         const devices = await navigator.bluetooth.getDevices()
         const lastDevice = (dev && dev.id === deviceId ? dev : null)
           || devices.find((device) => device.id === deviceId)
-        if (!lastDevice || !$('autoConnect').checked || ch) return
+        if (!$('autoConnect').checked || ch) return
+        if (!lastDevice) {
+          setConnectionStatus('connection.autoConnectNotAuthorized')
+          return
+        }
         dev = lastDevice
-        dev.addEventListener('gattserverdisconnected', onDisconnected)
+        watchDeviceDisconnect(dev)
         setConnectionButton('connection.reconnect')
-        await connect()
+        const connected = await connect()
+        if (connected) return
+        scheduleAutomaticReconnect()
       } catch (error) {
         console.warn('Could not automatically reconnect to the last Bluetooth device.', error)
+        setConnectionStatus('connection.autoConnectFailed', { message: error.message })
+        scheduleAutomaticReconnect()
       } finally {
         automaticConnectPending = false
         $('connect').disabled = false
@@ -912,7 +956,10 @@
     }
     $('connect').onclick = () => {
       if (automaticConnectPending) return
-      if (ch) dev.gatt.disconnect()
+      if (ch) {
+        manualDisconnectRequested = true
+        dev.gatt.disconnect()
+      }
       else connect()
     }
     $('bluetoothSettings').onclick = async () => {
@@ -945,8 +992,17 @@
     $('autoConnect').checked = localStorage.getItem('lamp-auto-connect') === 'true'
     $('autoConnect').addEventListener('change', () => {
       localStorage.setItem('lamp-auto-connect', String($('autoConnect').checked))
-      if ($('autoConnect').checked && ch) rememberDevice(dev)
-      else if ($('autoConnect').checked) connectToLastDevice()
+      if ($('autoConnect').checked && ch) {
+        rememberDevice(dev)
+        automaticReconnectAttempts = 0
+      } else if ($('autoConnect').checked) {
+        automaticReconnectAttempts = 0
+        connectToLastDevice()
+      } else {
+        clearTimeout(automaticReconnectTimer)
+        automaticReconnectTimer = null
+        automaticReconnectAttempts = 0
+      }
     })
     window.api.onTrayToggle(() => $('connect').click())
     window.api.onTraySyncToggle(() => $('ambi-start').click())

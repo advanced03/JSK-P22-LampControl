@@ -125,14 +125,14 @@
           <div class="card sc">
             <div>
               <div class="t" data-ambi-i18n="capture.screen">Screen</div>
-              <div class="d" data-ambi-i18n="capture.screenDescription">Average the full screen of this display.</div>
+              <div class="d" data-ambi-i18n="capture.screenDescription">Use the average color across the entire selected screen.</div>
             </div>
             <select id="ambi-screen" aria-label="Screen to follow" data-ambi-i18n-aria-label="capture.screenAria"></select>
           </div>
           <div class="card sc">
             <div>
               <div class="t" data-ambi-i18n="capture.ignoreBars">Ignore black bars</div>
-              <div class="d" data-ambi-i18n="capture.ignoreBarsDescription">Optionally exclude letterbox bars from the average.</div>
+              <div class="d" data-ambi-i18n="capture.ignoreBarsDescription">Exclude letterbox bars when calculating the average color.</div>
             </div>
             <input type="checkbox" id="ambi-bars" aria-label="Ignore black bars" data-ambi-i18n-aria-label="capture.ignoreBarsAria">
           </div>
@@ -148,7 +148,7 @@
           <div class="card sc">
             <div>
               <div class="t" data-ambi-i18n="hdr.correction">Correction strength</div>
-              <div class="d" data-ambi-i18n="hdr.correctionDescription">Adjusts the gamma and color correction.</div>
+              <div class="d" data-ambi-i18n="hdr.correctionDescription">Adjusts gamma and color to correct washed-out HDR capture.</div>
             </div>
             <div class="ctl">
               <input type="range" id="ambi-hdramt" min="0" max="100" aria-label="HDR correction strength" data-ambi-i18n-aria-label="hdr.correctionAria">
@@ -163,17 +163,17 @@
               <button id="ambi-reset-calibration" type="button" data-ambi-i18n="button.reset">Reset</button>
             </div>
           </div>
-          <p class="d ambi-hint" data-ambi-i18n="calibration.description">Match the lamp to the preview. The preview won’t change.</p>
+          <p class="d ambi-hint" data-ambi-i18n="calibration.description">Adjust the lamp until it matches the preview. The preview itself stays the same.</p>
           <div class="card sc">
-            <div><div class="t" data-ambi-i18n="calibration.red">Red output</div><div class="d" data-ambi-i18n="calibration.redDescription">0% turns red off; 100% leaves it unchanged.</div></div>
+            <div><div class="t" data-ambi-i18n="calibration.red">Red output</div><div class="d" data-ambi-i18n="calibration.redDescription">At 0%, red is off; at 100%, it is unchanged.</div></div>
             <div class="ctl"><input type="range" id="ambi-cal-red" min="0" max="100" aria-label="Red color calibration" data-ambi-i18n-aria-label="calibration.redAria"><output for="ambi-cal-red"></output></div>
           </div>
           <div class="card sc">
-            <div><div class="t" data-ambi-i18n="calibration.green">Green output</div><div class="d" data-ambi-i18n="calibration.greenDescription">0% turns green off; 100% leaves it unchanged.</div></div>
+            <div><div class="t" data-ambi-i18n="calibration.green">Green output</div><div class="d" data-ambi-i18n="calibration.greenDescription">At 0%, green is off; at 100%, it is unchanged.</div></div>
             <div class="ctl"><input type="range" id="ambi-cal-green" min="0" max="100" aria-label="Green color calibration" data-ambi-i18n-aria-label="calibration.greenAria"><output for="ambi-cal-green"></output></div>
           </div>
           <div class="card sc">
-            <div><div class="t" data-ambi-i18n="calibration.blue">Blue output</div><div class="d" data-ambi-i18n="calibration.blueDescription">0% turns blue off; 100% leaves it unchanged.</div></div>
+            <div><div class="t" data-ambi-i18n="calibration.blue">Blue output</div><div class="d" data-ambi-i18n="calibration.blueDescription">At 0%, blue is off; at 100%, it is unchanged.</div></div>
             <div class="ctl"><input type="range" id="ambi-cal-blue" min="0" max="100" aria-label="Blue color calibration" data-ambi-i18n-aria-label="calibration.blueAria"><output for="ambi-cal-blue"></output></div>
           </div>
 
@@ -182,25 +182,25 @@
             <button id="ambi-reset-response" type="button" data-ambi-i18n="response.reset">Reset</button>
           </div>
           <div class="card sc">
-            <div><div class="t" data-ambi-i18n="response.fps">Updates per second</div><div class="d" data-ambi-i18n="response.fpsDescription">Higher rates update faster but use more CPU and Bluetooth.</div></div>
+            <div><div class="t" data-ambi-i18n="response.fps">Updates per second</div><div class="d" data-ambi-i18n="response.fpsDescription">More frequent updates make Ambilight respond faster, but use more CPU and Bluetooth bandwidth.</div></div>
             <div class="ctl"><input type="range" id="ambi-fps" min="1" max="30" aria-label="Updates per second" data-ambi-i18n-aria-label="response.fpsAria"><output for="ambi-fps"></output></div>
           </div>
           <div class="card sc">
-            <div><div class="t" data-ambi-i18n="response.smoothing">Smoothing</div><div class="d" data-ambi-i18n="response.smoothingDescription">Higher values make transitions smoother and slower.</div></div>
+            <div><div class="t" data-ambi-i18n="response.smoothing">Smoothing</div><div class="d" data-ambi-i18n="response.smoothingDescription">Higher values smooth color changes more, but make the lamp respond more slowly.</div></div>
             <div class="ctl"><input type="range" id="ambi-smooth" min="0" max="100" aria-label="Smoothing" data-ambi-i18n-aria-label="response.smoothingAria"><output for="ambi-smooth"></output></div>
           </div>
           <div class="card sc">
-            <div><div class="t" data-ambi-i18n="response.vividness">Vividness</div><div class="d" data-ambi-i18n="response.vividnessDescription">Increase for richer colors; lower for a natural look.</div></div>
+            <div><div class="t" data-ambi-i18n="response.vividness">Vividness</div><div class="d" data-ambi-i18n="response.vividnessDescription">Increase this for more vivid colors; lower it for a more natural look.</div></div>
             <div class="ctl"><input type="range" id="ambi-vivid" min="0" max="100" aria-label="Vividness" data-ambi-i18n-aria-label="response.vividnessAria"><output for="ambi-vivid"></output></div>
           </div>
           <div class="card sc">
-            <div><div class="t" data-ambi-i18n="response.brightness">Brightness</div><div class="d" data-ambi-i18n="response.brightnessDescription">Limits lamp brightness. The preview stays unchanged.</div></div>
+            <div><div class="t" data-ambi-i18n="response.brightness">Brightness</div><div class="d" data-ambi-i18n="response.brightnessDescription">Adjusts the lamp brightness without changing the preview.</div></div>
             <div class="ctl"><input type="range" id="ambi-bright" min="5" max="100" aria-label="Brightness" data-ambi-i18n-aria-label="response.brightnessAria"><output for="ambi-bright"></output></div>
           </div>
           <div class="card sc">
             <div>
               <div class="t" data-ambi-i18n="response.allowTurnOff">Allow light to fully turn off</div>
-              <div class="d" data-ambi-i18n="response.allowTurnOffDescription">When disabled, pure black scenes use white at the lamp’s lowest brightness.</div>
+              <div class="d" data-ambi-i18n="response.allowTurnOffDescription">When unchecked, pure-black scenes keep the lamp on with white at its lowest brightness.</div>
             </div>
             <input type="checkbox" id="ambi-allowTurnOff" aria-label="Allow light to fully turn off" data-ambi-i18n-aria-label="response.allowTurnOff">
           </div>
@@ -211,23 +211,23 @@
           <div class="card sc">
             <div>
               <div class="t" data-i18n="language">Language</div>
-              <div class="d" data-i18n="settings.languageDescription">Choose the language used by the application.</div>
+              <div class="d" data-i18n="settings.languageDescription">Choose the app language.</div>
             </div>
             <select id="language" data-i18n-attr="aria-label:language" aria-label="Language"></select>
           </div>
           <label class="card sc setting-toggle">
             <div>
-              <div class="t" data-i18n="settings.trayTitle">Keep in tray</div>
-              <div class="d" data-i18n="settings.trayDescription">Closing the window hides the app in the system tray. Use the tray menu to open the app, disconnect from the lamp, or quit.</div>
+              <div class="t" data-i18n="settings.trayTitle">Keep running in the system tray</div>
+              <div class="d" data-i18n="settings.trayDescription">Closing the window keeps the app running in the system tray. Use the tray menu to reopen it or quit.</div>
             </div>
             <input id="keepInTray" type="checkbox" data-i18n-attr="aria-label:settings.trayTitle" aria-label="Keep in tray">
           </label>
           <label class="card sc setting-toggle">
             <div>
-              <div class="t" data-i18n="settings.autoConnectTitle">Connect to last device automatically</div>
-              <div class="d" data-i18n="settings.autoConnectDescription">Reconnect to the last lamp when the app opens.</div>
+              <div class="t" data-i18n="settings.autoConnectTitle">Automatically reconnect to the last lamp</div>
+              <div class="d" data-i18n="settings.autoConnectDescription">The app tries to reconnect at startup and after an unexpected disconnection. Connect to the lamp once so the app can remember it.</div>
             </div>
-            <input id="autoConnect" type="checkbox" data-i18n-attr="aria-label:settings.autoConnectTitle" aria-label="Connect to last device automatically">
+            <input id="autoConnect" type="checkbox" data-i18n-attr="aria-label:settings.autoConnectTitle" aria-label="Automatically reconnect to the last lamp">
           </label>
         </section>
       </main>
