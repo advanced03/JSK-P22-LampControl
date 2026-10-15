@@ -33,7 +33,7 @@
       'connection.bluetoothOff': 'Bluetooth is turned off. Turn it on in Windows Settings and try again.',
       'connection.openBluetoothSettings': 'Open Bluetooth settings',
       'connection.settingsFailed': 'Could not open Bluetooth settings: {message}',
-      'connection.noDevice': 'No device chosen, or it has no 0xFFF0 service.',
+      'connection.noDevice': 'No device chosen, or it has no 0xFFF0 service. Check that Bluetooth is enabled and the lamp is on and nearby.',
       'connection.failed': 'Could not connect: {message}',
       'connection.writeFailed': 'Write failed: {message}',
       'power.title': 'Power',
@@ -94,7 +94,6 @@
       'schedule.noDays': 'no days',
       'schedule.days': '{count} days',
       'schedule.oneDay': '{count} day',
-      'schedule.keepDay': 'Keep at least one day selected',
       'schedule.connectFirst': 'Connect to the lamp first',
       'schedule.chooseTime': 'Pick a time and at least one day',
       'schedule.sent': 'Sent: {time}, {days}, {state}',
@@ -245,7 +244,7 @@
       'connection.bluetoothOff': 'Bluetooth is uitgeschakeld. Schakel Bluetooth in via de Windows-instellingen en probeer het opnieuw.',
       'connection.openBluetoothSettings': 'Bluetooth-instellingen openen',
       'connection.settingsFailed': 'Bluetooth-instellingen konden niet worden geopend: {message}',
-      'connection.noDevice': 'Geen apparaat gekozen of het apparaat heeft geen 0xFFF0-service.',
+      'connection.noDevice': 'Geen apparaat gekozen of het apparaat heeft geen 0xFFF0-service. Controleer of Bluetooth is ingeschakeld en de lamp aan en dichtbij is.',
       'connection.failed': 'Verbinden mislukt: {message}',
       'connection.writeFailed': 'Schrijven mislukt: {message}',
       'power.title': 'Aan/uit',
@@ -307,7 +306,6 @@
       'schedule.noDays': 'geen dagen',
       'schedule.days': '{count} dagen',
       'schedule.oneDay': '{count} dag',
-      'schedule.keepDay': 'Selecteer ten minste één dag',
       'schedule.connectFirst': 'Verbind eerst met de lamp',
       'schedule.chooseTime': 'Kies een tijd en ten minste één dag',
       'schedule.sent': 'Verstuurd: {time}, {days}, {state}',
@@ -458,7 +456,7 @@
       'connection.bluetoothOff': '蓝牙已关闭。请在 Windows 设置中启用蓝牙后重试。',
       'connection.openBluetoothSettings': '打开蓝牙设置',
       'connection.settingsFailed': '无法打开蓝牙设置：{message}',
-      'connection.noDevice': '未选择设备，或设备没有 0xFFF0 服务。',
+      'connection.noDevice': '未选择设备或设备没有 0xFFF0 服务。请检查蓝牙是否已启用，并确认灯具已打开且在附近。',
       'connection.failed': '连接失败：{message}',
       'connection.writeFailed': '写入失败：{message}',
       'power.title': '电源',
@@ -519,7 +517,6 @@
       'schedule.noDays': '无日期',
       'schedule.days': '{count} 天',
       'schedule.oneDay': '{count} 天',
-      'schedule.keepDay': '请至少选择一天',
       'schedule.connectFirst': '请先连接灯具',
       'schedule.chooseTime': '请选择时间和至少一天',
       'schedule.sent': '已发送：{time}，{days}，{state}',
@@ -687,7 +684,7 @@ connection.noBluetooth|Web Bluetooth n’est pas disponible dans ce navigateur.
 connection.bluetoothOff|Le Bluetooth est désactivé. Activez-le dans les paramètres Windows, puis réessayez.
 connection.openBluetoothSettings|Ouvrir les paramètres Bluetooth
 connection.settingsFailed|Impossible d’ouvrir les paramètres Bluetooth : {message}
-connection.noDevice|Aucun appareil sélectionné, ou le service 0xFFF0 est introuvable.
+connection.noDevice|Aucun appareil sélectionné ou aucun service 0xFFF0. Vérifiez que le Bluetooth est activé et que la lampe est allumée et à proximité.
 connection.failed|Échec de la connexion : {message}
 connection.writeFailed|Échec de l’écriture : {message}
 power.title|Alimentation
@@ -748,7 +745,6 @@ schedule.everyDay|tous les jours
 schedule.noDays|aucun jour
 schedule.days|{count} jours
 schedule.oneDay|{count} jour
-schedule.keepDay|Sélectionnez au moins un jour
 schedule.connectFirst|Connectez d’abord la lampe
 schedule.chooseTime|Choisissez une heure et au moins un jour
 schedule.sent|Envoyé : {time}, {days}, {state}
@@ -898,7 +894,7 @@ connection.noBluetooth|Web Bluetooth ist in diesem Browser nicht verfügbar.
 connection.bluetoothOff|Bluetooth ist ausgeschaltet. Schalten Sie es in den Windows-Einstellungen ein und versuchen Sie es erneut.
 connection.openBluetoothSettings|Bluetooth-Einstellungen öffnen
 connection.settingsFailed|Bluetooth-Einstellungen konnten nicht geöffnet werden: {message}
-connection.noDevice|Kein Gerät ausgewählt oder der Dienst 0xFFF0 ist nicht verfügbar.
+connection.noDevice|Kein Gerät ausgewählt oder kein 0xFFF0-Dienst verfügbar. Prüfe, ob Bluetooth aktiviert und die Lampe eingeschaltet und in der Nähe ist.
 connection.failed|Verbindung fehlgeschlagen: {message}
 connection.writeFailed|Schreiben fehlgeschlagen: {message}
 power.title|Stromversorgung
@@ -959,7 +955,6 @@ schedule.everyDay|jeden Tag
 schedule.noDays|keine Tage
 schedule.days|{count} Tage
 schedule.oneDay|{count} Tag
-schedule.keepDay|Wählen Sie mindestens einen Tag aus.
 schedule.connectFirst|Verbinden Sie zuerst die Lampe.
 schedule.chooseTime|Wählen Sie eine Uhrzeit und mindestens einen Tag aus.
 schedule.sent|Gesendet: {time}, {days}, {state}
@@ -1109,7 +1104,7 @@ connection.noBluetooth|Web Bluetooth no está disponible en este navegador.
 connection.bluetoothOff|Bluetooth está desactivado. Actívalo en la configuración de Windows y vuelve a intentarlo.
 connection.openBluetoothSettings|Abrir la configuración de Bluetooth
 connection.settingsFailed|No se pudo abrir la configuración de Bluetooth: {message}
-connection.noDevice|No se ha seleccionado ningún dispositivo o no ofrece el servicio 0xFFF0.
+connection.noDevice|No se ha seleccionado ningún dispositivo o no ofrece el servicio 0xFFF0. Comprueba que Bluetooth esté activado y que la lámpara esté encendida y cerca.
 connection.failed|No se pudo conectar: {message}
 connection.writeFailed|Error al escribir: {message}
 power.title|Encendido
@@ -1170,7 +1165,6 @@ schedule.everyDay|todos los días
 schedule.noDays|ningún día
 schedule.days|{count} días
 schedule.oneDay|{count} día
-schedule.keepDay|Selecciona al menos un día.
 schedule.connectFirst|Conecta primero la lámpara.
 schedule.chooseTime|Elige una hora y al menos un día.
 schedule.sent|Enviado: {time}, {days}, {state}
@@ -1320,7 +1314,7 @@ connection.noBluetooth|Web Bluetooth non è disponibile in questo browser.
 connection.bluetoothOff|Il Bluetooth è disattivato. Attivalo nelle impostazioni di Windows e riprova.
 connection.openBluetoothSettings|Apri le impostazioni Bluetooth
 connection.settingsFailed|Impossibile aprire le impostazioni Bluetooth: {message}
-connection.noDevice|Nessun dispositivo selezionato oppure il servizio 0xFFF0 non è disponibile.
+connection.noDevice|Nessun dispositivo selezionato o servizio 0xFFF0 non disponibile. Verifica che il Bluetooth sia attivo e che la lampada sia accesa e vicina.
 connection.failed|Connessione non riuscita: {message}
 connection.writeFailed|Scrittura non riuscita: {message}
 power.title|Alimentazione
@@ -1381,7 +1375,6 @@ schedule.everyDay|ogni giorno
 schedule.noDays|nessun giorno
 schedule.days|{count} giorni
 schedule.oneDay|{count} giorno
-schedule.keepDay|Seleziona almeno un giorno.
 schedule.connectFirst|Connetti prima la lampada.
 schedule.chooseTime|Scegli un orario e almeno un giorno.
 schedule.sent|Inviato: {time}, {days}, {state}
@@ -1531,7 +1524,7 @@ connection.noBluetooth|O Web Bluetooth não está disponível neste navegador.
 connection.bluetoothOff|O Bluetooth está desligado. Ative-o nas configurações do Windows e tente novamente.
 connection.openBluetoothSettings|Abrir configurações de Bluetooth
 connection.settingsFailed|Não foi possível abrir as configurações de Bluetooth: {message}
-connection.noDevice|Nenhum dispositivo foi selecionado ou o serviço 0xFFF0 não está disponível.
+connection.noDevice|Nenhum dispositivo selecionado ou serviço 0xFFF0 indisponível. Verifique se o Bluetooth está ativado e se a lâmpada está ligada e próxima.
 connection.failed|Não foi possível conectar: {message}
 connection.writeFailed|Falha ao gravar: {message}
 power.title|Energia
@@ -1592,7 +1585,6 @@ schedule.everyDay|todos os dias
 schedule.noDays|nenhum dia
 schedule.days|{count} dias
 schedule.oneDay|{count} dia
-schedule.keepDay|Selecione pelo menos um dia.
 schedule.connectFirst|Conecte a lâmpada primeiro.
 schedule.chooseTime|Escolha um horário e pelo menos um dia.
 schedule.sent|Enviado: {time}, {days}, {state}

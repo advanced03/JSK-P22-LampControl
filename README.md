@@ -37,12 +37,14 @@ not digitally signed.
 ## Ambilight
 
 Open **Ambilight** in the sidebar, connect to the lamp with the app's shared **Connect** button, select a display, and
-choose **Start sync**. The app samples the selected screen and sends its average color to the lamp. The preview shows
+choose **Start sync**. The app samples the selected screen and sends its average color to the lamp by default. You can
+switch to the per-channel median to reduce the effect of large areas of very dark or bright pixels. The preview shows
 the color before lamp calibration is applied.
 
 Ambilight settings let you:
 
-- Ignore black letterbox bars when calculating the screen's average color.
+- Ignore black letterbox bars when calculating the screen color.
+- Choose average (default) or median screen-color sampling.
 - Apply optional HDR correction for washed-out colors.
 - Calibrate red, green, and blue output independently; use the calibration wizard to compare test colors with the
   preview.

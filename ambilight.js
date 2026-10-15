@@ -13,6 +13,7 @@ const defaultSettings = {
   vivid: 40,
   bright: 100,
   screen: '',
+  captureMode: 'average',
   hdr: false,
   hdramt: 50,
   calRed: 100,
@@ -34,6 +35,9 @@ function loadSettings() {
 }
 
 const settings = loadSettings();
+if (!['average', 'median'].includes(settings.captureMode)) {
+  settings.captureMode = defaultSettings.captureMode;
+}
 for (const settingName of ['calRed', 'calGreen', 'calBlue']) {
   const value = Number(settings[settingName]);
   settings[settingName] = Number.isFinite(value)
@@ -104,7 +108,7 @@ function setCalibrationValue(settingName, value) {
 
 function bindSettings() {
   const settingIds = [
-    'bars', 'fps', 'smooth', 'vivid', 'bright', 'hdr', 'hdramt'
+    'bars', 'captureMode', 'fps', 'smooth', 'vivid', 'bright', 'hdr', 'hdramt'
   ];
 
   for (const id of settingIds) {
@@ -166,7 +170,7 @@ function bindSettings() {
 
 }
 
-function frameColor(data, width, height, ignoreBars) {
+function frameColor(data, width, height, ignoreBars, mode = 'average') {
   let left = 0;
   let right = width - 1;
   let top = 0;
@@ -197,11 +201,43 @@ function frameColor(data, width, height, ignoreBars) {
     right = width - 1 - lastBrightColumn;
   }
 
+  let pixelCount = 0;
+
+  if (mode === 'median') {
+    const histograms = [new Uint32Array(256), new Uint32Array(256), new Uint32Array(256)];
+    for (let y = top; y <= bottom; y++) {
+      for (let x = left; x <= right; x++) {
+        const index = (y * width + x) * 4;
+        histograms[0][data[index]]++;
+        histograms[1][data[index + 1]]++;
+        histograms[2][data[index + 2]]++;
+        pixelCount++;
+      }
+    }
+
+    const lowerRank = Math.floor((pixelCount - 1) / 2);
+    const upperRank = Math.floor(pixelCount / 2);
+    return histograms.map(histogram => {
+      let cumulative = 0;
+      let lowerValue = null;
+      let upperValue = 0;
+      for (let value = 0; value < histogram.length; value++) {
+        cumulative += histogram[value];
+        if (lowerValue === null && cumulative > lowerRank) {
+          lowerValue = value;
+        }
+        if (cumulative > upperRank) {
+          upperValue = value;
+          break;
+        }
+      }
+      return (lowerValue + upperValue) / 2;
+    });
+  }
+
   let red = 0;
   let green = 0;
   let blue = 0;
-  let pixelCount = 0;
-
   for (let y = top; y <= bottom; y++) {
     for (let x = left; x <= right; x++) {
       const index = (y * width + x) * 4;
@@ -514,7 +550,8 @@ async function syncLoop() {
         image.data,
         192,
         108,
-        settings.bars
+        settings.bars,
+        settings.captureMode
       );
 
       if (settings.hdr) {

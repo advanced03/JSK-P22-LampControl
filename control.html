@@ -132,6 +132,16 @@
           </div>
           <div class="card sc">
             <div>
+              <div class="t" data-ambi-i18n="capture.method">Color calculation</div>
+              <div class="d" data-ambi-i18n="capture.methodDescription">Choose how screen pixels are combined.</div>
+            </div>
+            <select id="ambi-captureMode" aria-label="Color calculation" data-ambi-i18n-aria-label="capture.methodAria">
+              <option value="average" data-ambi-i18n="capture.average">Average</option>
+              <option value="median" data-ambi-i18n="capture.median">Median</option>
+            </select>
+          </div>
+          <div class="card sc">
+            <div>
               <div class="t" data-ambi-i18n="capture.ignoreBars">Ignore black bars</div>
               <div class="d" data-ambi-i18n="capture.ignoreBarsDescription">Optionally exclude letterbox bars from the average.</div>
             </div>
@@ -503,7 +513,7 @@
       connectionStatusValues = values
       const status = i18n.t(key, values)
       $('status').textContent = status
-      $('bluetoothSettings').hidden = key !== 'connection.bluetoothOff'
+      $('bluetoothSettings').hidden = !['connection.bluetoothOff', 'connection.noDevice'].includes(key)
       window.api.state({ status, connected: !!ch, running: ambilightRunning })
       ambilightConnectionListeners.forEach((callback) => callback(!!ch, status))
     }
@@ -874,7 +884,7 @@
         '</span><label style="display:flex;gap:8px;align-items:center;color:var(--ink2);font-size:13px"><input type="checkbox" class="needs enb" disabled aria-label="' +
         i18n.t(titleKey) + ' ' + i18n.t('schedule.enabled') + '"><span class="enabled-label">' +
         i18n.t('schedule.enabled') +
-        '</span></label><input type="time" class="needs" disabled value="00:00"></div><div style="display:flex;align-items:center;gap:14px;margin-top:14px"><span class="repeat-label" style="color:var(--ink2);min-width:56px">' +
+        '</span></label><input type="time" class="needs" disabled></div><div style="display:flex;align-items:center;gap:14px;margin-top:14px"><span class="repeat-label" style="color:var(--ink2);min-width:56px">' +
         i18n.t('schedule.repeat') + '</span><div class="days"></div></div>'
       const days = d.querySelector('.days'),
         tm = d.querySelector('input[type=time]'),
@@ -903,14 +913,10 @@
         b.dataset.dayIndex = i
         b.textContent = i18n.t('schedule.short' + n)
         b.setAttribute('aria-label', i18n.t('schedule.day' + n))
-        b.className = 'sel needs'
+        b.className = 'needs'
         b.onclick = () => {
           b.classList.toggle('sel')
-          if (!weeks()) {
-            b.classList.add('sel')
-            say('schedule.keepDay')
-            return
-          }
+          if (!weeks()) tm.value = ''
           push()
         }
         b.disabled = !ch
@@ -925,12 +931,21 @@
       }
       // bit 7 of the weeks byte is the on/off flag, bits 0-6 are Monday to Sunday (decoded from the vendor app)
       const push = () => {
-        const [h, m] = tm.value.split(':').map(Number), w = weeks()
+        const [h, m] = tm.value ? tm.value.split(':').map(Number) : [0, 0]
+        const w = weeks()
         if (!ch) {
           say('schedule.connectFirst')
           return
         }
-        if (!tm.value || !w) {
+
+        if (!w) {
+          enb.checked = false
+          send([0x7e, 8, 0x82, h, m, 0, mode, 0, 0xef])
+          say('schedule.notSet')
+          return
+        }
+
+        if (!tm.value) {
           say('schedule.chooseTime')
           return
         }
@@ -941,7 +956,14 @@
           stateKey: enb.checked ? 'schedule.onState' : 'schedule.offState',
         })
       }
-      enb.onchange = push
+      enb.onchange = () => {
+        if (enb.checked && !weeks()) {
+          enb.checked = false
+          say('schedule.chooseTime')
+          return
+        }
+        push()
+      }
       let tmr
       tm.addEventListener('input', () => {
         clearTimeout(tmr)
@@ -954,9 +976,11 @@
         say,
         refresh: renderStatus,
         show(h, m, w) {
-          if (h > 23 || m > 59) {
+          if (h > 23 || m > 59 || !(w & 127)) {
             say('schedule.notSet')
+            tm.value = ''
             enb.checked = false
+            ;[...days.children].forEach((b) => b.classList.remove('sel'))
             return
           }
           tm.value = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0')
