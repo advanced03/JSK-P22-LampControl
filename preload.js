@@ -7,6 +7,9 @@ contextBridge.exposeInMainWorld('api', {
   choose(deviceId) {
     ipcRenderer.send('choose', deviceId)
   },
+  openBluetoothSettings() {
+    return ipcRenderer.invoke('open-bluetooth-settings')
+  },
   screens() {
     return ipcRenderer.invoke('screens')
   },

@@ -30,6 +30,8 @@
       'connection.disconnectedStatus': 'Disconnected',
       'connection.noBluetooth': 'Web Bluetooth is not available in this browser.',
       'connection.bluetoothOff': 'Bluetooth is turned off. Turn it on in Windows Settings and try again.',
+      'connection.openBluetoothSettings': 'Open Bluetooth settings',
+      'connection.settingsFailed': 'Could not open Bluetooth settings: {message}',
       'connection.noDevice': 'No device chosen, or it has no 0xFFF0 service.',
       'connection.failed': 'Could not connect: {message}',
       'connection.writeFailed': 'Write failed: {message}',
@@ -243,6 +245,8 @@
       'connection.disconnectedStatus': 'Verbinding verbroken',
       'connection.noBluetooth': 'Web Bluetooth is niet beschikbaar in deze browser.',
       'connection.bluetoothOff': 'Bluetooth is uitgeschakeld. Schakel Bluetooth in via de Windows-instellingen en probeer het opnieuw.',
+      'connection.openBluetoothSettings': 'Bluetooth-instellingen openen',
+      'connection.settingsFailed': 'Bluetooth-instellingen konden niet worden geopend: {message}',
       'connection.noDevice': 'Geen apparaat gekozen of het apparaat heeft geen 0xFFF0-service.',
       'connection.failed': 'Verbinden mislukt: {message}',
       'connection.writeFailed': 'Schrijven mislukt: {message}',
@@ -457,6 +461,8 @@
       'connection.disconnectedStatus': '已断开连接',
       'connection.noBluetooth': '此浏览器不支持 Web Bluetooth。',
       'connection.bluetoothOff': '蓝牙已关闭。请在 Windows 设置中启用蓝牙后重试。',
+      'connection.openBluetoothSettings': '打开蓝牙设置',
+      'connection.settingsFailed': '无法打开蓝牙设置：{message}',
       'connection.noDevice': '未选择设备，或设备没有 0xFFF0 服务。',
       'connection.failed': '连接失败：{message}',
       'connection.writeFailed': '写入失败：{message}',
@@ -687,6 +693,8 @@ connection.connected|Connecté à {name}
 connection.disconnectedStatus|Déconnecté
 connection.noBluetooth|Web Bluetooth n’est pas disponible dans ce navigateur.
 connection.bluetoothOff|Le Bluetooth est désactivé. Activez-le dans les paramètres Windows, puis réessayez.
+connection.openBluetoothSettings|Ouvrir les paramètres Bluetooth
+connection.settingsFailed|Impossible d’ouvrir les paramètres Bluetooth : {message}
 connection.noDevice|Aucun appareil sélectionné, ou le service 0xFFF0 est introuvable.
 connection.failed|Échec de la connexion : {message}
 connection.writeFailed|Échec de l’écriture : {message}
@@ -899,6 +907,8 @@ connection.connected|Verbunden mit {name}
 connection.disconnectedStatus|Verbindung getrennt
 connection.noBluetooth|Web Bluetooth ist in diesem Browser nicht verfügbar.
 connection.bluetoothOff|Bluetooth ist ausgeschaltet. Schalten Sie es in den Windows-Einstellungen ein und versuchen Sie es erneut.
+connection.openBluetoothSettings|Bluetooth-Einstellungen öffnen
+connection.settingsFailed|Bluetooth-Einstellungen konnten nicht geöffnet werden: {message}
 connection.noDevice|Kein Gerät ausgewählt oder der Dienst 0xFFF0 ist nicht verfügbar.
 connection.failed|Verbindung fehlgeschlagen: {message}
 connection.writeFailed|Schreiben fehlgeschlagen: {message}
@@ -1111,6 +1121,8 @@ connection.connected|Conectado a {name}
 connection.disconnectedStatus|Desconectado
 connection.noBluetooth|Web Bluetooth no está disponible en este navegador.
 connection.bluetoothOff|Bluetooth está desactivado. Actívalo en la configuración de Windows y vuelve a intentarlo.
+connection.openBluetoothSettings|Abrir la configuración de Bluetooth
+connection.settingsFailed|No se pudo abrir la configuración de Bluetooth: {message}
 connection.noDevice|No se ha seleccionado ningún dispositivo o no ofrece el servicio 0xFFF0.
 connection.failed|No se pudo conectar: {message}
 connection.writeFailed|Error al escribir: {message}
@@ -1323,6 +1335,8 @@ connection.connected|Connessa a {name}
 connection.disconnectedStatus|Disconnessa
 connection.noBluetooth|Web Bluetooth non è disponibile in questo browser.
 connection.bluetoothOff|Il Bluetooth è disattivato. Attivalo nelle impostazioni di Windows e riprova.
+connection.openBluetoothSettings|Apri le impostazioni Bluetooth
+connection.settingsFailed|Impossibile aprire le impostazioni Bluetooth: {message}
 connection.noDevice|Nessun dispositivo selezionato oppure il servizio 0xFFF0 non è disponibile.
 connection.failed|Connessione non riuscita: {message}
 connection.writeFailed|Scrittura non riuscita: {message}
@@ -1535,6 +1549,8 @@ connection.connected|Conectado a {name}
 connection.disconnectedStatus|Desconectado
 connection.noBluetooth|O Web Bluetooth não está disponível neste navegador.
 connection.bluetoothOff|O Bluetooth está desligado. Ative-o nas configurações do Windows e tente novamente.
+connection.openBluetoothSettings|Abrir configurações de Bluetooth
+connection.settingsFailed|Não foi possível abrir as configurações de Bluetooth: {message}
 connection.noDevice|Nenhum dispositivo foi selecionado ou o serviço 0xFFF0 não está disponível.
 connection.failed|Não foi possível conectar: {message}
 connection.writeFailed|Falha ao gravar: {message}

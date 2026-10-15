@@ -20,6 +20,7 @@
         <div class="conn">
           <div class="cs"><i>&#xE702;</i><span id="status">Not connected</span></div>
           <button class="accent" id="connect" data-i18n="connection.connect">Connect</button>
+          <button id="bluetoothSettings" data-i18n="connection.openBluetoothSettings" hidden>Open Bluetooth settings</button>
         </div>
       </nav>
       <main class="content">
@@ -391,6 +392,7 @@
       connectionStatusValues = values
       const status = i18n.t(key, values)
       $('status').textContent = status
+      $('bluetoothSettings').hidden = key !== 'connection.bluetoothOff'
       window.api.state({ status, connected: !!ch })
     }
     function setConnectionButton(key) {
@@ -904,6 +906,13 @@
     $('connect').onclick = () => {
       if (ch) dev.gatt.disconnect()
       else connect()
+    }
+    $('bluetoothSettings').onclick = async () => {
+      try {
+        await window.api.openBluetoothSettings()
+      } catch (e) {
+        setConnectionStatus('connection.settingsFailed', { message: e.message })
+      }
     }
     const trayPreference = localStorage.getItem('lamp-keep-in-tray') === 'true'
     function updateTrayLabels() {

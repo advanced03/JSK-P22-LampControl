@@ -2,6 +2,7 @@ const {
   app,
   BrowserWindow,
   ipcMain,
+  shell,
   session,
   desktopCapturer,
   nativeTheme,
@@ -237,6 +238,9 @@ app.whenReady().then(() => {
   })
 
   ipcMain.handle('env', () => env())
+  ipcMain.handle('open-bluetooth-settings', async () => {
+    await shell.openExternal('ms-settings:bluetooth')
+  })
   ipcMain.on('choose', (_event, deviceId) => {
     if (pickCb) {
       pickCb(deviceId)
