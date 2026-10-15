@@ -31,6 +31,9 @@ not digitally signed.
 
 <img width="975" height="725" alt="{23978387-298A-45BB-A731-7D25EB0A8320}" src="https://github.com/user-attachments/assets/1c7f3424-2bcf-4d80-a1e1-9165eb9f6dbb" />
 
+<img width="988" height="730" alt="{C25BB108-8E25-4983-BF5E-1F7CA9BE71F6}" src="https://github.com/user-attachments/assets/876d01ae-5039-46b5-9dc3-f092b859760c" />
+
+
 ## Ambilight
 
 Open **Ambilight** in the sidebar, connect to the lamp with the app's shared **Connect** button, select a display, and
