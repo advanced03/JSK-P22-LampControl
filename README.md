@@ -38,13 +38,14 @@ not digitally signed.
 
 Open **Ambilight** in the sidebar, connect to the lamp with the app's shared **Connect** button, select a display, and
 choose **Start sync**. The app samples the selected screen and sends its average color to the lamp by default. You can
-switch to the per-channel median to reduce the effect of large areas of very dark or bright pixels. The preview shows
-the color before lamp calibration is applied.
+switch to **Expressive** mode to give small, high-contrast regions more influence than large, mostly uniform areas.
+The preview shows the color before lamp calibration is applied.
 
 Ambilight settings let you:
 
 - Ignore black letterbox bars when calculating the screen color.
-- Choose average (default) or median screen-color sampling.
+- Choose average (default) or expressive screen-color sampling.
+- In Expressive mode, tune the contrast threshold and weighting strength.
 - Apply optional HDR correction for washed-out colors.
 - Calibrate red, green, and blue output independently; use the calibration wizard to compare test colors with the
   preview.
@@ -60,9 +61,10 @@ mode is enabled, the tray menu can start or stop sync.
   hides the app; use the tray menu to reopen it, disconnect, or quit.
 - Connect to the lamp whose Bluetooth name starts with `MELK`. Close other apps connected to it first; the lamp
   typically accepts only one connection at a time.
-- `main.js` creates the window and handles display capture; `preload.js` exposes the renderer API; `picker.html`
-  displays Bluetooth devices; and `ambilight.js` adds screen-color processing and calibration. `fluent.css` /
-  `fluent.js` provide styling and Windows theme handling.
+- `main.js` creates the window and handles display capture; `preload.js` exposes the renderer API; `control.html` /
+  `control.js` implement the main lamp-control UI; and `picker.html` / `picker.js` implement Bluetooth device
+  selection. `ambilight.js` handles screen-color processing and calibration. `fluent.css` / `fluent.js` provide
+  styling and Windows theme handling.
 
 ## Bluetooth protocol
 

@@ -14,6 +14,8 @@ const defaultSettings = {
   bright: 100,
   screen: '',
   captureMode: 'average',
+  expressiveSensitivity: 0,
+  expressiveStrength: 40,
   hdr: false,
   hdramt: 50,
   calRed: 100,
@@ -35,10 +37,16 @@ function loadSettings() {
 }
 
 const settings = loadSettings();
-if (!['average', 'median'].includes(settings.captureMode)) {
+if (!['average', 'expressive'].includes(settings.captureMode)) {
   settings.captureMode = defaultSettings.captureMode;
 }
 for (const settingName of ['calRed', 'calGreen', 'calBlue']) {
+  const value = Number(settings[settingName]);
+  settings[settingName] = Number.isFinite(value)
+    ? Math.max(0, Math.min(100, value))
+    : defaultSettings[settingName];
+}
+for (const settingName of ['expressiveSensitivity', 'expressiveStrength']) {
   const value = Number(settings[settingName]);
   settings[settingName] = Number.isFinite(value)
     ? Math.max(0, Math.min(100, value))
@@ -108,13 +116,17 @@ function setCalibrationValue(settingName, value) {
 
 function bindSettings() {
   const settingIds = [
-    'bars', 'captureMode', 'fps', 'smooth', 'vivid', 'bright', 'hdr', 'hdramt'
+    'bars', 'captureMode', 'expressiveSensitivity', 'expressiveStrength',
+    'fps', 'smooth', 'vivid', 'bright', 'hdr', 'hdramt'
   ];
 
   for (const id of settingIds) {
     const input = $(id);
     const isCheckbox = input.type === 'checkbox';
     const output = input.parentElement.querySelector('output');
+    const outputSuffix = ['expressiveSensitivity', 'expressiveStrength'].includes(id)
+      ? '%'
+      : '';
 
     if (isCheckbox) {
       input.checked = settings[id];
@@ -123,7 +135,7 @@ function bindSettings() {
     }
 
     if (output) {
-      output.textContent = settings[id];
+      output.textContent = `${settings[id]}${outputSuffix}`;
     }
 
     const updateSetting = () => {
@@ -131,13 +143,16 @@ function bindSettings() {
         ? Number(input.value)
         : input.value;
       if (output) {
-        output.textContent = settings[id];
+        output.textContent = `${settings[id]}${outputSuffix}`;
       }
       saveSettings();
     };
 
     input.addEventListener('input', updateSetting);
     input.addEventListener('change', updateSetting);
+    if (id === 'captureMode') {
+      input.addEventListener('change', updateExpressiveControls);
+    }
   }
 
   for (const [id, settingName] of calibrationControls) {
@@ -170,7 +185,15 @@ function bindSettings() {
 
 }
 
-function frameColor(data, width, height, ignoreBars, mode = 'average') {
+function frameColor(
+  data,
+  width,
+  height,
+  ignoreBars,
+  mode = 'average',
+  sensitivity = 0,
+  strength = 40
+) {
   let left = 0;
   let right = width - 1;
   let top = 0;
@@ -201,43 +224,10 @@ function frameColor(data, width, height, ignoreBars, mode = 'average') {
     right = width - 1 - lastBrightColumn;
   }
 
-  let pixelCount = 0;
-
-  if (mode === 'median') {
-    const histograms = [new Uint32Array(256), new Uint32Array(256), new Uint32Array(256)];
-    for (let y = top; y <= bottom; y++) {
-      for (let x = left; x <= right; x++) {
-        const index = (y * width + x) * 4;
-        histograms[0][data[index]]++;
-        histograms[1][data[index + 1]]++;
-        histograms[2][data[index + 2]]++;
-        pixelCount++;
-      }
-    }
-
-    const lowerRank = Math.floor((pixelCount - 1) / 2);
-    const upperRank = Math.floor(pixelCount / 2);
-    return histograms.map(histogram => {
-      let cumulative = 0;
-      let lowerValue = null;
-      let upperValue = 0;
-      for (let value = 0; value < histogram.length; value++) {
-        cumulative += histogram[value];
-        if (lowerValue === null && cumulative > lowerRank) {
-          lowerValue = value;
-        }
-        if (cumulative > upperRank) {
-          upperValue = value;
-          break;
-        }
-      }
-      return (lowerValue + upperValue) / 2;
-    });
-  }
-
   let red = 0;
   let green = 0;
   let blue = 0;
+  let pixelCount = 0;
   for (let y = top; y <= bottom; y++) {
     for (let x = left; x <= right; x++) {
       const index = (y * width + x) * 4;
@@ -248,9 +238,42 @@ function frameColor(data, width, height, ignoreBars, mode = 'average') {
     }
   }
 
-  return pixelCount
-    ? [red / pixelCount, green / pixelCount, blue / pixelCount]
-    : [0, 0, 0];
+  if (!pixelCount) {
+    return [0, 0, 0];
+  }
+
+  const average = [red / pixelCount, green / pixelCount, blue / pixelCount];
+  if (mode !== 'expressive') {
+    return average;
+  }
+
+  const weighted = [0, 0, 0];
+  let totalWeight = 0;
+  const sensitivityThreshold = sensitivity / 100;
+  const weightMultiplier = strength / 5;
+  for (let y = top; y <= bottom; y++) {
+    for (let x = left; x <= right; x++) {
+      const index = (y * width + x) * 4;
+      const redDifference = data[index] - average[0];
+      const greenDifference = data[index + 1] - average[1];
+      const blueDifference = data[index + 2] - average[2];
+      const normalizedDistance = Math.sqrt((
+        redDifference * redDifference
+        + greenDifference * greenDifference
+        + blueDifference * blueDifference
+      ) / (3 * 255 * 255));
+      const contrast = sensitivityThreshold === 1
+        ? 0
+        : Math.max(0, (normalizedDistance - sensitivityThreshold) / (1 - sensitivityThreshold));
+      const weight = 1 + weightMultiplier * contrast * contrast;
+      weighted[0] += data[index] * weight;
+      weighted[1] += data[index + 1] * weight;
+      weighted[2] += data[index + 2] * weight;
+      totalWeight += weight;
+    }
+  }
+
+  return weighted.map(channel => channel / totalWeight);
 }
 
 function vividify([red, green, blue], amount) {
@@ -551,7 +574,9 @@ async function syncLoop() {
         192,
         108,
         settings.bars,
-        settings.captureMode
+        settings.captureMode,
+        settings.expressiveSensitivity,
+        settings.expressiveStrength
       );
 
       if (settings.hdr) {
@@ -655,6 +680,12 @@ function updateHdrControls() {
   $('hdramt').disabled = !settings.hdr;
 }
 
+function updateExpressiveControls() {
+  const expressive = settings.captureMode === 'expressive';
+  $('expressive-sensitivity-card').hidden = !expressive;
+  $('expressive-strength-card').hidden = !expressive;
+}
+
 function updateConnection(connected, status) {
   $('connection-status').textContent = status;
   $('start').disabled = !connected;
@@ -701,6 +732,7 @@ async function populateScreens() {
 
 bindSettings();
 updateHdrControls();
+updateExpressiveControls();
 $('hdr').addEventListener('change', updateHdrControls);
 $('hdrnote').textContent = i18n.translate('hdr.manualNote');
 

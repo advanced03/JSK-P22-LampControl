@@ -47,6 +47,10 @@
   padding: 18px 22px;
 }
 
+#pAmbi .expressive-setting[hidden] {
+  display: none;
+}
+
 #pAmbi .sc .ctl {
   flex: 0 1 340px;
   min-width: 180px;

@@ -82,9 +82,6 @@
       'music.sensitivityDescription': 'Higher values make the lamp respond to quieter sounds.',
       'music.noMicrophone': 'This model has no microphone.',
       'schedule.title': 'Schedule',
-      'schedule.clock': 'Lamp clock',
-      'schedule.clockDescription': 'Schedules need the correct time. It is set automatically when you connect.',
-      'schedule.setClock': "Set to this PC's time",
       'schedule.timers': 'Timers',
       'schedule.on': 'Schedule on',
       'schedule.off': 'Schedule off',
@@ -293,10 +290,6 @@
       'music.sensitivityDescription': 'Een hogere waarde laat de lamp ook op zachtere geluiden reageren.',
       'music.noMicrophone': 'Dit model heeft geen microfoon.',
       'schedule.title': 'Schema',
-      'schedule.clock': 'Klok van de lamp',
-      'schedule.clockDescription':
-        'Voor schema’s moet de tijd kloppen. Deze wordt automatisch ingesteld bij het verbinden.',
-      'schedule.setClock': 'Instellen op de tijd van deze pc',
       'schedule.timers': 'Timers',
       'schedule.on': 'Inschakelen plannen',
       'schedule.off': 'Uitschakelen plannen',
@@ -505,9 +498,6 @@
       'music.sensitivityDescription': '数值越高，对较轻的声音也越敏感',
       'music.noMicrophone': '此型号没有麦克风。',
       'schedule.title': '定时',
-      'schedule.clock': '灯具时钟',
-      'schedule.clockDescription': '定时功能需要正确时间。连接时会自动设置。',
-      'schedule.setClock': '设为电脑时间',
       'schedule.timers': '定时器',
       'schedule.on': '定时开灯',
       'schedule.off': '定时关灯',
@@ -733,9 +723,6 @@ music.sensitivity|Sensibilité
 music.sensitivityDescription|Une valeur élevée permet de détecter les sons plus faibles.
 music.noMicrophone|Ce modèle n’a pas de microphone.
 schedule.title|Programmation
-schedule.clock|Horloge de la lampe
-schedule.clockDescription|Les programmations nécessitent une heure exacte. Elle est réglée automatiquement lors de la connexion.
-schedule.setClock|Régler sur l’heure de ce PC
 schedule.timers|Minuteries
 schedule.on|Programmer l’allumage
 schedule.off|Programmer l’extinction
@@ -943,9 +930,6 @@ music.sensitivity|Empfindlichkeit
 music.sensitivityDescription|Bei höherer Empfindlichkeit reagiert die Lampe auch auf leisere Geräusche.
 music.noMicrophone|Dieses Modell hat kein Mikrofon.
 schedule.title|Zeitplan
-schedule.clock|Lampen-Uhr
-schedule.clockDescription|Für Zeitpläne muss die Uhr richtig eingestellt sein. Beim Verbinden wird sie automatisch gestellt.
-schedule.setClock|Auf PC-Zeit einstellen
 schedule.timers|Timer
 schedule.on|Einschalten planen
 schedule.off|Ausschalten planen
@@ -1153,9 +1137,6 @@ music.sensitivity|Sensibilidad
 music.sensitivityDescription|Con un valor más alto, la lámpara reacciona a sonidos más suaves.
 music.noMicrophone|Este modelo no tiene micrófono.
 schedule.title|Programación
-schedule.clock|Reloj de la lámpara
-schedule.clockDescription|La programación requiere que la hora sea correcta. Se ajusta automáticamente al conectar.
-schedule.setClock|Usar la hora de este PC
 schedule.timers|Temporizadores
 schedule.on|Programar encendido
 schedule.off|Programar apagado
@@ -1363,9 +1344,6 @@ music.sensitivity|Sensibilità
 music.sensitivityDescription|Un valore più alto fa reagire la lampada anche ai suoni più deboli.
 music.noMicrophone|Questo modello non ha un microfono.
 schedule.title|Programmazione
-schedule.clock|Orologio della lampada
-schedule.clockDescription|La programmazione richiede che l’ora sia corretta. L’orologio viene impostato automaticamente alla connessione.
-schedule.setClock|Imposta sull’ora del PC
 schedule.timers|Timer
 schedule.on|Programma l’accensione
 schedule.off|Programma lo spegnimento
@@ -1573,9 +1551,6 @@ music.sensitivity|Sensibilidade
 music.sensitivityDescription|Um valor mais alto faz a lâmpada reagir a sons mais baixos.
 music.noMicrophone|Este modelo não tem microfone.
 schedule.title|Programação
-schedule.clock|Relógio da lâmpada
-schedule.clockDescription|A programação exige que o horário esteja correto. Ele é ajustado automaticamente ao conectar.
-schedule.setClock|Usar o horário deste PC
 schedule.timers|Temporizadores
 schedule.on|Programar para ligar
 schedule.off|Programar para desligar
