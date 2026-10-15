@@ -50,7 +50,7 @@
               <canvas id="wheel" width="260" height="260" tabindex="0" data-i18n-attr="aria-label:color.wheelLabel"
                 aria-label="Color wheel: drag to choose hue and saturation"></canvas>
               <div
-                class="hexcol"><div class="chip" id="chip"></div><input type="text" id="hex" value="#FF3B6B" maxlength="7" data-i18n-attr="aria-label:color.hexLabel" aria-label="Hex color" disabled><div class="d" data-i18n="color.help" style="font-size:12px;color:var(--ink2)">Drag on the wheel or type a hex code. The center is white.</div></div>
+                class="hexcol"><div class="chip" id="chip"></div><input type="text" id="hex" value="#FFFFFF" maxlength="7" data-i18n-attr="aria-label:color.hexLabel" aria-label="Hex color" disabled></div>
             </div>
           </div>
         </section>
@@ -109,8 +109,6 @@
           <h1 data-i18n="schedule.title">Schedule</h1>
           <div
             class="card sc"><div><div class="t" data-i18n="schedule.clock">Lamp clock</div><div class="d" data-i18n="schedule.clockDescription">Schedules need the correct time. It is set automatically when you connect.</div></div><button id="setClock" class="needs" disabled data-i18n="schedule.setClock">Set to this PC's time</button></div>
-          <div
-            class="card sc"><div><div class="t" data-i18n="schedule.readTitle">Read from lamp</div><div class="d" data-i18n="schedule.readDescription">Loads the timers stored on the lamp. This also happens when you connect.</div></div><button id="readTm" class="needs" disabled data-i18n="schedule.read">Read</button></div>
           <h2 data-i18n="schedule.timers">Timers</h2>
           <div class="tm" id="tm"></div>
         </section>
@@ -804,6 +802,9 @@
       get connected() {
         return !!ch
       },
+      get poweredOff() {
+        return powerState === 'off'
+      },
       sendColor(red, green, blue) {
         if (!ch) return false
         ambilightSending = true
@@ -999,7 +1000,6 @@
       }
       reading = false
     }
-    $('readTm').onclick = readTimers
     function afterConnect() {
       send(clk())
       noMic = /^MELK-(OE|OB|TX)/i.test(dev.name || '')
@@ -1041,14 +1041,26 @@
         setConnectionStatus('connection.connected', { name: dev.name || 'device' })
         afterConnect()
       } catch (e) {
-        if (e.name === 'NotFoundError') setConnectionStatus('connection.noDevice')
-        else {
-          setConnectionStatus('connection.failed', { message: e.message })
-          if (reconnecting) {
-            // The lamp did not answer: forget it, so the next click opens the picker again.
-            dev = null
-            setConnectionButton('connection.connect')
-          }
+        let bluetoothOff = false
+        try {
+          bluetoothOff = !await navigator.bluetooth.getAvailability()
+        } catch (availabilityError) {
+          console.warn('Could not determine Bluetooth availability after a connection error.', availabilityError)
+        }
+        if (bluetoothOff) {
+          setConnectionStatus('connection.bluetoothOff')
+          return
+        }
+        if (e.name === 'NotFoundError') {
+          setConnectionStatus('connection.noDevice')
+          return
+        }
+
+        setConnectionStatus('connection.failed', { message: e.message })
+        if (reconnecting) {
+          // The lamp did not answer: forget it, so the next click opens the picker again.
+          dev = null
+          setConnectionButton('connection.connect')
         }
       }
     }

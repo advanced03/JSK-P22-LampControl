@@ -576,6 +576,11 @@ async function toggleSync() {
     return;
   }
 
+  if (window.lampControl.poweredOff) {
+    setStatus('status.lampOff');
+    return;
+  }
+
   if (running) {
     stopSync();
     setStatus('status.stopped');

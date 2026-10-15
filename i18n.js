@@ -45,7 +45,6 @@
       'color.pick': 'Pick a color',
       'color.wheelLabel': 'Color wheel: drag to choose hue and saturation',
       'color.hexLabel': 'Hex color',
-      'color.help': 'Drag on the wheel or type a hex code. The center is white.',
       'effects.title': 'Effects',
       'effects.nowPlaying': 'Now playing',
       'effects.colorStops': 'Picking a color stops the running effect',
@@ -86,9 +85,6 @@
       'schedule.clock': 'Lamp clock',
       'schedule.clockDescription': 'Schedules need the correct time. It is set automatically when you connect.',
       'schedule.setClock': "Set to this PC's time",
-      'schedule.readTitle': 'Read from lamp',
-      'schedule.readDescription': 'Loads the timers stored on the lamp. This also happens when you connect.',
-      'schedule.read': 'Read',
       'schedule.timers': 'Timers',
       'schedule.on': 'Schedule on',
       'schedule.off': 'Schedule off',
@@ -261,7 +257,6 @@
       'color.pick': 'Kies een kleur',
       'color.wheelLabel': 'Kleurwiel: sleep om tint en verzadiging te kiezen',
       'color.hexLabel': 'Hexkleur',
-      'color.help': 'Sleep over het wiel of typ een hexcode. Het midden is wit.',
       'effects.title': 'Effecten',
       'effects.nowPlaying': 'Nu actief',
       'effects.colorStops': 'Een kleur kiezen stopt het actieve effect',
@@ -303,9 +298,6 @@
       'schedule.clockDescription':
         'Voor schema’s moet de tijd kloppen. Deze wordt automatisch ingesteld bij het verbinden.',
       'schedule.setClock': 'Instellen op de tijd van deze pc',
-      'schedule.readTitle': 'Timers van de lamp ophalen',
-      'schedule.readDescription': 'Laadt de timers die op de lamp zijn opgeslagen. Dit gebeurt ook wanneer je verbinding maakt.',
-      'schedule.read': 'Lezen',
       'schedule.timers': 'Timers',
       'schedule.on': 'Inschakelen plannen',
       'schedule.off': 'Uitschakelen plannen',
@@ -478,7 +470,6 @@
       'color.pick': '选择颜色',
       'color.wheelLabel': '色轮：拖动以选择色调和饱和度',
       'color.hexLabel': '十六进制颜色',
-      'color.help': '在色轮上拖动或输入十六进制代码。中心为白色。',
       'effects.title': '效果',
       'effects.nowPlaying': '当前效果',
       'effects.colorStops': '选择颜色会停止当前效果',
@@ -519,9 +510,6 @@
       'schedule.clock': '灯具时钟',
       'schedule.clockDescription': '定时功能需要正确时间。连接时会自动设置。',
       'schedule.setClock': '设为电脑时间',
-      'schedule.readTitle': '从灯具读取',
-      'schedule.readDescription': '加载灯具中保存的定时设置。连接时也会自动读取。',
-      'schedule.read': '读取',
       'schedule.timers': '定时器',
       'schedule.on': '定时开灯',
       'schedule.off': '定时关灯',
@@ -711,7 +699,6 @@ brightness.description|Niveau de luminosité de la lampe
 color.pick|Choisir une couleur
 color.wheelLabel|Palette de couleurs : faites glisser pour choisir la teinte et la saturation
 color.hexLabel|Code couleur hexadécimal
-color.help|Faites glisser sur la palette ou saisissez un code hexadécimal. Le centre est blanc.
 effects.title|Effets
 effects.nowPlaying|Effet en cours
 effects.colorStops|Choisir une couleur arrête l’effet en cours
@@ -752,9 +739,6 @@ schedule.title|Programmation
 schedule.clock|Horloge de la lampe
 schedule.clockDescription|Les programmations nécessitent une heure exacte. Elle est réglée automatiquement lors de la connexion.
 schedule.setClock|Régler sur l’heure de ce PC
-schedule.readTitle|Lire depuis la lampe
-schedule.readDescription|Charge les minuteries enregistrées sur la lampe. Cette lecture a aussi lieu lors de la connexion.
-schedule.read|Lire
 schedule.timers|Minuteries
 schedule.on|Programmer l’allumage
 schedule.off|Programmer l’extinction
@@ -926,7 +910,6 @@ brightness.description|Helligkeit der Lampe
 color.pick|Farbe auswählen
 color.wheelLabel|Farbkreis: Ziehen Sie, um Farbton und Sättigung auszuwählen
 color.hexLabel|Hex-Farbwert
-color.help|Wählen Sie eine Farbe im Farbkreis oder geben Sie einen Hex-Code ein. Die Mitte ist weiß.
 effects.title|Effekte
 effects.nowPlaying|Aktueller Effekt
 effects.colorStops|Wenn Sie eine Farbe auswählen, wird der laufende Effekt beendet.
@@ -967,9 +950,6 @@ schedule.title|Zeitplan
 schedule.clock|Lampen-Uhr
 schedule.clockDescription|Für Zeitpläne muss die Uhr richtig eingestellt sein. Beim Verbinden wird sie automatisch gestellt.
 schedule.setClock|Auf PC-Zeit einstellen
-schedule.readTitle|Von der Lampe lesen
-schedule.readDescription|Lädt die auf der Lampe gespeicherten Timer. Das geschieht auch beim Verbinden.
-schedule.read|Lesen
 schedule.timers|Timer
 schedule.on|Einschalten planen
 schedule.off|Ausschalten planen
@@ -1141,7 +1121,6 @@ brightness.description|Nivel de brillo de la lámpara
 color.pick|Elegir un color
 color.wheelLabel|Rueda de color: arrastra para elegir el tono y la saturación
 color.hexLabel|Código de color hexadecimal
-color.help|Arrastra en la rueda o escribe un código hexadecimal. El centro es blanco.
 effects.title|Efectos
 effects.nowPlaying|Efecto actual
 effects.colorStops|Al elegir un color se detiene el efecto actual
@@ -1182,9 +1161,6 @@ schedule.title|Programación
 schedule.clock|Reloj de la lámpara
 schedule.clockDescription|La programación requiere que la hora sea correcta. Se ajusta automáticamente al conectar.
 schedule.setClock|Usar la hora de este PC
-schedule.readTitle|Leer de la lámpara
-schedule.readDescription|Carga los temporizadores guardados en la lámpara. También se hace al conectar.
-schedule.read|Leer
 schedule.timers|Temporizadores
 schedule.on|Programar encendido
 schedule.off|Programar apagado
@@ -1356,7 +1332,6 @@ brightness.description|Livello di luminosità della lampada
 color.pick|Scegli un colore
 color.wheelLabel|Ruota dei colori: trascina per scegliere tonalità e saturazione
 color.hexLabel|Codice colore esadecimale
-color.help|Trascina sulla ruota o inserisci un codice esadecimale. Il centro è bianco.
 effects.title|Effetti
 effects.nowPlaying|Effetto in corso
 effects.colorStops|Scegliendo un colore si interrompe l’effetto in corso
@@ -1397,9 +1372,6 @@ schedule.title|Programmazione
 schedule.clock|Orologio della lampada
 schedule.clockDescription|La programmazione richiede che l’ora sia corretta. L’orologio viene impostato automaticamente alla connessione.
 schedule.setClock|Imposta sull’ora del PC
-schedule.readTitle|Leggi dalla lampada
-schedule.readDescription|Carica i timer salvati sulla lampada. La lettura avviene anche alla connessione.
-schedule.read|Leggi
 schedule.timers|Timer
 schedule.on|Programma l’accensione
 schedule.off|Programma lo spegnimento
@@ -1571,7 +1543,6 @@ brightness.description|Nível de brilho da lâmpada
 color.pick|Escolher uma cor
 color.wheelLabel|Roda de cores: arraste para escolher o matiz e a saturação
 color.hexLabel|Código de cor hexadecimal
-color.help|Arraste na roda ou digite um código hexadecimal. O centro é branco.
 effects.title|Efeitos
 effects.nowPlaying|Efeito atual
 effects.colorStops|Ao escolher uma cor, o efeito atual é interrompido
@@ -1612,9 +1583,6 @@ schedule.title|Programação
 schedule.clock|Relógio da lâmpada
 schedule.clockDescription|A programação exige que o horário esteja correto. Ele é ajustado automaticamente ao conectar.
 schedule.setClock|Usar o horário deste PC
-schedule.readTitle|Ler da lâmpada
-schedule.readDescription|Carrega os temporizadores salvos na lâmpada. Isso também acontece ao conectar.
-schedule.read|Ler
 schedule.timers|Temporizadores
 schedule.on|Programar para ligar
 schedule.off|Programar para desligar

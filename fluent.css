@@ -20,7 +20,7 @@
   --rail: rgba(0,0,0,.2);
   --thumb-o: #fff;
   --info: rgba(0,0,0,.035);
-  --glow: #ff3b6b;
+  --glow: #ffffff;
   font: 14px/20px "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
 }
 @media (prefers-color-scheme:dark) {
