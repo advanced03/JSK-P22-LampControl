@@ -1,51 +1,18 @@
 (() => {
 const $ = id => document.getElementById(`ambi-${id}`);
 const i18n = window.ambiI18n;
+const core = window.AmbiCore;
 
-const commands = {
-  color: (red, green, blue) => [0x7e, 7, 5, 3, red, green, blue, 0x10, 0xef]
-};
-
-const NEUTRAL_SATURATION_THRESHOLD = 0.15;
-const NEUTRAL_CHANNEL_SPREAD_THRESHOLD = 12;
-const BLACK_SCENE_CHANNEL_THRESHOLD = 3;
-const previousDefaultSettings = { smooth: 35, hdramt: 50 };
-
-const defaultSettings = {
-  bars: false,
-  fps: 30,
-  smooth: 50,
-  vivid: 40,
-  bright: 100,
-  allowTurnOff: true,
-  screen: '',
-  hdr: false,
-  hdramt: 10,
-  calRed: 100,
-  calGreen: 100,
-  calBlue: 100
-};
+const RECOVERY_ATTEMPTS = 6;
+const SYNC_FRAME_WIDTH = 192;
+const SYNC_FRAME_HEIGHT = 108;
 
 function loadSettings() {
   try {
-    const saved = JSON.parse(localStorage.getItem('cfg') || '{}');
-    if (saved && typeof saved === 'object') {
-      if (saved.smooth === previousDefaultSettings.smooth) {
-        saved.smooth = defaultSettings.smooth;
-      }
-      if (saved.hdramt === previousDefaultSettings.hdramt) {
-        saved.hdramt = defaultSettings.hdramt;
-      }
-      delete saved.mode;
-      delete saved.captureMode;
-      delete saved.expressiveSensitivity;
-      delete saved.expressiveStrength;
-      delete saved.minimumBrightness;
-    }
-    return { ...defaultSettings, ...saved };
+    return core.migrateSettings(JSON.parse(localStorage.getItem('cfg') || '{}'));
   } catch (error) {
     console.warn('Could not read saved settings; using defaults.', error);
-    return { ...defaultSettings };
+    return core.migrateSettings({});
   }
 }
 
@@ -54,7 +21,7 @@ for (const settingName of ['calRed', 'calGreen', 'calBlue']) {
   const value = Number(settings[settingName]);
   settings[settingName] = Number.isFinite(value)
     ? Math.max(0, Math.min(100, value))
-    : defaultSettings[settingName];
+    : core.SETTINGS_DEFAULTS[settingName];
 }
 let statusKey = 'status.notConnected';
 let statusValues = {};
@@ -121,7 +88,7 @@ function setCalibrationValue(settingName, value) {
 
 function bindSettings() {
   const settingIds = [
-    'bars',
+    'bars', 'dominant',
     'fps', 'smooth', 'vivid', 'bright', 'allowTurnOff', 'hdr', 'hdramt'
   ];
 
@@ -129,7 +96,6 @@ function bindSettings() {
     const input = $(id);
     const isCheckbox = input.type === 'checkbox';
     const output = input.parentElement.querySelector('output');
-    const outputSuffix = '';
 
     if (isCheckbox) {
       input.checked = settings[id];
@@ -138,7 +104,7 @@ function bindSettings() {
     }
 
     if (output) {
-      output.textContent = `${settings[id]}${outputSuffix}`;
+      output.textContent = `${settings[id]}`;
     }
 
     const updateSetting = () => {
@@ -146,7 +112,7 @@ function bindSettings() {
         ? Number(input.value)
         : input.value;
       if (output) {
-        output.textContent = `${settings[id]}${outputSuffix}`;
+        output.textContent = `${settings[id]}`;
       }
       saveSettings();
     };
@@ -175,7 +141,7 @@ function bindSettings() {
   $('reset-response').addEventListener('click', () => {
     for (const id of ['fps', 'smooth', 'vivid', 'bright', 'allowTurnOff']) {
       const input = $(id);
-      const value = defaultSettings[id];
+      const value = core.SETTINGS_DEFAULTS[id];
       settings[id] = value;
       if (input.type === 'checkbox') {
         input.checked = value;
@@ -186,167 +152,6 @@ function bindSettings() {
       input.dispatchEvent(new Event('input', { bubbles: true }));
     }
   });
-
-}
-
-function frameColor(data, width, height, ignoreBars) {
-  if (!ignoreBars) {
-    let red = 0;
-    let green = 0;
-    let blue = 0;
-    const pixelCount = width * height;
-    for (let index = 0; index < data.length; index += 4) {
-      red += data[index];
-      green += data[index + 1];
-      blue += data[index + 2];
-    }
-    return [red / pixelCount, green / pixelCount, blue / pixelCount];
-  }
-
-  let left = 0;
-  let right = width - 1;
-  let top = 0;
-  let bottom = height - 1;
-
-  if (ignoreBars) {
-    const brightestInRow = new Uint8Array(height);
-    const brightestInColumn = new Uint8Array(width);
-
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const index = (y * width + x) * 4;
-        const brightness = Math.max(data[index], data[index + 1], data[index + 2]);
-        brightestInRow[y] = Math.max(brightestInRow[y], brightness);
-        brightestInColumn[x] = Math.max(brightestInColumn[x], brightness);
-      }
-    }
-
-    top = brightestInRow.findIndex(value => value > 24);
-    left = brightestInColumn.findIndex(value => value > 24);
-    if (top < 0 || left < 0) {
-      return [0, 0, 0];
-    }
-
-    const lastBrightRow = [...brightestInRow].reverse().findIndex(value => value > 24);
-    const lastBrightColumn = [...brightestInColumn].reverse().findIndex(value => value > 24);
-    bottom = height - 1 - lastBrightRow;
-    right = width - 1 - lastBrightColumn;
-  }
-
-  let red = 0;
-  let green = 0;
-  let blue = 0;
-  let pixelCount = 0;
-  for (let y = top; y <= bottom; y++) {
-    for (let x = left; x <= right; x++) {
-      const index = (y * width + x) * 4;
-      red += data[index];
-      green += data[index + 1];
-      blue += data[index + 2];
-      pixelCount++;
-    }
-  }
-
-  if (!pixelCount) {
-    return [0, 0, 0];
-  }
-
-  return [red / pixelCount, green / pixelCount, blue / pixelCount];
-}
-
-function isNearNeutral(rgb) {
-  const maximum = Math.max(...rgb);
-  const minimum = Math.min(...rgb);
-  return maximum - minimum <= Math.max(
-    NEUTRAL_CHANNEL_SPREAD_THRESHOLD,
-    maximum * NEUTRAL_SATURATION_THRESHOLD
-  );
-}
-
-function vividify([red, green, blue], amount) {
-  red /= 255;
-  green /= 255;
-  blue /= 255;
-
-  const maximum = Math.max(red, green, blue);
-  const minimum = Math.min(red, green, blue);
-  const value = maximum;
-  const delta = maximum - minimum;
-  let hue = 0;
-  let saturation = maximum ? delta / maximum : 0;
-
-  if (isNearNeutral([red * 255, green * 255, blue * 255])) {
-    return [red, green, blue].map(channel => channel * 255);
-  }
-
-  if (delta) {
-    if (maximum === red) {
-      hue = ((green - blue) / delta) % 6;
-    } else if (maximum === green) {
-      hue = (blue - red) / delta + 2;
-    } else {
-      hue = (red - green) / delta + 4;
-    }
-    hue /= 6;
-    if (hue < 0) {
-      hue += 1;
-    }
-  }
-
-  saturation = Math.min(1, saturation * (1 + amount / 50));
-  const hueSector = hue * 6;
-  const sector = Math.floor(hueSector);
-  const fraction = hueSector - sector;
-  const low = value * (1 - saturation);
-  const descending = value * (1 - fraction * saturation);
-  const ascending = value * (1 - (1 - fraction) * saturation);
-  let outputRed;
-  let outputGreen;
-  let outputBlue;
-  switch (sector % 6) {
-    case 0:
-      outputRed = value;
-      outputGreen = ascending;
-      outputBlue = low;
-      break;
-    case 1:
-      outputRed = descending;
-      outputGreen = value;
-      outputBlue = low;
-      break;
-    case 2:
-      outputRed = low;
-      outputGreen = value;
-      outputBlue = ascending;
-      break;
-    case 3:
-      outputRed = low;
-      outputGreen = descending;
-      outputBlue = value;
-      break;
-    case 4:
-      outputRed = ascending;
-      outputGreen = low;
-      outputBlue = value;
-      break;
-    default:
-      outputRed = value;
-      outputGreen = low;
-      outputBlue = descending;
-      break;
-  }
-  return [outputRed * 255, outputGreen * 255, outputBlue * 255];
-}
-
-// Windows exposes a simplified SDR version of HDR content, which can look washed out.
-function correctHdr(rgb, amount) {
-  const strength = amount / 100;
-  const gamma = 1 + 0.8 * strength;
-  const corrected = rgb.map(channel => {
-    const normalized = Math.max(0, Math.min(255, channel)) / 255;
-    return 255 * Math.pow(normalized, gamma);
-  });
-  return vividify(corrected, 30 * strength);
 }
 
 function calibrateColor([red, green, blue]) {
@@ -390,10 +195,7 @@ function refreshWizardColors() {
     'aria-label',
     `${i18n.translate('wizard.sent')}: ${outputHex}`
   );
-  sendCommand(
-    commands.color(...outputColor),
-    minimumWhiteActive ? window.lampControl.brightness : null
-  );
+  sendColor(outputColor, minimumWhiteActive ? window.lampControl.brightness : null);
 }
 
 function renderWizardStep() {
@@ -446,7 +248,7 @@ function closeCalibrationWizard() {
   wizardActive = false;
   minimumWhiteActive = false;
   if (!running && wizardPreviousOutput && window.lampControl.connected) {
-    sendCommand(commands.color(...wizardPreviousOutput));
+    sendColor(wizardPreviousOutput);
   }
   wizardPreviousOutput = null;
 }
@@ -456,41 +258,21 @@ function closeCalibrationWizard() {
 // frame of extra delay on a real scene change.
 const GLITCH_FILTER_FRAMES = 3;
 
-function medianColor(colors) {
-  return [0, 1, 2].map(channel => {
-    const values = colors.map(color => color[channel]).sort((a, b) => a - b);
-    return values[Math.floor(values.length / 2)];
-  });
-}
-
-function isBlackScene(color) {
-  return color.every(channel => channel <= BLACK_SCENE_CHANNEL_THRESHOLD);
-}
-
-function smoothColor(current, target, elapsedSeconds, amount) {
-  const timeConstant = amount / 100 * 1.2;
-  const blend = timeConstant < 1e-3
-    ? 1
-    : 1 - Math.exp(-elapsedSeconds / timeConstant);
-
-  return current.map((channel, index) => (
-    channel + (target[index] - channel) * blend
-  ));
-}
-
 let running = false;
 let starting = false;
+let recovering = false;
+let resumeAfterReconnect = false;
 let startGeneration = 0;
 let stream = null;
 
 const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
-function sendCommand(bytes, brightness = null) {
-  if (!window.lampControl.sendColor(...bytes.slice(4, 7), brightness)) {
+function sendColor(rgb, brightness = null) {
+  if (!window.lampControl.sendColor(rgb[0], rgb[1], rgb[2], brightness)) {
     setStatus('status.notConnected');
     return;
   }
-  lastOutputColor = bytes.slice(4, 7);
+  lastOutputColor = [...rgb];
   if (wizardActive) {
     $('wizard-status').textContent = '';
   }
@@ -523,6 +305,14 @@ async function startCapture(generation) {
 
   stopCapture();
   stream = nextStream;
+  // The track ends by itself when the display goes away or its mode changes; recover instead of freezing.
+  nextStream.getVideoTracks().forEach(track => {
+    track.addEventListener('ended', () => {
+      if (stream === nextStream) {
+        recoverCapture();
+      }
+    });
+  });
   video.srcObject = stream;
   await video.play();
   if (generation !== startGeneration) {
@@ -542,6 +332,54 @@ function stopCapture() {
   video.srcObject = null;
 }
 
+// Restarts screen capture after the display changed, the PC woke from sleep, or the stream ended.
+async function recoverCapture() {
+  if (!running || recovering) {
+    return;
+  }
+
+  recovering = true;
+  const generation = ++startGeneration;
+  setStatus('status.recovering');
+  stopCapture();
+  let lastError = null;
+  try {
+    for (let attempt = 0; attempt < RECOVERY_ATTEMPTS; attempt++) {
+      await sleep(Math.min(1000 * 2 ** attempt, 8000));
+      if (!running || generation !== startGeneration) {
+        return;
+      }
+      try {
+        await refreshScreens();
+        if (generation !== startGeneration) {
+          return;
+        }
+        if (await startCapture(generation)) {
+          setStatus('status.syncing');
+          return;
+        }
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    stopSync();
+    setStatus('status.captureFailed', { message: lastError ? lastError.message : '' });
+  } finally {
+    recovering = false;
+  }
+}
+
+// Safety net: if the stream died without an event, notice within a couple of seconds.
+setInterval(() => {
+  if (!running || recovering || starting) {
+    return;
+  }
+  const tracks = stream ? stream.getVideoTracks() : [];
+  if (!stream || tracks.length === 0 || tracks.every(track => track.readyState === 'ended')) {
+    recoverCapture();
+  }
+}, 2000);
+
 function stopSync() {
   if (!running && !starting) {
     return;
@@ -559,6 +397,7 @@ function stopSync() {
 
 window.ambilight = {
   stop() {
+    resumeAfterReconnect = false;
     if (!running && !starting) {
       return;
     }
@@ -581,7 +420,9 @@ async function syncLoop() {
   let lastSendTime = 0;
   let lastCalibrationRevision = calibrationRevision;
   let previousFrameTime = performance.now();
-  let blackSceneActive = false;
+  let wasBlack = false;
+  let haveColor = false;
+  const blackDetector = core.createBlackDetector();
   const recentColors = [];
 
   while (running) {
@@ -594,50 +435,47 @@ async function syncLoop() {
     }
 
     if (video.readyState >= 2) {
-      context.drawImage(video, 0, 0, 192, 108);
-      const image = context.getImageData(0, 0, 192, 108);
-      let sampledColor = frameColor(
-        image.data,
-        192,
-        108,
-        settings.bars
-      );
+      context.drawImage(video, 0, 0, SYNC_FRAME_WIDTH, SYNC_FRAME_HEIGHT);
+      const image = context.getImageData(0, 0, SYNC_FRAME_WIDTH, SYNC_FRAME_HEIGHT);
+      let sampledColor = core.frameColor(image.data, SYNC_FRAME_WIDTH, SYNC_FRAME_HEIGHT, {
+        ignoreBars: settings.bars,
+        dominant: settings.dominant
+      });
 
       if (settings.hdr) {
-        sampledColor = correctHdr(sampledColor, settings.hdramt);
+        sampledColor = core.correctHdr(sampledColor, settings.hdramt);
       }
 
-      const vividColor = vividify(sampledColor, settings.vivid);
+      const vividColor = core.vividify(sampledColor, settings.vivid);
       recentColors.push(vividColor);
       if (recentColors.length > GLITCH_FILTER_FRAMES) {
         recentColors.shift();
       }
-      const targetColor = medianColor(recentColors);
-      if (isBlackScene(targetColor)) {
+      const targetColor = core.medianColor(recentColors);
+      const isBlack = blackDetector.update(targetColor);
+      if (isBlack) {
         currentColor = [0, 0, 0];
-        blackSceneActive = true;
-      } else if (blackSceneActive) {
+      } else if (wasBlack || !haveColor) {
+        // First frame (or leaving a black scene): jump straight to the scene color instead of fading up from black.
         currentColor = targetColor;
-        blackSceneActive = false;
       } else {
-        currentColor = smoothColor(
+        currentColor = core.smoothColor(
           currentColor,
           targetColor,
           (frameStart - previousFrameTime) / 1000,
           settings.smooth
         );
       }
+      wasBlack = isBlack;
+      haveColor = true;
       previousFrameTime = frameStart;
 
-      const previewColor = currentColor.map(channel => (
-        Math.max(0, Math.min(255, Math.round(channel * settings.bright / 100)))
-      ));
+      const previewColor = currentColor.map(channel => clampByte(channel * settings.bright / 100));
       let outputColor = calibrateColor(currentColor).map(channel => (
-        Math.max(0, Math.min(255, Math.round(channel * settings.bright / 100)))
+        clampByte(channel * settings.bright / 100)
       ));
       let outputBrightness = null;
-      const keepWhiteAtBlack = !settings.allowTurnOff
-        && isBlackScene(targetColor);
+      const keepWhiteAtBlack = !settings.allowTurnOff && isBlack;
       if (keepWhiteAtBlack) {
         outputColor = [255, 255, 255];
         if (!minimumWhiteActive) {
@@ -664,7 +502,7 @@ async function syncLoop() {
       if (window.lampControl.connected && (
         changedEnough || needsRefresh || calibrationChanged || outputBrightness !== null
       )) {
-        sendCommand(commands.color(...outputColor), outputBrightness);
+        sendColor(outputColor, outputBrightness);
         lastSentColor = outputColor;
         lastSendTime = frameStart;
         lastCalibrationRevision = calibrationRevision;
@@ -692,6 +530,7 @@ async function toggleSync() {
   }
 
   if (running) {
+    resumeAfterReconnect = false;
     stopSync();
     setStatus('status.stopped');
     return;
@@ -733,40 +572,59 @@ function updateConnection(connected, status) {
   $('start').disabled = !connected;
   if (!connected) {
     if (running || starting) {
+      // After an unexpected drop (sleep, out of range), sync resumes by itself once auto-reconnect succeeds.
+      resumeAfterReconnect = !window.lampControl.disconnectedManually;
       stopSync();
     }
     if (wizardActive) {
       $('wizard-status').textContent = i18n.translate('wizard.disconnected');
     }
     setStatus('status.notConnected');
-  } else if (!running) {
-    setStatus('status.stopped');
-    refreshWizardColors();
+  } else {
+    if (!running) {
+      setStatus('status.stopped');
+      refreshWizardColors();
+    }
+    if (resumeAfterReconnect && window.lampControl.autoReconnect) {
+      resumeAfterReconnect = false;
+      setTimeout(() => {
+        if (!running && !starting && window.lampControl.connected) {
+          toggleSync();
+        }
+      }, 1500);
+    }
   }
+}
+
+async function refreshScreens() {
+  const screens = await window.api.screens();
+  const select = $('screen');
+  select.replaceChildren();
+  screens.forEach(({ label, id }) => {
+    select.add(new Option(label, id));
+  });
+
+  if (screens.length === 0) {
+    select.disabled = true;
+    return;
+  }
+
+  select.disabled = false;
+  const savedIndex = Number.isInteger(settings.screen)
+    ? Math.max(0, Math.min(settings.screen, screens.length - 1))
+    : -1;
+  const selectedScreen = screens.some(({ id }) => id === settings.screen)
+    ? settings.screen
+    : screens[savedIndex >= 0 ? savedIndex : 0].id;
+  select.value = selectedScreen;
+  settings.screen = selectedScreen;
+  saveSettings();
+  window.api.setScreen(selectedScreen);
 }
 
 async function populateScreens() {
   try {
-    const screens = await window.api.screens();
-    screens.forEach(({ label, id }) => {
-      $('screen').add(new Option(label, id));
-    });
-
-    if (screens.length === 0) {
-      $('screen').disabled = true;
-      return;
-    }
-
-    const savedIndex = Number.isInteger(settings.screen)
-      ? Math.max(0, Math.min(settings.screen, screens.length - 1))
-      : -1;
-    const selectedScreen = screens.some(({ id }) => id === settings.screen)
-      ? settings.screen
-      : screens[savedIndex >= 0 ? savedIndex : 0].id;
-    $('screen').value = selectedScreen;
-    settings.screen = selectedScreen;
-    saveSettings();
-    window.api.setScreen(selectedScreen);
+    await refreshScreens();
   } catch (error) {
     setStatus('status.screensFailed', { message: error.message });
   }
@@ -799,7 +657,6 @@ $('calibration-wizard').addEventListener('close', closeCalibrationWizard);
 window.lampControl.onConnectionChange(updateConnection);
 i18n.setLanguage(window.i18n.language);
 document.addEventListener('languagechange', () => {
-  i18n.setLanguage(window.i18n.language);
   setStatus(statusKey, statusValues);
   if (wizardActive) {
     renderWizardStep();
@@ -826,6 +683,20 @@ $('screen').addEventListener('change', async () => {
       setStatus('status.captureFailed', { message: error.message });
     }
   }
+});
+
+// Display topology changes and waking from sleep can silently kill the capture stream.
+let displayChangeTimer = null;
+window.api.onDisplayChange(() => {
+  clearTimeout(displayChangeTimer);
+  displayChangeTimer = setTimeout(() => {
+    refreshScreens().catch(() => {});
+    recoverCapture();
+  }, 1500);
+});
+window.api.onResume(() => {
+  refreshScreens().catch(() => {});
+  setTimeout(recoverCapture, 2000);
 });
 
 populateScreens();

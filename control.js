@@ -250,13 +250,14 @@
     ]]]
     const SERVICE = 0xfff0, CHAR = 0xfff3, $ = (id) => document.getElementById(id)
     const LAST_DEVICE_ID_KEY = 'lamp-last-device-id'
-    const AUTO_RECONNECT_MAX_ATTEMPTS = 3
+    const AUTO_RECONNECT_MAX_DELAY = 30000
     const AUTO_RECONNECT_BASE_DELAY = 1500
     let ch = null, dev = null, busy = false, pending = null
     let automaticConnectPending = false
     let automaticReconnectAttempts = 0
     let automaticReconnectTimer = null
     let manualDisconnectRequested = false
+    let lastDisconnectManual = false
     let activeEffect = false
     let selectedColor = [255, 255, 255]
     let ambilightRunning = false
@@ -284,13 +285,28 @@
       document.querySelectorAll('.needs').forEach((b) => b.disabled = !v)
       renderEffectState()
     }
+    const P = window.LampProtocol
     const cmd = {
-      power: (o) => [0x7e, 4, 4, +o, 0, +o, 0xff, 0, 0xef],
-      color: (r, g, b) => [0x7e, 7, 5, 3, r, g, b, 0x10, 0xef],
-      bright: (l) => [0x7e, 4, 1, l, 0xff, 0xff, 0xff, 0, 0xef],
-      mode: (n) => [0x7e, 5, 3, n, 6, 0xff, 0xff, 0, 0xef],
-      scene: (n) => [0x7e, 5, 0x31, n, 7, 0xff, 0xff, 1, 0xef],
-      speed: (n) => [0x7e, 4, 2, n, 0xff, 0xff, 0xff, 0, 0xef],
+      power: P.power,
+      color: P.color,
+      bright: P.brightness,
+      mode: P.mode,
+      scene: P.scene,
+      speed: P.speed,
+    }
+    // Browser Bluetooth errors are cryptic ("GATT operation failed for unknown reason"); say what it means.
+    function friendlyErrorKey(error) {
+      const text = `${(error && error.name) || ''} ${(error && error.message) || error}`
+      if (/no longer in range|out of range/i.test(text)) return 'error.outOfRange'
+      if (/NetworkError|GATT|connection attempt failed|disconnected/i.test(text)) return 'error.connection'
+      return null
+    }
+    const errorMessage = (error) => (error && error.message) || String(error)
+    // Known Bluetooth failures get a plain-language status; anything else keeps the generic "{message}" form.
+    function reportConnectionError(key, error) {
+      const friendly = friendlyErrorKey(error)
+      if (friendly) setConnectionStatus(friendly)
+      else setConnectionStatus(key, { message: errorMessage(error) })
     }
     // Every GATT read and write goes through one queue, so two operations never overlap
     // (overlapping ones fail with "GATT operation already in progress").
@@ -315,7 +331,7 @@
           await new Promise((r) => setTimeout(r, 40))
         }
       } catch (e) {
-        setConnectionStatus('connection.writeFailed', { message: e.message })
+        reportConnectionError('connection.writeFailed', e)
       }
       busy = false
     }
@@ -355,6 +371,28 @@
       if (drag && !activeEffect) pick(e)
     }
     cv.onpointerup = () => drag = false
+    function rgb2hsv(r, g, b) {
+      r /= 255
+      g /= 255
+      b /= 255
+      const max = Math.max(r, g, b), d = max - Math.min(r, g, b)
+      let h = 0
+      if (d) h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4
+      return [(h * 60 + 360) % 360, max ? d / max : 0]
+    }
+    // Keyboard: left/right change hue, up/down change saturation (hold Shift for bigger steps)
+    cv.onkeydown = (e) => {
+      if (!ch || activeEffect) return
+      let [h, s] = rgb2hsv(...selectedColor)
+      const hueStep = e.shiftKey ? 15 : 5, satStep = e.shiftKey ? 0.2 : 0.05
+      if (e.key === 'ArrowRight') h += hueStep
+      else if (e.key === 'ArrowLeft') h -= hueStep
+      else if (e.key === 'ArrowUp') s += satStep
+      else if (e.key === 'ArrowDown') s -= satStep
+      else return
+      e.preventDefault()
+      applyRGB(...hsv2rgb((h + 360) % 360, Math.max(0, Math.min(1, s)), 1))
+    }
     $('hex').oninput = (e) => {
       if (activeEffect) return
       const v = e.target.value.trim()
@@ -398,11 +436,16 @@
         ([name, count], i) => {
           const b = document.createElement('button')
           b.setAttribute('role', 'tab')
+          b.setAttribute('aria-selected', String(i === gi + 1))
           b.innerHTML = name + '<small>' + count + '</small>'
           b.onclick = () => {
             gi = i - 1
-            document.querySelectorAll('#cats button').forEach((x) => x.classList.remove('sel'))
+            document.querySelectorAll('#cats button').forEach((x) => {
+              x.classList.remove('sel')
+              x.setAttribute('aria-selected', 'false')
+            })
             b.classList.add('sel')
+            b.setAttribute('aria-selected', 'true')
             render()
           }
           if (i === gi + 1) b.classList.add('sel')
@@ -523,13 +566,10 @@
         }
       })()
     }
-    const clk = () => {
-      const d = new Date()
-      return [0x7e, 7, 0x83, d.getHours(), d.getMinutes(), d.getSeconds(), d.getDay(), 0xff, 0xef]
-    }
-    const micOnOff = (v) => [0x7e, 4, 7, +v, 0xff, 0xff, 0xff, 0, 0xef],
-      eqCmd = (n) => [0x7e, 7, 3, n + 128, 4, 0xff, 0xff, 0, 0xef],
-      sensCmd = (n) => [0x7e, 4, 6, n, 0xff, 0xff, 0xff, 0, 0xef]
+    const clk = () => P.clock(new Date())
+    const micOnOff = P.mic,
+      eqCmd = P.eq,
+      sensCmd = P.sensitivity
     const eqKeys = [
       'music.eqEnergetic',
       'music.eqRhythm',
@@ -571,7 +611,9 @@
     function renderMic() {
       const on = micState === 'on'
       $('micState').classList.toggle('run', on)
-      $('micState').textContent = on
+      $('micState').textContent = noMic
+        ? i18n.t('music.noMicrophone')
+        : on
         ? i18n.t('music.running')
         : micState === 'off'
         ? i18n.t('music.stopped')
@@ -599,6 +641,16 @@
       get brightness() {
         return Number($('bright').value)
       },
+      get autoReconnect() {
+        return $('autoConnect').checked
+      },
+      get disconnectedManually() {
+        return lastDisconnectManual
+      },
+      // Called from the main process (with a simulated user gesture) to reconnect without showing the chooser.
+      connectAuto() {
+        return connect({ auto: true })
+      },
       sendColor(red, green, blue, brightness = null) {
         if (!ch) return false
         ambilightSending = true
@@ -618,7 +670,7 @@
               await ch.writeValueWithoutResponse(new Uint8Array(colorCommand))
               await new Promise((resolve) => setTimeout(resolve, 40))
             }).catch((error) => {
-              setConnectionStatus('connection.writeFailed', { message: error.message })
+              reportConnectionError('connection.writeFailed', error)
             })
           }
         } finally {
@@ -662,13 +714,18 @@
     const timers = []
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
     const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    const dayText = (w) => {
-      const n = [0, 1, 2, 3, 4, 5, 6].filter((i) => w >> i & 1).length
-      return n === 7
-        ? i18n.t('schedule.everyDay')
-        : n === 0
-        ? i18n.t('schedule.noDays')
-        : i18n.t('schedule.days', { count: n })
+    // Bits 0-6 of the weeks byte are Monday to Sunday. Day names come from the browser's own locale data.
+    function dayText(w) {
+      w &= 127
+      if (w === 127) return i18n.t('schedule.everyDay')
+      if (w === 0) return i18n.t('schedule.noDays')
+      if (w === 0b0011111) return i18n.t('schedule.weekdays')
+      if (w === 0b1100000) return i18n.t('schedule.weekends')
+      const format = new Intl.DateTimeFormat(i18n.language, { weekday: 'short' })
+      return [0, 1, 2, 3, 4, 5, 6]
+        .filter((i) => w >> i & 1)
+        .map((i) => format.format(new Date(2024, 0, 1 + i))) // 1 January 2024 was a Monday
+        .join(', ')
     }
     ;['schedule.on', 'schedule.off'].forEach((titleKey, mode) => {
       const d = document.createElement('div')
@@ -687,16 +744,13 @@
         st = d.querySelector('.st')
       let statusKey = 'music.unknown', statusValues = {}
       const renderStatus = () => {
-        const values = { ...statusValues }
-        if (values.dayCount !== undefined) {
-          values.days = dayText(values.dayCount)
-          delete values.dayCount
+        if (statusKey === 'schedule.summary') {
+          const { time, weeks, enabled } = statusValues
+          const key = !enabled ? 'schedule.summaryDisabled' : mode === 0 ? 'schedule.summaryOn' : 'schedule.summaryOff'
+          st.textContent = i18n.t(key, { time, days: dayText(weeks) })
+        } else {
+          st.textContent = i18n.t(statusKey, statusValues)
         }
-        if (values.stateKey) {
-          values.state = i18n.t(values.stateKey)
-          delete values.stateKey
-        }
-        st.textContent = i18n.t(statusKey, values)
       }
       const say = (key, values = {}) => {
         statusKey = key
@@ -735,7 +789,7 @@
 
         if (!w) {
           enb.checked = false
-          send([0x7e, 8, 0x82, h, m, 0, mode, 0, 0xef])
+          send(P.timerWrite(h, m, mode, 0))
           say('schedule.notSet')
           return
         }
@@ -744,12 +798,8 @@
           say('schedule.chooseTime')
           return
         }
-        send([0x7e, 8, 0x82, h, m, 0, mode, w | (enb.checked ? 128 : 0), 0xef])
-        say('schedule.sent', {
-          time: tm.value,
-          dayCount: w,
-          stateKey: enb.checked ? 'schedule.onState' : 'schedule.offState',
-        })
+        send(P.timerWrite(h, m, mode, w | (enb.checked ? P.WEEK_ENABLED : 0)))
+        say('schedule.summary', { time: tm.value, weeks: w, enabled: enb.checked })
       }
       enb.onchange = () => {
         if (enb.checked && !weeks()) {
@@ -781,11 +831,7 @@
           tm.value = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0')
           ;[...days.children].forEach((b, i) => b.classList.toggle('sel', !!(w >> i & 1)))
           enb.checked = !!(w & 128)
-          say('schedule.onLamp', {
-            time: tm.value,
-            dayCount: w & 127,
-            stateKey: enb.checked ? 'schedule.onState' : 'schedule.offState',
-          })
+          say('schedule.summary', { time: tm.value, weeks: w & 127, enabled: enb.checked })
         },
       })
       $('tm').appendChild(d)
@@ -800,21 +846,26 @@
         t.say('schedule.reading')
         try {
           let ok = false
-          for (let tries = 0; tries < 2 && !ok && ch; tries++) {
+          for (let tries = 0; tries < 3 && !ok && ch; tries++) {
             const v = await gatt(async () => {
-              await ch.writeValueWithoutResponse(new Uint8Array([0x7e, 8, 0x82, 255, 255, 255, mode, 0, 0xef]))
-              await sleep(tries ? 900 : 450)
+              await ch.writeValueWithoutResponse(new Uint8Array(P.timerQuery(mode)))
+              await sleep(450 + tries * 450)
               const dv = await ch.readValue()
               return new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength)
             })
-            if (v.length >= 9 && v[0] === 0x7e && v[1] === 8 && v[2] === 0x82 && v[8] === 0xef && v[6] === mode) {
-              t.show(v[3], v[4], v[7])
+            const report = P.parseTimerReport(v, mode)
+            if (report) {
+              t.show(report.hour, report.minute, report.weeks)
               ok = true
             }
           }
           if (!ok) t.say('schedule.noReport')
         } catch (e) {
-          t.say('schedule.readFailed', { message: e.message })
+          {
+            const friendly = friendlyErrorKey(e)
+            if (friendly) t.say(friendly)
+            else t.say('schedule.readFailed', { message: errorMessage(e) })
+          }
         }
       }
       reading = false
@@ -830,10 +881,10 @@
     }
 
     function scheduleAutomaticReconnect() {
-      if (!$('autoConnect').checked || automaticReconnectTimer
-        || automaticReconnectAttempts >= AUTO_RECONNECT_MAX_ATTEMPTS) return
+      if (!$('autoConnect').checked || automaticReconnectTimer) return
 
-      const delay = AUTO_RECONNECT_BASE_DELAY * (2 ** automaticReconnectAttempts)
+      // Keep trying while the option is on (the lamp may simply be off or out of range), backing off to 30 s.
+      const delay = Math.min(AUTO_RECONNECT_MAX_DELAY, AUTO_RECONNECT_BASE_DELAY * (2 ** Math.min(automaticReconnectAttempts, 5)))
       automaticReconnectAttempts++
       automaticReconnectTimer = setTimeout(() => {
         automaticReconnectTimer = null
@@ -843,6 +894,7 @@
     function onDisconnected() {
       const wasManuallyDisconnected = manualDisconnectRequested
       manualDisconnectRequested = false
+      lastDisconnectManual = wasManuallyDisconnected
       ch = null
       pending = null
       setActive()
@@ -872,7 +924,7 @@
     function watchDeviceDisconnect(device) {
       device.addEventListener('gattserverdisconnected', onDisconnected)
     }
-    async function connect() {
+    async function connect(options = {}) {
       const reconnecting = !!dev
       try {
         if (!await isBluetoothAvailable()) return false
@@ -908,46 +960,55 @@
           return false
         }
         if (e.name === 'NotFoundError') {
-          setConnectionStatus('connection.noDevice')
+          setConnectionStatus(options.auto ? 'connection.autoConnectNotFound' : 'connection.noDevice')
           return false
         }
 
-        setConnectionStatus('connection.failed', { message: e.message })
+        reportConnectionError('connection.failed', e)
         setConnectionButton(reconnecting ? 'connection.reconnect' : 'connection.connect')
         return false
       }
     }
     async function connectToLastDevice() {
       if (automaticConnectPending || ch || !$('autoConnect').checked) return
-      if (!navigator.bluetooth || typeof navigator.bluetooth.getDevices !== 'function') {
-        setConnectionStatus('connection.autoConnectUnavailable')
+      if (!navigator.bluetooth) {
+        setConnectionStatus('connection.noBluetooth')
         return
       }
       automaticConnectPending = true
       $('connect').disabled = true
       try {
+        // Path 1: a device the browser already remembers.
         const deviceId = localStorage.getItem(LAST_DEVICE_ID_KEY)
-        if (!deviceId) {
+        let lastDevice = dev && dev.id === deviceId ? dev : null
+        if (!lastDevice && deviceId && typeof navigator.bluetooth.getDevices === 'function') {
+          try {
+            lastDevice = (await navigator.bluetooth.getDevices()).find((device) => device.id === deviceId) || null
+          } catch (error) {
+            console.warn('Could not list remembered Bluetooth devices.', error)
+          }
+        }
+        if (!$('autoConnect').checked || ch) return
+        if (lastDevice) {
+          dev = lastDevice
+          watchDeviceDisconnect(dev)
+          setConnectionButton('connection.reconnect')
+          if (!await connect({ auto: true })) scheduleAutomaticReconnect()
+          return
+        }
+
+        // Path 2: remembered permissions do not survive a restart, so ask the main process to open the
+        // Bluetooth chooser itself and pick the lamp that was chosen last time, without showing a window.
+        setConnectionStatus('connection.connecting')
+        const result = await window.api.autoConnect()
+        if (!result.attempted) {
           setConnectionStatus('connection.autoConnectNoDevice')
           return
         }
-        const devices = await navigator.bluetooth.getDevices()
-        const lastDevice = (dev && dev.id === deviceId ? dev : null)
-          || devices.find((device) => device.id === deviceId)
-        if (!$('autoConnect').checked || ch) return
-        if (!lastDevice) {
-          setConnectionStatus('connection.autoConnectNotAuthorized')
-          return
-        }
-        dev = lastDevice
-        watchDeviceDisconnect(dev)
-        setConnectionButton('connection.reconnect')
-        const connected = await connect()
-        if (connected) return
-        scheduleAutomaticReconnect()
+        if (!result.connected && !ch) scheduleAutomaticReconnect()
       } catch (error) {
         console.warn('Could not automatically reconnect to the last Bluetooth device.', error)
-        setConnectionStatus('connection.autoConnectFailed', { message: error.message })
+        reportConnectionError('connection.autoConnectFailed', error)
         scheduleAutomaticReconnect()
       } finally {
         automaticConnectPending = false

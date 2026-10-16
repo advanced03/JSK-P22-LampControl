@@ -37,6 +37,15 @@ contextBridge.exposeInMainWorld('api', {
   onTrayPower(callback) {
     ipcRenderer.on('tray-power', (_event, enabled) => callback(enabled))
   },
+  autoConnect() {
+    return ipcRenderer.invoke('auto-connect')
+  },
+  onResume(callback) {
+    ipcRenderer.on('resume', () => callback())
+  },
+  onDisplayChange(callback) {
+    ipcRenderer.on('display-changed', () => callback())
+  },
   env() {
     return ipcRenderer.invoke('env')
   },

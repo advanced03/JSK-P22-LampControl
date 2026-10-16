@@ -1,0 +1,17 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # The tests only need Node itself (no dependencies), so there is no install step.
+      - run: node --test "test/*.test.js"
+      - run: for f in main.js preload.js control.js ambilight.js ambicore.js protocol.js picker.js fluent.js i18n.js; do node --check "$f"; done

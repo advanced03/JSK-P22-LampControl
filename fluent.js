@@ -34,13 +34,43 @@
   })
   setTimeout(() => sliders.forEach(fillSlider), 0)
 
-  const navigation = document.querySelectorAll('.nav')
+  // Sidebar behaves as a tab list: roles, selected state, and Up/Down/Home/End to move between pages.
+  const navigation = Array.from(document.querySelectorAll('.nav'))
+  const pages = Array.from(document.querySelectorAll('.page'))
+
+  function selectPage(button, moveFocus) {
+    navigation.forEach((item) => {
+      const selected = item === button
+      item.classList.toggle('sel', selected)
+      item.setAttribute('aria-selected', String(selected))
+      item.tabIndex = selected ? 0 : -1
+    })
+    pages.forEach((page) => page.classList.toggle('on', page.id === button.dataset.page))
+    if (moveFocus) button.focus()
+  }
+
   navigation.forEach((button) => {
-    button.addEventListener('click', () => {
-      navigation.forEach((item) => item.classList.toggle('sel', item === button))
-      document.querySelectorAll('.page').forEach((page) => {
-        page.classList.toggle('on', page.id === button.dataset.page)
-      })
+    button.id = button.id || 'tab-' + button.dataset.page
+    button.setAttribute('role', 'tab')
+    button.setAttribute('aria-controls', button.dataset.page)
+    const page = document.getElementById(button.dataset.page)
+    if (page) {
+      page.setAttribute('role', 'tabpanel')
+      page.setAttribute('aria-labelledby', button.id)
+    }
+    button.addEventListener('click', () => selectPage(button, false))
+    button.addEventListener('keydown', (event) => {
+      const index = navigation.indexOf(button)
+      let next = -1
+      if (event.key === 'ArrowDown' || event.key === 'ArrowRight') next = (index + 1) % navigation.length
+      else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') next = (index - 1 + navigation.length) % navigation.length
+      else if (event.key === 'Home') next = 0
+      else if (event.key === 'End') next = navigation.length - 1
+      if (next < 0) return
+      event.preventDefault()
+      selectPage(navigation[next], true)
     })
   })
+  const initial = navigation.find((item) => item.classList.contains('sel')) || navigation[0]
+  if (initial) selectPage(initial, false)
 })()

@@ -8,16 +8,31 @@ const {
   nativeTheme,
   screen,
   systemPreferences,
+  powerMonitor,
   Tray,
   Menu,
   nativeImage,
 } = require('electron')
 const path = require('path')
+const fs = require('fs')
 const os = require('os')
 app.commandLine.appendSwitch('enable-web-bluetooth')
 app.commandLine.appendSwitch('disable-renderer-backgrounding')
 app.commandLine.appendSwitch('disable-background-timer-throttling')
 app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion')
+
+// The lamp accepts one Bluetooth connection, so a second copy of the app can only get in the way.
+const gotLock = app.requestSingleInstanceLock()
+if (!gotLock) app.quit()
+app.on('second-instance', () => showWin())
+
+// The app only ever shows its own local pages. Refuse to navigate anywhere else or to open new windows.
+app.on('web-contents-created', (_event, contents) => {
+  contents.setWindowOpenHandler(() => ({ action: 'deny' }))
+  contents.on('will-navigate', (event, url) => {
+    if (!url.startsWith('file:')) event.preventDefault()
+  })
+})
 
 // Mica / Acrylic backdrops need Windows 11 22H2 (build 22621); older systems get a solid Fluent background.
 const MICA = process.platform === 'win32' && parseInt(os.release().split('.')[2] || '0', 10) >= 22621
@@ -69,6 +84,9 @@ function fluent(material, extra) {
       webPreferences: {
         preload: path.join(__dirname, 'preload.js'),
         backgroundThrottling: false,
+        contextIsolation: true,
+        nodeIntegration: false,
+        sandbox: true,
       },
     },
     MICA ? { backgroundMaterial: material } : {},
@@ -94,6 +112,7 @@ let trayLabels = {
 
 function showWin() {
   if (!win) return
+  if (win.isMinimized()) win.restore()
   win.show()
   win.focus()
 }
@@ -156,6 +175,24 @@ app.on('before-quit', () => {
   quitting = true
 })
 
+// The lamp chosen last time, remembered across restarts so auto-reconnect can pick it without a window.
+const lastLampFile = () => path.join(app.getPath('userData'), 'last-lamp.json')
+function loadLastLamp() {
+  try {
+    return JSON.parse(fs.readFileSync(lastLampFile(), 'utf8')).id || null
+  } catch (e) {
+    return null
+  }
+}
+function saveLastLamp(id) {
+  try {
+    fs.writeFileSync(lastLampFile(), JSON.stringify({ id }))
+  } catch (e) {
+    // Not being able to remember the lamp only disables silent reconnect.
+  }
+}
+let autoPick = null // { id, callback, timer } while a silent reconnect is waiting for the lamp to show up
+
 let win = null
 let picker = null
 let pickCb = null
@@ -214,14 +251,26 @@ function createWindow() {
   win.loadFile('control.html')
   win.webContents.on('select-bluetooth-device', (event, devices, callback) => {
     event.preventDefault()
-    pickCb = callback
     lastList = devices
+    if (autoPick) {
+      const wanted = autoPick.id
+      if (devices.some((device) => device.deviceId === wanted)) {
+        clearTimeout(autoPick.timer)
+        autoPick = null
+        callback(wanted)
+      } else {
+        autoPick.callback = callback // keep waiting; the event repeats as new devices are discovered
+      }
+      return
+    }
+    pickCb = callback
     openPicker()
     sendDevices()
   })
 }
 
 app.whenReady().then(() => {
+  if (!gotLock) return
   const defaultSession = session.defaultSession
   async function getScreenSources() {
     return desktopCapturer.getSources({
@@ -230,21 +279,22 @@ app.whenReady().then(() => {
     })
   }
 
-  defaultSession.setPermissionCheckHandler(() => true)
-  defaultSession.setPermissionRequestHandler(
-    (_webContents, _permission, callback) => callback(true),
-  )
-  defaultSession.setDevicePermissionHandler(() => true)
-  defaultSession.setDisplayMediaRequestHandler(async (_request, callback) => {
-    const sources = await getScreenSources()
-    callback({ video: sources.find(({ id }) => id === selectedScreen) || sources[0] })
-  })
+  // Grant permissions (screen capture, Bluetooth) only to the app's own local pages, never to remote origins.
+  const trusted = (origin) => !origin || origin === 'null' || origin.startsWith('file:')
+  defaultSession.setPermissionCheckHandler((_webContents, _permission, origin, details) => (
+    trusted((details && details.requestingUrl) || origin)
+  ))
+  defaultSession.setPermissionRequestHandler((_webContents, _permission, callback, details) => (
+    callback(trusted(details && details.requestingUrl))
+  ))
+  defaultSession.setDevicePermissionHandler((details) => trusted(details && details.origin))
 
   ipcMain.handle('env', () => env())
   ipcMain.handle('open-bluetooth-settings', async () => {
     await shell.openExternal('ms-settings:bluetooth')
   })
   ipcMain.on('choose', (_event, deviceId) => {
+    if (deviceId) saveLastLamp(deviceId)
     if (pickCb) {
       pickCb(deviceId)
       pickCb = null
@@ -284,6 +334,37 @@ app.whenReady().then(() => {
     return source.id
   })
 
+  // Silent reconnect: run the renderer's connect with a simulated user gesture (Web Bluetooth requires one)
+  // while the chooser handler above auto-selects the remembered lamp.
+  ipcMain.handle('auto-connect', async () => {
+    const id = loadLastLamp()
+    if (!id || !win || autoPick) return { attempted: false, connected: false }
+    autoPick = {
+      id,
+      callback: null,
+      timer: setTimeout(() => {
+        if (autoPick) {
+          if (autoPick.callback) autoPick.callback('') // cancel the request: the lamp was not found nearby
+          autoPick = null
+        }
+      }, 12000),
+    }
+    try {
+      const connected = await Promise.race([
+        win.webContents.executeJavaScript('window.lampControl.connectAuto()', true),
+        new Promise((resolve) => setTimeout(() => resolve(false), 15000)),
+      ])
+      return { attempted: true, connected: !!connected }
+    } catch (e) {
+      return { attempted: true, connected: false }
+    } finally {
+      if (autoPick) {
+        clearTimeout(autoPick.timer)
+        autoPick = null
+      }
+    }
+  })
+
   ipcMain.on('tray', (_event, enabled) => {
     trayOn = !!enabled
     buildTray()
@@ -306,6 +387,17 @@ app.whenReady().then(() => {
   })
 
   createWindow()
+
+  // Screen capture can die silently when the PC sleeps or a display changes; tell the renderer to recover.
+  const toWindow = (channel) => {
+    if (win && !win.isDestroyed()) win.webContents.send(channel)
+  }
+  powerMonitor.on('resume', () => toWindow('resume'))
+  screen.on('display-added', () => toWindow('display-changed'))
+  screen.on('display-removed', () => toWindow('display-changed'))
+  screen.on('display-metrics-changed', (_event, _display, changedMetrics) => {
+    if (changedMetrics.some((metric) => metric !== 'workArea')) toWindow('display-changed')
+  })
 })
 
 app.on('window-all-closed', () => app.quit())

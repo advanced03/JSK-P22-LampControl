@@ -6,7 +6,12 @@
   "author": "lamp",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --win portable --x64"
+    "test": "node --test \"test/*.test.js\"",
+    "build": "electron-builder --win portable --x64",
+    "build:installer": "electron-builder --win nsis --x64"
+  },
+  "engines": {
+    "node": ">=22.12"
   },
   "devDependencies": {
     "electron": "44.7.2",
@@ -29,10 +34,11 @@
       "i18n.js",
       "picker.js",
       "picker.html",
+      "protocol.js",
       "control.js",
       "control.html",
+      "ambicore.js",
       "ambilight.js",
-      "ambilight-i18n.js",
       "ambilight.css",
       "fluent.css",
       "fluent.js",
@@ -42,6 +48,12 @@
     "win": {
       "target": "portable",
       "signAndEditExecutable": true
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName}-Setup.${ext}"
     }
   },
   "allowScripts": {

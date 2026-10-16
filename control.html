@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title data-i18n-title="app.title">JSK-P22 Lamp Control</title>
     <link rel="stylesheet" href="fluent.css">
@@ -125,16 +126,23 @@
           <div class="card sc">
             <div>
               <div class="t" data-ambi-i18n="capture.screen">Screen</div>
-              <div class="d" data-ambi-i18n="capture.screenDescription">Use the average color across the entire selected screen.</div>
+              <div class="d" data-ambi-i18n="capture.screenDescription">Choose the screen the lamp follows.</div>
             </div>
             <select id="ambi-screen" aria-label="Screen to follow" data-ambi-i18n-aria-label="capture.screenAria"></select>
           </div>
           <div class="card sc">
             <div>
               <div class="t" data-ambi-i18n="capture.ignoreBars">Ignore black bars</div>
-              <div class="d" data-ambi-i18n="capture.ignoreBarsDescription">Exclude letterbox bars when calculating the average color.</div>
+              <div class="d" data-ambi-i18n="capture.ignoreBarsDescription">Leave black letterbox and pillarbox bars out when working out the screen color.</div>
             </div>
             <input type="checkbox" id="ambi-bars" aria-label="Ignore black bars" data-ambi-i18n-aria-label="capture.ignoreBarsAria">
+          </div>
+          <div class="card sc">
+            <div>
+              <div class="t" data-ambi-i18n="capture.dominant">Favor dominant colors</div>
+              <div class="d" data-ambi-i18n="capture.dominantDescription">Gives vivid areas more weight than gray ones, so the lamp avoids a muddy average of the whole screen.</div>
+            </div>
+            <input type="checkbox" id="ambi-dominant" aria-label="Favor dominant colors" data-ambi-i18n-aria-label="capture.dominant">
           </div>
 
           <h2 data-ambi-i18n="section.hdr">HDR</h2>
@@ -148,7 +156,7 @@
           <div class="card sc">
             <div>
               <div class="t" data-ambi-i18n="hdr.correction">Correction strength</div>
-              <div class="d" data-ambi-i18n="hdr.correctionDescription">Adjusts gamma and color to correct washed-out HDR capture.</div>
+              <div class="d" data-ambi-i18n="hdr.correctionDescription">Adjusts gamma and color to counter washed-out HDR capture.</div>
             </div>
             <div class="ctl">
               <input type="range" id="ambi-hdramt" min="0" max="100" aria-label="HDR correction strength" data-ambi-i18n-aria-label="hdr.correctionAria">
@@ -194,7 +202,7 @@
             <div class="ctl"><input type="range" id="ambi-vivid" min="0" max="100" aria-label="Vividness" data-ambi-i18n-aria-label="response.vividnessAria"><output for="ambi-vivid"></output></div>
           </div>
           <div class="card sc">
-            <div><div class="t" data-ambi-i18n="response.brightness">Brightness</div><div class="d" data-ambi-i18n="response.brightnessDescription">Adjusts the lamp brightness without changing the preview.</div></div>
+            <div><div class="t" data-ambi-i18n="response.brightness">Brightness</div><div class="d" data-ambi-i18n="response.brightnessDescription">Limits the lamp brightness. The preview stays the same.</div></div>
             <div class="ctl"><input type="range" id="ambi-bright" min="5" max="100" aria-label="Brightness" data-ambi-i18n-aria-label="response.brightnessAria"><output for="ambi-bright"></output></div>
           </div>
           <div class="card sc">
@@ -218,7 +226,7 @@
           <label class="card sc setting-toggle">
             <div>
               <div class="t" data-i18n="settings.trayTitle">Keep running in the system tray</div>
-              <div class="d" data-i18n="settings.trayDescription">Closing the window keeps the app running in the system tray. Use the tray menu to reopen it or quit.</div>
+              <div class="d" data-i18n="settings.trayDescription">Closing the window keeps the app running in the system tray. Use the tray menu to reopen it, disconnect the lamp, or quit.</div>
             </div>
             <input id="keepInTray" type="checkbox" data-i18n-attr="aria-label:settings.trayTitle" aria-label="Keep in tray">
           </label>
@@ -254,8 +262,9 @@
     <video id="ambi-video" muted playsinline style="display:none"></video>
     <canvas id="ambi-cv" width="192" height="108" style="display:none"></canvas>
     <script src="i18n.js"></script>
+    <script src="protocol.js"></script>
     <script src="control.js"></script>
-    <script src="ambilight-i18n.js"></script>
+    <script src="ambicore.js"></script>
     <script src="ambilight.js"></script>
     <script src="fluent.js"></script>
   </body>

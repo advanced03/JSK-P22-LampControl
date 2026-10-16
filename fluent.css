@@ -667,3 +667,36 @@ canvas#wheel {
   border: 2px solid transparent;
   background-clip: content-box;
 }
+
+/* Respect the system "reduce motion" setting. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Windows high-contrast themes: keep controls visible and the color wheel colored. */
+@media (forced-colors: active) {
+  .card,
+  button,
+  select,
+  input[type='text'] {
+    border: 1px solid CanvasText;
+  }
+  .nav.sel,
+  button.sel,
+  button.accent {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  canvas#wheel,
+  .wizard-swatch,
+  #ambi-sw {
+    forced-color-adjust: none;
+  }
+}

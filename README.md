@@ -15,11 +15,15 @@ selected language is saved locally. Windows 11 may use Mica or Acrylic window ma
 ```powershell
 npm install
 npm start
+npm test
 npm run build
+npm run build:installer
 ```
 
-The build creates a portable Windows x64 executable in `dist/`. Electron Builder embeds the app icon; the executable is
-not digitally signed.
+`npm run build` creates a portable Windows x64 executable in `dist/`; `npm run build:installer` creates an NSIS
+installer instead, which starts faster because nothing has to be unpacked on every launch. Electron Builder embeds the
+app icon; neither is digitally signed, so Windows SmartScreen may warn on first run. `npm test` needs no dependencies
+and checks the Bluetooth protocol builders, the color processing, and the translations.
 
 ## Screenshots
 
@@ -37,32 +41,50 @@ not digitally signed.
 ## Ambilight
 
 Open **Ambilight** in the sidebar, connect to the lamp with the app's shared **Connect** button, select a display, and
-choose **Start sync**. The app samples the selected screen and sends its average color to the lamp. The preview shows
-the color before lamp calibration is applied.
+choose **Start sync**. The app samples the selected screen and sends a representative color to the lamp. Colors are
+averaged in linear light, and **Favor dominant colors** (on by default) gives vivid areas more weight than gray ones so
+the result is not a muddy average; overall brightness still follows the scene. The preview shows the color before lamp
+calibration is applied.
 
 Ambilight settings let you:
 
-- Ignore black letterbox bars when calculating the screen color.
+- Ignore black letterbox and pillarbox bars when working out the screen color. Subtitles or logos inside a bar do not
+  defeat the detection.
 - Apply optional HDR correction for washed-out colors.
 - Calibrate red, green, and blue output independently; use the calibration wizard to compare test colors with the
   preview.
 - Tune update rate, smoothing, vividness, and brightness to balance responsiveness and appearance.
 - Choose whether a black scene can turn the lamp fully off. If not, the app sets the lamp to white at 1% brightness.
+  Entering and leaving a black scene uses separate thresholds, so fades and noise do not make the lamp flicker.
 
 Settings are saved locally. Ambilight uses the app's existing Bluetooth connection; it does not open a separate lamp
 connection. Other lamp commands stop active screen sync, and disconnecting the lamp stops capture. When system-tray
 mode is enabled, the tray menu can start or stop sync.
 
+Screen capture recovers by itself when the display changes, the PC wakes from sleep, or the capture stream ends. If the
+lamp connection drops unexpectedly (for example during sleep) and automatic reconnect is on, sync resumes once the lamp
+is back. A manual disconnect never restarts sync on its own.
+
 ## Notes
 
 - Change the language and optionally enable system-tray mode in Settings. With tray mode enabled, closing the window
   hides the app; use the tray menu to reopen it, disconnect, or quit.
+- Only one copy of the app can run at a time; starting a second one brings the first to the front.
+- Automatic reconnect keeps retrying (backing off to 30 seconds) while the lamp is out of reach. The app remembers the
+  last lamp itself, so reconnecting works after a restart without showing the device picker.
 - Connect to the lamp whose Bluetooth name starts with `MELK`. Close other apps connected to it first; the lamp
   typically accepts only one connection at a time.
 - `main.js` creates the window and handles display capture; `preload.js` exposes the renderer API; `control.html` /
   `control.js` implement the main lamp-control UI; and `picker.html` / `picker.js` implement Bluetooth device
-  selection. `ambilight.js` handles screen-color processing and calibration. `fluent.css` / `fluent.js` provide
-  styling and Windows theme handling.
+  selection. `protocol.js` builds and parses lamp commands; `ambicore.js` holds the screen-color math and settings
+  migration (both are pure and unit-tested); `ambilight.js` handles capture, the sync loop and calibration.
+  `i18n.js` holds all text for all pages. `fluent.css` / `fluent.js` provide styling, Windows theme handling and
+  sidebar navigation.
+- The lamp clock command carries a weekday byte whose convention is not verified on real firmware. If scheduled timers
+  fire on the wrong day, flip `CLOCK_WEEKDAY_ISO` in `protocol.js`.
+- Effect names are translated from their structure (name, then colors) using each language's own word order, not by
+  swapping words. To add or change a language, edit `i18n.js`; `npm test` fails if a language is missing a key, has
+  different placeholders, mixes formal and informal German, or if two effects end up with the same translated name.
 
 ## Bluetooth protocol
 

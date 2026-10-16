@@ -1,1809 +1,2564 @@
-;(function () {
+// All user-visible text for the lamp apps: the control page, the Ambilight page and the Bluetooth picker.
+// Keys starting with "ambi." belong to the Ambilight page. English is the source of truth: every other language
+// must define the same keys with the same {placeholders} (npm test checks this).
+;(function (root) {
   const translations = {
-    en: {
-      language: 'Language',
-      languageName: 'English',
-      'app.title': 'JSK-P22 Lamp Control',
-      'nav.color': 'Color',
-      'nav.effects': 'Effects',
-      'nav.music': 'Music',
-      'nav.schedule': 'Schedule',
-      'nav.ambilight': 'Ambilight',
-      'nav.settings': 'Settings',
-      'settings.title': 'Settings',
-      'settings.languageDescription': 'Choose the app language.',
-      'settings.trayTitle': 'Keep running in the system tray',
-      'settings.trayDescription': 'Closing the window keeps the app running in the system tray. Use the tray menu to reopen it or quit.',
-      'settings.autoConnectTitle': 'Automatically reconnect to the last lamp',
-      'settings.autoConnectDescription': 'The app tries to reconnect at startup and after an unexpected disconnection. Connect to the lamp once so the app can remember it.',
-      'tray.open': 'Open app',
-      'tray.startSync': 'Start sync',
-      'tray.stopSync': 'Stop sync',
-      'tray.disconnect': 'Disconnect from lamp',
-      'tray.connect': 'Open to connect',
-      'tray.turnOn': 'Turn lamp on',
-      'tray.turnOff': 'Turn lamp off',
-      'tray.quit': 'Quit',
-      'connection.disconnected': 'Not connected',
-      'connection.connect': 'Connect',
-      'connection.reconnect': 'Reconnect',
-      'connection.disconnect': 'Disconnect',
-      'connection.connecting': 'Connecting…',
-      'connection.connected': 'Connected to {name}',
-      'connection.disconnectedStatus': 'Disconnected',
-      'connection.noBluetooth': 'Bluetooth control is not available in this app.',
-      'connection.bluetoothOff': 'Bluetooth is turned off. Turn it on in Windows Settings and try again.',
-      'connection.openBluetoothSettings': 'Open Bluetooth settings',
-      'connection.settingsFailed': 'Could not open Bluetooth settings: {message}',
-      'connection.noDevice': 'No lamp was selected, or it does not provide the required 0xFFF0 service. Make sure Bluetooth is on and the lamp is powered on and nearby.',
-      'connection.failed': 'Could not connect: {message}',
-      'connection.autoConnectUnavailable': 'Automatic reconnection is not available in this app. Use Connect to choose your lamp.',
-      'connection.autoConnectNoDevice': 'Connect to a lamp once to enable automatic reconnection.',
-      'connection.autoConnectNotAuthorized': 'The last lamp is no longer available to reconnect. Use Connect to choose it again.',
-      'connection.autoConnectFailed': 'Could not reconnect automatically: {message}',
-      'connection.writeFailed': 'Write failed: {message}',
-      'power.title': 'Power',
-      'power.description': "Turn the lamp on or off. The status shows the last command sent because the lamp doesn't report its power state.",
-      'power.on': 'On',
-      'power.off': 'Off',
-      'brightness.title': 'Brightness',
-      'brightness.description': 'Lamp output level',
-      'color.pick': 'Pick a color',
-      'color.wheelLabel': 'Color wheel: drag to choose hue and saturation',
-      'color.hexLabel': 'Hex color',
-      'effects.title': 'Effects',
-      'effects.nowPlaying': 'Now playing',
-      'effects.stop': 'Stop effect',
-      'effects.colorDisabled': 'The color picker is disabled while an effect is playing.',
-      'effects.none': 'none',
-      'effects.speed': 'Effect speed',
-      'effects.speedDescription': 'How fast the effect runs',
-      'effects.search': 'Search effects',
-      'effects.categories': 'Effect categories',
-      'effects.scrollLeft': 'Scroll categories left',
-      'effects.scrollRight': 'Scroll categories right',
-      'effects.colors': 'Filter by color',
-      'effects.all': 'All',
-      'effects.noMatches': 'No effects match.',
-      'effects.onlyColor': 'Only {color} effects',
-      'effects.multicolor': 'Multicolor',
-      'music.title': 'Music',
-      'music.sync': 'Music sync',
-      'music.description': 'The lamp responds to sound picked up by its built-in microphone.',
-      'music.unknown': 'Unknown',
-      'music.running': 'Running',
-      'music.stopped': 'Stopped',
-      'music.start': 'Start',
-      'music.stop': 'Stop',
-      'music.mode': 'Mode',
-      'music.modeDescription': 'How the lamp reacts to sound',
-      'music.eqEnergetic': 'Energetic',
-      'music.eqRhythm': 'Rhythm',
-      'music.eqSpectrum': 'Spectrum',
-      'music.eqRolling': 'Rolling',
-      'music.eqEnergetic2': 'Energetic 2',
-      'music.eqRhythm2': 'Rhythm 2',
-      'music.eqSpectrum2': 'Spectrum 2',
-      'music.eqRolling2': 'Rolling 2',
-      'music.sensitivity': 'Sensitivity',
-      'music.sensitivityDescription': 'Higher sensitivity makes the lamp respond to quieter sounds.',
-      'music.noMicrophone': 'This model has no microphone.',
-      'schedule.title': 'Schedule',
-      'schedule.timers': 'Timers',
-      'schedule.on': 'Schedule on',
-      'schedule.off': 'Schedule off',
-      'schedule.enabled': 'Enabled',
-      'schedule.repeat': 'Repeat',
-      'schedule.everyDay': 'every day',
-      'schedule.noDays': 'no days',
-      'schedule.days': '{count} days',
-      'schedule.oneDay': '{count} day',
-      'schedule.connectFirst': 'Connect to the lamp first',
-      'schedule.chooseTime': 'Pick a time and at least one day',
-      'schedule.sent': 'Schedule sent: {time}, {days}, {state}',
-      'schedule.onState': 'on',
-      'schedule.offState': 'off',
-      'schedule.notSet': 'Not set',
-      'schedule.onLamp': 'Lamp schedule: {time}, {days}, {state}',
-      'schedule.reading': 'Reading from lamp…',
-      'schedule.noReport': 'The lamp did not return any schedule information.',
-      'schedule.readFailed': 'Could not read the schedule: {message}',
-      'schedule.dayMon': 'Monday',
-      'schedule.dayTue': 'Tuesday',
-      'schedule.dayWed': 'Wednesday',
-      'schedule.dayThu': 'Thursday',
-      'schedule.dayFri': 'Friday',
-      'schedule.daySat': 'Saturday',
-      'schedule.daySun': 'Sunday',
-      'schedule.shortMon': 'M',
-      'schedule.shortTue': 'T',
-      'schedule.shortWed': 'W',
-      'schedule.shortThu': 'T',
-      'schedule.shortFri': 'F',
-      'schedule.shortSat': 'S',
-      'schedule.shortSun': 'S',
-      'category.special': 'Special',
-      'category.jump': 'Jump & strobe',
-      'category.fade': 'Fade & transition',
-      'category.marquee': 'Marquee',
-      'category.race': 'Race & wave',
-      'category.flush': 'Flush & curtain',
-      'category.water': 'Water',
-      'category.flow': 'Flow',
-      'category.tail': 'Tail',
-      'category.running': 'Running',
-      'category.runningReverse': 'Running reverse',
-      'category.scenes': 'Scenes',
-      'picker.title': 'Choose your lamp',
-      'picker.searchingHint': 'Looking for nearby lamps, often named MELK-…',
-      'picker.pickHint': 'Choose your lamp from the list.',
-      'picker.rangeHint': 'Make sure the lamp is powered and in range.',
-      'picker.cancel': 'Cancel',
-      'picker.unnamed': 'Unnamed device',
-      'picker.searching': 'Searching for nearby devices…',
-      'effectWords': {
-        'Auto play': 'Auto play',
-        'Magic reverse': 'Magic reverse',
-        'Magic': 'Magic',
-        'Energy': 'Energy',
-        'Jump': 'Jump',
-        'Strobe': 'Strobe',
-        'Fade': 'Fade',
-        'Transition reverse': 'Transition reverse',
-        'Transition': 'Transition',
-        'Marquee': 'Marquee',
-        'Race reverse': 'Race reverse',
-        'Race': 'Race',
-        'Wave reverse': 'Wave reverse',
-        'Wave': 'Wave',
-        'Flush close': 'Flush close',
-        'Flush open': 'Flush open',
-        'Flush reverse': 'Flush reverse',
-        'Flush': 'Flush',
-        'Curtain close': 'Curtain close',
-        'Curtain open': 'Curtain open',
-        'Curtain': 'Curtain',
-        'Water reverse': 'Water reverse',
-        'Water': 'Water',
-        'Flow reverse': 'Flow reverse',
-        'Flow': 'Flow',
-        'Tail reverse': 'Tail reverse',
-        'Tail': 'Tail',
-        'Running reverse': 'Running reverse',
-        'Running': 'Running',
-        'Sunrise': 'Sunrise',
-        'Sunset': 'Sunset',
-        'Birthday': 'Birthday',
-        'Candlelight': 'Candlelight',
-        'Fireworks': 'Fireworks',
-        'Party': 'Party',
-        'Destiny': 'Destiny',
-        'Starry sky': 'Starry sky',
-        'Romantic': 'Romantic',
-        'Disco': 'Disco',
-        'Rainbow': 'Rainbow',
-        'Movie': 'Movie',
-        'Christmas': 'Christmas',
-        'Flowing': 'Flowing',
-        'Sleeping': 'Sleeping',
-        'Ocean': 'Ocean',
-        'Forest': 'Forest',
-        'Reading': 'Reading',
-        'Working': 'Working',
-        'Dazzle': 'Dazzle',
-        'Gentle': 'Gentle',
-        'Wedding': 'Wedding',
-        'Snow': 'Snow',
-        'Fire': 'Fire',
-        'Lightning': 'Lightning',
+    "en": {
+      "language": "Language",
+      "languageName": "English",
+      "app.title": "JSK-P22 Lamp Control",
+      "nav.color": "Color",
+      "nav.effects": "Effects",
+      "nav.music": "Music",
+      "nav.schedule": "Schedule",
+      "nav.ambilight": "Ambilight",
+      "nav.settings": "Settings",
+      "settings.title": "Settings",
+      "settings.languageDescription": "Choose the app language.",
+      "settings.trayTitle": "Keep running in the system tray",
+      "settings.trayDescription": "Closing the window keeps the app running in the system tray. Use the tray menu to reopen it, disconnect the lamp, or quit.",
+      "settings.autoConnectTitle": "Automatically reconnect to the last lamp",
+      "settings.autoConnectDescription": "The app reconnects at startup and after an unexpected disconnection, and keeps trying while the lamp is out of reach. If Ambilight was running, it resumes. Connect to the lamp once so the app can remember it.",
+      "tray.open": "Open app",
+      "tray.startSync": "Start sync",
+      "tray.stopSync": "Stop sync",
+      "tray.disconnect": "Disconnect from lamp",
+      "tray.connect": "Open to connect",
+      "tray.turnOn": "Turn lamp on",
+      "tray.turnOff": "Turn lamp off",
+      "tray.quit": "Quit",
+      "connection.disconnected": "Not connected",
+      "connection.connect": "Connect",
+      "connection.reconnect": "Reconnect",
+      "connection.disconnect": "Disconnect",
+      "connection.connecting": "Connecting…",
+      "connection.connected": "Connected to {name}",
+      "connection.disconnectedStatus": "Disconnected",
+      "connection.noBluetooth": "Bluetooth control is not available in this app.",
+      "connection.bluetoothOff": "Bluetooth is turned off. Turn it on in Windows Settings and try again.",
+      "connection.openBluetoothSettings": "Open Bluetooth settings",
+      "connection.settingsFailed": "Could not open Bluetooth settings: {message}",
+      "connection.noDevice": "No lamp was selected, or it does not provide the required 0xFFF0 service. Make sure Bluetooth is on and the lamp is powered on and nearby.",
+      "connection.failed": "Could not connect: {message}",
+      "connection.autoConnectNoDevice": "Connect to a lamp once to enable automatic reconnection.",
+      "connection.autoConnectFailed": "Could not reconnect automatically: {message}",
+      "connection.writeFailed": "Write failed: {message}",
+      "power.title": "Power",
+      "power.description": "Turn the lamp on or off. The status shows the last command sent because the lamp doesn't report its power state.",
+      "power.on": "On",
+      "power.off": "Off",
+      "brightness.title": "Brightness",
+      "brightness.description": "Lamp output level.",
+      "color.pick": "Pick a color",
+      "color.wheelLabel": "Color wheel: drag, or use the arrow keys, to choose hue and saturation",
+      "color.hexLabel": "Hex color",
+      "effects.title": "Effects",
+      "effects.nowPlaying": "Now playing",
+      "effects.stop": "Stop effect",
+      "effects.colorDisabled": "The color picker is disabled while an effect is playing.",
+      "effects.none": "None",
+      "effects.speed": "Effect speed",
+      "effects.speedDescription": "How fast the effect runs.",
+      "effects.search": "Search effects",
+      "effects.categories": "Effect categories",
+      "effects.scrollLeft": "Scroll categories left",
+      "effects.scrollRight": "Scroll categories right",
+      "effects.colors": "Filter by color",
+      "effects.all": "All",
+      "effects.noMatches": "No effects match.",
+      "effects.onlyColor": "Only {color} effects",
+      "effects.multicolor": "Multicolor",
+      "music.title": "Music",
+      "music.sync": "Music sync",
+      "music.description": "The lamp responds to sound picked up by its built-in microphone.",
+      "music.unknown": "Unknown",
+      "music.running": "Running",
+      "music.stopped": "Stopped",
+      "music.start": "Start",
+      "music.stop": "Stop",
+      "music.mode": "Mode",
+      "music.modeDescription": "How the lamp reacts to sound.",
+      "music.eqEnergetic": "Energetic",
+      "music.eqRhythm": "Rhythm",
+      "music.eqSpectrum": "Spectrum",
+      "music.eqRolling": "Rolling",
+      "music.eqEnergetic2": "Energetic 2",
+      "music.eqRhythm2": "Rhythm 2",
+      "music.eqSpectrum2": "Spectrum 2",
+      "music.eqRolling2": "Rolling 2",
+      "music.sensitivity": "Sensitivity",
+      "music.sensitivityDescription": "Higher sensitivity makes the lamp respond to quieter sounds.",
+      "music.noMicrophone": "This model has no microphone.",
+      "schedule.title": "Schedule",
+      "schedule.timers": "Timers",
+      "schedule.on": "Turn on",
+      "schedule.off": "Turn off",
+      "schedule.enabled": "Enabled",
+      "schedule.repeat": "Repeat",
+      "schedule.everyDay": "every day",
+      "schedule.noDays": "no days",
+      "schedule.connectFirst": "Connect to the lamp first",
+      "schedule.chooseTime": "Pick a time and at least one day",
+      "schedule.notSet": "Not set",
+      "schedule.reading": "Reading from lamp…",
+      "schedule.noReport": "The lamp did not return any schedule information.",
+      "schedule.readFailed": "Could not read the schedule: {message}",
+      "schedule.dayMon": "Monday",
+      "schedule.dayTue": "Tuesday",
+      "schedule.dayWed": "Wednesday",
+      "schedule.dayThu": "Thursday",
+      "schedule.dayFri": "Friday",
+      "schedule.daySat": "Saturday",
+      "schedule.daySun": "Sunday",
+      "schedule.shortMon": "M",
+      "schedule.shortTue": "T",
+      "schedule.shortWed": "W",
+      "schedule.shortThu": "T",
+      "schedule.shortFri": "F",
+      "schedule.shortSat": "S",
+      "schedule.shortSun": "S",
+      "category.special": "Special",
+      "category.jump": "Jump & strobe",
+      "category.fade": "Fade & transition",
+      "category.marquee": "Marquee",
+      "category.race": "Race & wave",
+      "category.flush": "Flush & curtain",
+      "category.water": "Water",
+      "category.flow": "Flow",
+      "category.tail": "Tail",
+      "category.running": "Running",
+      "category.runningReverse": "Running reverse",
+      "category.scenes": "Scenes",
+      "picker.title": "Choose your lamp",
+      "picker.searchingHint": "Looking for nearby lamps, often named MELK-…",
+      "picker.pickHint": "Choose your lamp from the list.",
+      "picker.rangeHint": "Make sure the lamp is powered and in range.",
+      "picker.cancel": "Cancel",
+      "picker.unnamed": "Unnamed device",
+      "picker.searching": "Searching for nearby devices…",
+      "ambi.sync.heading": "Ambilight",
+      "ambi.sync.preview": "Current lamp color",
+      "ambi.status.notConnected": "Not connected",
+      "ambi.status.lampOff": "The app thinks the lamp is off. Turn it on before starting Ambilight.",
+      "ambi.status.syncing": "Syncing",
+      "ambi.status.stopped": "Stopped",
+      "ambi.status.captureFailed": "Screen capture failed: {message}",
+      "ambi.status.screensFailed": "Could not load displays: {message}",
+      "ambi.button.startSync": "Start sync",
+      "ambi.button.stopSync": "Stop sync",
+      "ambi.button.reset": "Reset",
+      "ambi.section.capture": "Capture",
+      "ambi.capture.screen": "Screen",
+      "ambi.capture.screenDescription": "Choose the screen the lamp follows.",
+      "ambi.capture.screenAria": "Screen to follow",
+      "ambi.capture.ignoreBars": "Ignore black bars",
+      "ambi.capture.ignoreBarsDescription": "Leave black letterbox and pillarbox bars out when working out the screen color.",
+      "ambi.capture.ignoreBarsAria": "Ignore black bars",
+      "ambi.section.hdr": "HDR",
+      "ambi.hdr.display": "Apply HDR correction",
+      "ambi.hdr.displayAria": "Apply HDR correction",
+      "ambi.hdr.manualNote": "Windows doesn’t tell the app whether a display is using HDR, so this is a manual adjustment. It can reduce washed-out colors but can’t recover detail lost during capture.",
+      "ambi.hdr.correction": "Correction strength",
+      "ambi.hdr.correctionDescription": "Adjusts gamma and color to counter washed-out HDR capture.",
+      "ambi.hdr.correctionAria": "HDR correction strength",
+      "ambi.section.calibration": "Color calibration",
+      "ambi.calibration.description": "Adjust the lamp until it matches the preview. The preview itself stays the same.",
+      "ambi.calibration.red": "Red output",
+      "ambi.calibration.redDescription": "At 0%, red is off; at 100%, it is unchanged.",
+      "ambi.calibration.redAria": "Red color calibration",
+      "ambi.calibration.green": "Green output",
+      "ambi.calibration.greenDescription": "At 0%, green is off; at 100%, it is unchanged.",
+      "ambi.calibration.greenAria": "Green color calibration",
+      "ambi.calibration.blue": "Blue output",
+      "ambi.calibration.blueDescription": "At 0%, blue is off; at 100%, it is unchanged.",
+      "ambi.calibration.blueAria": "Blue color calibration",
+      "ambi.section.response": "Response",
+      "ambi.response.fps": "Updates per second",
+      "ambi.response.fpsDescription": "More frequent updates make Ambilight respond faster, but use more CPU and Bluetooth bandwidth.",
+      "ambi.response.fpsAria": "Updates per second",
+      "ambi.response.smoothing": "Smoothing",
+      "ambi.response.smoothingDescription": "Higher values smooth color changes more, but make the lamp respond more slowly.",
+      "ambi.response.smoothingAria": "Smoothing",
+      "ambi.response.vividness": "Vividness",
+      "ambi.response.vividnessDescription": "Increase this for more vivid colors; lower it for a more natural look.",
+      "ambi.response.vividnessAria": "Vividness",
+      "ambi.response.brightness": "Brightness",
+      "ambi.response.brightnessDescription": "Limits the lamp brightness. The preview stays the same.",
+      "ambi.response.brightnessAria": "Brightness",
+      "ambi.response.allowTurnOff": "Allow light to fully turn off",
+      "ambi.response.allowTurnOffDescription": "When unchecked, pure-black scenes keep the lamp on with white at its lowest brightness.",
+      "ambi.response.reset": "Reset",
+      "ambi.wizard.open": "Calibration wizard",
+      "ambi.wizard.title": "Color calibration wizard",
+      "ambi.wizard.intro": "Sync pauses during the test and resumes when you close the wizard.",
+      "ambi.wizard.progress": "Test {current} of {total}",
+      "ambi.wizard.adjustHint": "Adjust the color channels until the lamp looks as close as possible to the reference.",
+      "ambi.wizard.reference": "Reference color",
+      "ambi.wizard.sent": "Color sent to lamp",
+      "ambi.wizard.cancel": "Cancel",
+      "ambi.wizard.previous": "Previous",
+      "ambi.wizard.next": "Next",
+      "ambi.wizard.finish": "Finish",
+      "ambi.wizard.noConnection": "Connect to the lamp to start calibration.",
+      "ambi.wizard.disconnected": "Lamp disconnected. Reconnect to continue.",
+      "ambi.wizard.color.red": "Red",
+      "ambi.wizard.color.redDescription": "Match the lamp’s red to the reference.",
+      "ambi.wizard.color.orange": "Orange",
+      "ambi.wizard.color.orangeDescription": "Check the red-green balance.",
+      "ambi.wizard.color.yellow": "Yellow",
+      "ambi.wizard.color.yellowDescription": "Check the combined red and green output.",
+      "ambi.wizard.color.green": "Green",
+      "ambi.wizard.color.greenDescription": "Match the lamp’s green to the reference.",
+      "ambi.wizard.color.cyan": "Cyan",
+      "ambi.wizard.color.cyanDescription": "Check the combined green and blue output.",
+      "ambi.wizard.color.blue": "Blue",
+      "ambi.wizard.color.blueDescription": "Match the lamp’s blue to the reference.",
+      "ambi.wizard.color.purple": "Purple",
+      "ambi.wizard.color.purpleDescription": "Check the red-blue balance.",
+      "ambi.wizard.color.pink": "Pink",
+      "ambi.wizard.color.pinkDescription": "Fine-tune the lighter red-blue mix.",
+      "ambi.capture.dominant": "Favor dominant colors",
+      "ambi.capture.dominantDescription": "Gives vivid areas more weight than gray ones, so the lamp avoids a muddy average of the whole screen.",
+      "ambi.status.recovering": "Reconnecting screen capture…",
+      "schedule.summaryOn": "Turns the lamp on at {time} ({days})",
+      "schedule.summaryOff": "Turns the lamp off at {time} ({days})",
+      "schedule.summaryDisabled": "Disabled: {time} ({days})",
+      "schedule.weekdays": "weekdays",
+      "schedule.weekends": "weekends",
+      "error.outOfRange": "The lamp is out of range or turned off.",
+      "error.connection": "Could not reach the lamp. Make sure it is on, in range, and not connected to another app.",
+      "connection.autoConnectNotFound": "The last lamp was not found nearby. Will keep trying.",
+      "effectWords": {
+        "Auto play": "Auto play",
+        "Magic reverse": "Magic reverse",
+        "Magic": "Magic",
+        "Energy": "Energy",
+        "Jump": "Jump",
+        "Strobe": "Strobe",
+        "Fade": "Fade",
+        "Transition reverse": "Transition reverse",
+        "Transition": "Transition",
+        "Marquee": "Marquee",
+        "Race reverse": "Race reverse",
+        "Race": "Race",
+        "Wave reverse": "Wave reverse",
+        "Wave": "Wave",
+        "Flush close": "Flush close",
+        "Flush open": "Flush open",
+        "Flush reverse": "Flush reverse",
+        "Flush": "Flush",
+        "Curtain close": "Curtain close",
+        "Curtain open": "Curtain open",
+        "Curtain": "Curtain",
+        "Water reverse": "Water reverse",
+        "Water": "Water",
+        "Flow reverse": "Flow reverse",
+        "Flow": "Flow",
+        "Tail reverse": "Tail reverse",
+        "Tail": "Tail",
+        "Running reverse": "Running reverse",
+        "Running": "Running",
+        "Sunrise": "Sunrise",
+        "Sunset": "Sunset",
+        "Birthday": "Birthday",
+        "Candlelight": "Candlelight",
+        "Fireworks": "Fireworks",
+        "Party": "Party",
+        "Destiny": "Destiny",
+        "Starry sky": "Starry sky",
+        "Romantic": "Romantic",
+        "Disco": "Disco",
+        "Rainbow": "Rainbow",
+        "Movie": "Movie",
+        "Christmas": "Christmas",
+        "Flowing": "Flowing",
+        "Sleeping": "Sleeping",
+        "Ocean": "Ocean",
+        "Forest": "Forest",
+        "Reading": "Reading",
+        "Working": "Working",
+        "Dazzle": "Dazzle",
+        "Gentle": "Gentle",
+        "Wedding": "Wedding",
+        "Snow": "Snow",
+        "Fire": "Fire",
+        "Lightning": "Lightning",
         "Valentine's Day": "Valentine's Day",
-        'Halloween': 'Halloween',
-        'Warning': 'Warning',
-        'multicolor': 'multicolor',
-        'six colors': 'six colors',
-        'red': 'red',
-        'green': 'green',
-        'blue': 'blue',
-        'yellow': 'yellow',
-        'cyan': 'cyan',
-        'purple': 'purple',
-        'white': 'white',
-        'reverse': 'reverse',
-        'and': 'and',
-        'to': 'to',
-        'dot': 'dot',
-        'on': 'on',
+        "Halloween": "Halloween",
+        "Warning": "Warning",
+      },
+      "effectSpec": {
+        "colors": {
+                "multicolor": "multicolor",
+                "red": "red",
+                "green": "green",
+                "blue": "blue",
+                "yellow": "yellow",
+                "cyan": "cyan",
+                "purple": "purple",
+                "white": "white"
+        }
       },
     },
-    nl: {
-      language: 'Taal',
-      languageName: 'Nederlands',
-      'app.title': 'JSK-P22 Lampbediening',
-      'nav.color': 'Kleur',
-      'nav.effects': 'Effecten',
-      'nav.music': 'Muziek',
-      'nav.schedule': 'Schema',
-      'nav.ambilight': 'Ambilight',
-      'nav.settings': 'Instellingen',
-      'settings.title': 'Instellingen',
-      'settings.languageDescription': 'Kies de taal die de toepassing gebruikt.',
-      'settings.trayTitle': 'In systeemvak houden',
-      'settings.trayDescription': 'Bij het sluiten wordt de toepassing verborgen in het systeemvak. Gebruik het menu om de toepassing te openen, de verbinding met de lamp te verbreken of af te sluiten.',
-      'settings.autoConnectTitle': 'Automatisch opnieuw verbinden met de laatst gebruikte lamp',
-      'settings.autoConnectDescription': 'De app probeert bij het opstarten en na een onverwachte verbreking opnieuw verbinding te maken. Verbind de lamp eerst één keer handmatig.',
-      'tray.open': 'App openen',
-      'tray.startSync': 'Synchronisatie starten',
-      'tray.stopSync': 'Synchronisatie stoppen',
-      'tray.disconnect': 'Verbinding met lamp verbreken',
-      'tray.connect': 'Openen om verbinding te maken',
-      'tray.turnOn': 'Lamp inschakelen',
-      'tray.turnOff': 'Lamp uitschakelen',
-      'tray.quit': 'Afsluiten',
-      'connection.disconnected': 'Niet verbonden',
-      'connection.connect': 'Verbinden',
-      'connection.reconnect': 'Opnieuw verbinden',
-      'connection.disconnect': 'Verbinding verbreken',
-      'connection.connecting': 'Verbinden…',
-      'connection.connected': 'Verbonden met {name}',
-      'connection.disconnectedStatus': 'Verbinding verbroken',
-      'connection.noBluetooth': 'Bluetooth-bediening is niet beschikbaar in deze app.',
-      'connection.bluetoothOff': 'Bluetooth is uitgeschakeld. Schakel Bluetooth in via de Windows-instellingen en probeer het opnieuw.',
-      'connection.openBluetoothSettings': 'Bluetooth-instellingen openen',
-      'connection.settingsFailed': 'Bluetooth-instellingen konden niet worden geopend: {message}',
-      'connection.noDevice': 'Geen apparaat gekozen of het apparaat heeft geen 0xFFF0-service. Controleer of Bluetooth is ingeschakeld en de lamp aan en dichtbij is.',
-      'connection.failed': 'Verbinden mislukt: {message}',
-      'connection.autoConnectUnavailable': 'Automatisch opnieuw verbinden is niet beschikbaar in deze app. Kies de lamp met de knop Verbinden.',
-      'connection.autoConnectNoDevice': 'Verbind een keer handmatig met een lamp om automatisch opnieuw verbinden in te schakelen.',
-      'connection.autoConnectNotAuthorized': 'De laatst gebruikte lamp is niet meer beschikbaar. Kies de lamp opnieuw met de knop Verbinden.',
-      'connection.autoConnectFailed': 'Automatisch opnieuw verbinden is mislukt: {message}',
-      'connection.writeFailed': 'Schrijven mislukt: {message}',
-      'power.title': 'Aan/uit',
-      'power.description': 'Zet de lamp aan of uit. De status toont de laatst verzonden opdracht; de lamp meldt de voedingsstatus niet terug.',
-      'power.on': 'Aan',
-      'power.off': 'Uit',
-      'brightness.title': 'Helderheid',
-      'brightness.description': 'Lichtsterkte van de lamp',
-      'color.pick': 'Kies een kleur',
-      'color.wheelLabel': 'Kleurwiel: sleep om tint en verzadiging te kiezen',
-      'color.hexLabel': 'Hexkleur',
-      'effects.title': 'Effecten',
-      'effects.nowPlaying': 'Nu actief',
-      'effects.stop': 'Effect stoppen',
-      'effects.colorDisabled': 'De kleurenkiezer is uitgeschakeld zolang er een effect actief is.',
-      'effects.none': 'geen',
-      'effects.speed': 'Effectsnelheid',
-      'effects.speedDescription': 'Hoe snel het effect wordt afgespeeld',
-      'effects.search': 'Effecten zoeken',
-      'effects.categories': 'Effectcategorieën',
-      'effects.scrollLeft': 'Categorieën naar links scrollen',
-      'effects.scrollRight': 'Categorieën naar rechts scrollen',
-      'effects.colors': 'Filteren op kleur',
-      'effects.all': 'Alles',
-      'effects.noMatches': 'Geen overeenkomende effecten.',
-      'effects.onlyColor': 'Alleen effecten in {color}',
-      'effects.multicolor': 'Meerkleurig',
-      'music.title': 'Muziek',
-      'music.sync': 'Muzieksynchronisatie',
-      'music.description': 'De lamp reageert op geluid via de ingebouwde microfoon.',
-      'music.unknown': 'Onbekend',
-      'music.running': 'Actief',
-      'music.stopped': 'Gestopt',
-      'music.start': 'Starten',
-      'music.stop': 'Stoppen',
-      'music.mode': 'Modus',
-      'music.modeDescription': 'Hoe de lamp op geluid reageert',
-      'music.eqEnergetic': 'Energiek',
-      'music.eqRhythm': 'Ritme',
-      'music.eqSpectrum': 'Spectrum',
-      'music.eqRolling': 'Rollend',
-      'music.eqEnergetic2': 'Energiek 2',
-      'music.eqRhythm2': 'Ritme 2',
-      'music.eqSpectrum2': 'Spectrum 2',
-      'music.eqRolling2': 'Rollend 2',
-      'music.sensitivity': 'Gevoeligheid',
-      'music.sensitivityDescription': 'Een hogere waarde laat de lamp ook op zachtere geluiden reageren.',
-      'music.noMicrophone': 'Dit model heeft geen microfoon.',
-      'schedule.title': 'Schema',
-      'schedule.timers': 'Timers',
-      'schedule.on': 'Inschakelen plannen',
-      'schedule.off': 'Uitschakelen plannen',
-      'schedule.enabled': 'Ingeschakeld',
-      'schedule.repeat': 'Herhalen',
-      'schedule.everyDay': 'elke dag',
-      'schedule.noDays': 'geen dagen',
-      'schedule.days': '{count} dagen',
-      'schedule.oneDay': '{count} dag',
-      'schedule.connectFirst': 'Verbind eerst met de lamp',
-      'schedule.chooseTime': 'Kies een tijd en ten minste één dag',
-      'schedule.sent': 'Verstuurd: {time}, {days}, {state}',
-      'schedule.onState': 'aan',
-      'schedule.offState': 'uit',
-      'schedule.notSet': 'Niet ingesteld',
-      'schedule.onLamp': 'Op lamp: {time}, {days}, {state}',
-      'schedule.reading': 'Lezen van de lamp…',
-      'schedule.noReport': 'De lamp heeft geen schema gemeld',
-      'schedule.readFailed': 'Lezen mislukt: {message}',
-      'schedule.dayMon': 'Maandag',
-      'schedule.dayTue': 'Dinsdag',
-      'schedule.dayWed': 'Woensdag',
-      'schedule.dayThu': 'Donderdag',
-      'schedule.dayFri': 'Vrijdag',
-      'schedule.daySat': 'Zaterdag',
-      'schedule.daySun': 'Zondag',
-      'schedule.shortMon': 'M',
-      'schedule.shortTue': 'D',
-      'schedule.shortWed': 'W',
-      'schedule.shortThu': 'D',
-      'schedule.shortFri': 'V',
-      'schedule.shortSat': 'Z',
-      'schedule.shortSun': 'Z',
-      'category.special': 'Speciaal',
-      'category.jump': 'Sprong en flits',
-      'category.fade': 'Vervagen en overgang',
-      'category.marquee': 'Lichtkrant',
-      'category.race': 'Race en golf',
-      'category.flush': 'Veeg- en gordijneffecten',
-      'category.water': 'Water',
-      'category.flow': 'Stroom',
-      'category.tail': 'Staart',
-      'category.running': 'Lopend',
-      'category.runningReverse': 'Omgekeerd lopend',
-      'category.scenes': 'Scènes',
-      'picker.title': 'Kies je lamp',
-      'picker.searchingHint': 'Zoeken... Lampen hebben meestal een naam die met MELK- begint.',
-      'picker.pickHint': 'Kies je lamp uit de lijst.',
-      'picker.rangeHint': 'Controleer of de lamp aanstaat en binnen bereik is.',
-      'picker.cancel': 'Annuleren',
-      'picker.unnamed': 'Naamloos apparaat',
-      'picker.searching': 'Zoeken naar lampen in de buurt…',
-      'effectWords': {
-        'Auto play': 'Automatisch',
-        'Magic reverse': 'Magie omgekeerd',
-        'Magic': 'Magie',
-        'Energy': 'Energie',
-        'Jump': 'Sprong',
-        'Strobe': 'Flits',
-        'Fade': 'Vervagen',
-        'Transition reverse': 'Overgang omgekeerd',
-        'Transition': 'Overgang',
-        'Marquee': 'Lichtkrant',
-        'Race reverse': 'Race omgekeerd',
-        'Race': 'Race',
-        'Wave reverse': 'Golf omgekeerd',
-        'Wave': 'Golf',
-        'Flush close': 'Vegen sluiten',
-        'Flush open': 'Vegen openen',
-        'Flush reverse': 'Vegen omgekeerd',
-        'Flush': 'Vegen',
-        'Curtain close': 'Gordijn sluiten',
-        'Curtain open': 'Gordijn openen',
-        'Curtain': 'Gordijn',
-        'Water reverse': 'Water omgekeerd',
-        'Water': 'Water',
-        'Flow reverse': 'Stroom omgekeerd',
-        'Flow': 'Stroom',
-        'Tail reverse': 'Staart omgekeerd',
-        'Tail': 'Staart',
-        'Running reverse': 'Lopend omgekeerd',
-        'Running': 'Lopend',
-        'Sunrise': 'Zonsopgang',
-        'Sunset': 'Zonsondergang',
-        'Birthday': 'Verjaardag',
-        'Candlelight': 'Kaarslicht',
-        'Fireworks': 'Vuurwerk',
-        'Party': 'Feest',
-        'Destiny': 'Lot',
-        'Starry sky': 'Sterrenhemel',
-        'Romantic': 'Romantisch',
-        'Disco': 'Disco',
-        'Rainbow': 'Regenboog',
-        'Movie': 'Film',
-        'Christmas': 'Kerstmis',
-        'Flowing': 'Stromend',
-        'Sleeping': 'Slapen',
-        'Ocean': 'Oceaan',
-        'Forest': 'Bos',
-        'Reading': 'Lezen',
-        'Working': 'Werken',
-        'Dazzle': 'Verblinden',
-        'Gentle': 'Zacht',
-        'Wedding': 'Bruiloft',
-        'Snow': 'Sneeuw',
-        'Fire': 'Vuur',
-        'Lightning': 'Bliksem',
-        "Valentine's Day": 'Valentijnsdag',
-        'Halloween': 'Halloween',
-        'Warning': 'Waarschuwing',
-        'multicolor': 'meerkleurig',
-        'six colors': 'zes kleuren',
-        'red': 'rood',
-        'green': 'groen',
-        'blue': 'blauw',
-        'yellow': 'geel',
-        'cyan': 'cyaan',
-        'purple': 'paars',
-        'white': 'wit',
-        'reverse': 'omgekeerd',
-        'and': 'en',
-        'to': 'naar',
-        'dot': 'punt',
-        'on': 'op',
+    "nl": {
+      "language": "Taal",
+      "languageName": "Nederlands",
+      "app.title": "JSK-P22 Lampbediening",
+      "nav.color": "Kleur",
+      "nav.effects": "Effecten",
+      "nav.music": "Muziek",
+      "nav.schedule": "Schema",
+      "nav.ambilight": "Ambilight",
+      "nav.settings": "Instellingen",
+      "settings.title": "Instellingen",
+      "settings.languageDescription": "Kies de taal die de toepassing gebruikt.",
+      "settings.trayTitle": "In systeemvak houden",
+      "settings.trayDescription": "Bij het sluiten wordt de toepassing verborgen in het systeemvak. Gebruik het menu om de toepassing te openen, de verbinding met de lamp te verbreken of af te sluiten.",
+      "settings.autoConnectTitle": "Automatisch opnieuw verbinden met de laatst gebruikte lamp",
+      "settings.autoConnectDescription": "De app maakt opnieuw verbinding bij het opstarten en na een onverwachte verbreking, en blijft het proberen zolang de lamp buiten bereik is. Als Ambilight actief was, wordt die hervat. Verbind eenmalig met de lamp zodat de app die kan onthouden.",
+      "tray.open": "App openen",
+      "tray.startSync": "Synchronisatie starten",
+      "tray.stopSync": "Synchronisatie stoppen",
+      "tray.disconnect": "Verbinding met lamp verbreken",
+      "tray.connect": "Openen om verbinding te maken",
+      "tray.turnOn": "Lamp inschakelen",
+      "tray.turnOff": "Lamp uitschakelen",
+      "tray.quit": "Afsluiten",
+      "connection.disconnected": "Niet verbonden",
+      "connection.connect": "Verbinden",
+      "connection.reconnect": "Opnieuw verbinden",
+      "connection.disconnect": "Verbinding verbreken",
+      "connection.connecting": "Verbinden…",
+      "connection.connected": "Verbonden met {name}",
+      "connection.disconnectedStatus": "Verbinding verbroken",
+      "connection.noBluetooth": "Bluetooth-bediening is niet beschikbaar in deze app.",
+      "connection.bluetoothOff": "Bluetooth is uitgeschakeld. Schakel Bluetooth in via de Windows-instellingen en probeer het opnieuw.",
+      "connection.openBluetoothSettings": "Bluetooth-instellingen openen",
+      "connection.settingsFailed": "Bluetooth-instellingen konden niet worden geopend: {message}",
+      "connection.noDevice": "Geen apparaat gekozen of het apparaat heeft geen 0xFFF0-service. Controleer of Bluetooth is ingeschakeld en de lamp aan en dichtbij is.",
+      "connection.failed": "Verbinden mislukt: {message}",
+      "connection.autoConnectNoDevice": "Verbind een keer handmatig met een lamp om automatisch opnieuw verbinden in te schakelen.",
+      "connection.autoConnectFailed": "Automatisch opnieuw verbinden is mislukt: {message}",
+      "connection.writeFailed": "Schrijven mislukt: {message}",
+      "power.title": "Aan/uit",
+      "power.description": "Zet de lamp aan of uit. De status toont de laatst verzonden opdracht; de lamp meldt de voedingsstatus niet terug.",
+      "power.on": "Aan",
+      "power.off": "Uit",
+      "brightness.title": "Helderheid",
+      "brightness.description": "Lichtsterkte van de lamp.",
+      "color.pick": "Kies een kleur",
+      "color.wheelLabel": "Kleurenwiel: sleep of gebruik de pijltoetsen om tint en verzadiging te kiezen",
+      "color.hexLabel": "Hexkleur",
+      "effects.title": "Effecten",
+      "effects.nowPlaying": "Nu actief",
+      "effects.stop": "Effect stoppen",
+      "effects.colorDisabled": "De kleurenkiezer is uitgeschakeld zolang er een effect actief is.",
+      "effects.none": "Geen",
+      "effects.speed": "Effectsnelheid",
+      "effects.speedDescription": "Hoe snel het effect wordt afgespeeld.",
+      "effects.search": "Effecten zoeken",
+      "effects.categories": "Effectcategorieën",
+      "effects.scrollLeft": "Categorieën naar links scrollen",
+      "effects.scrollRight": "Categorieën naar rechts scrollen",
+      "effects.colors": "Filteren op kleur",
+      "effects.all": "Alles",
+      "effects.noMatches": "Geen overeenkomende effecten.",
+      "effects.onlyColor": "Alleen effecten in {color}",
+      "effects.multicolor": "Meerkleurig",
+      "music.title": "Muziek",
+      "music.sync": "Muzieksynchronisatie",
+      "music.description": "De lamp reageert op geluid via de ingebouwde microfoon.",
+      "music.unknown": "Onbekend",
+      "music.running": "Actief",
+      "music.stopped": "Gestopt",
+      "music.start": "Starten",
+      "music.stop": "Stoppen",
+      "music.mode": "Modus",
+      "music.modeDescription": "Hoe de lamp op geluid reageert.",
+      "music.eqEnergetic": "Energiek",
+      "music.eqRhythm": "Ritme",
+      "music.eqSpectrum": "Spectrum",
+      "music.eqRolling": "Rollend",
+      "music.eqEnergetic2": "Energiek 2",
+      "music.eqRhythm2": "Ritme 2",
+      "music.eqSpectrum2": "Spectrum 2",
+      "music.eqRolling2": "Rollend 2",
+      "music.sensitivity": "Gevoeligheid",
+      "music.sensitivityDescription": "Een hogere waarde laat de lamp ook op zachtere geluiden reageren.",
+      "music.noMicrophone": "Dit model heeft geen microfoon.",
+      "schedule.title": "Schema",
+      "schedule.timers": "Timers",
+      "schedule.on": "Inschakelen",
+      "schedule.off": "Uitschakelen",
+      "schedule.enabled": "Ingeschakeld",
+      "schedule.repeat": "Herhalen",
+      "schedule.everyDay": "elke dag",
+      "schedule.noDays": "geen dagen",
+      "schedule.connectFirst": "Verbind eerst met de lamp",
+      "schedule.chooseTime": "Kies een tijd en ten minste één dag",
+      "schedule.notSet": "Niet ingesteld",
+      "schedule.reading": "Lezen van de lamp…",
+      "schedule.noReport": "De lamp heeft geen schema gemeld.",
+      "schedule.readFailed": "Lezen mislukt: {message}",
+      "schedule.dayMon": "Maandag",
+      "schedule.dayTue": "Dinsdag",
+      "schedule.dayWed": "Woensdag",
+      "schedule.dayThu": "Donderdag",
+      "schedule.dayFri": "Vrijdag",
+      "schedule.daySat": "Zaterdag",
+      "schedule.daySun": "Zondag",
+      "schedule.shortMon": "M",
+      "schedule.shortTue": "D",
+      "schedule.shortWed": "W",
+      "schedule.shortThu": "D",
+      "schedule.shortFri": "V",
+      "schedule.shortSat": "Z",
+      "schedule.shortSun": "Z",
+      "category.special": "Speciaal",
+      "category.jump": "Sprong en flits",
+      "category.fade": "Vervagen en overgang",
+      "category.marquee": "Lichtkrant",
+      "category.race": "Race en golf",
+      "category.flush": "Veeg- en gordijneffecten",
+      "category.water": "Water",
+      "category.flow": "Stroom",
+      "category.tail": "Staart",
+      "category.running": "Lopend",
+      "category.runningReverse": "Omgekeerd lopend",
+      "category.scenes": "Scènes",
+      "picker.title": "Kies je lamp",
+      "picker.searchingHint": "Zoeken... Lampen hebben meestal een naam die met MELK- begint.",
+      "picker.pickHint": "Kies je lamp uit de lijst.",
+      "picker.rangeHint": "Controleer of de lamp aanstaat en binnen bereik is.",
+      "picker.cancel": "Annuleren",
+      "picker.unnamed": "Naamloos apparaat",
+      "picker.searching": "Zoeken naar lampen in de buurt…",
+      "ambi.sync.heading": "Ambilight",
+      "ambi.sync.preview": "Huidige lampkleur",
+      "ambi.status.notConnected": "Niet verbonden",
+      "ambi.status.lampOff": "De lamp staat als uitgeschakeld geregistreerd. Zet de lamp aan voordat je Ambilight start.",
+      "ambi.status.syncing": "Synchroniseren",
+      "ambi.status.stopped": "Gestopt",
+      "ambi.status.captureFailed": "Schermopname mislukt: {message}",
+      "ambi.status.screensFailed": "Schermen laden mislukt: {message}",
+      "ambi.button.startSync": "Synchronisatie starten",
+      "ambi.button.stopSync": "Synchronisatie stoppen",
+      "ambi.button.reset": "Reset",
+      "ambi.section.capture": "Opname",
+      "ambi.capture.screen": "Scherm",
+      "ambi.capture.screenDescription": "Kies het scherm dat de lamp volgt.",
+      "ambi.capture.screenAria": "Te volgen scherm",
+      "ambi.capture.ignoreBars": "Zwarte balken negeren",
+      "ambi.capture.ignoreBarsDescription": "Laat zwarte balken buiten beschouwing bij het bepalen van de schermkleur.",
+      "ambi.capture.ignoreBarsAria": "Zwarte balken negeren",
+      "ambi.section.hdr": "HDR",
+      "ambi.hdr.display": "HDR-correctie toepassen",
+      "ambi.hdr.displayAria": "HDR-correctie toepassen",
+      "ambi.hdr.manualNote": "Windows geeft niet door of een scherm HDR gebruikt, dus dit is een handmatige aanpassing. Het kan fletse kleuren verminderen, maar herstelt geen details die tijdens de schermopname verloren zijn gegaan.",
+      "ambi.hdr.correction": "Correctiesterkte",
+      "ambi.hdr.correctionDescription": "Past gamma en kleuren aan om fletse HDR-opnamen te corrigeren.",
+      "ambi.hdr.correctionAria": "Sterkte van HDR-correctie",
+      "ambi.section.calibration": "Kleurkalibratie",
+      "ambi.calibration.description": "Stel de lamp af op het voorbeeld. Het voorbeeld zelf verandert niet.",
+      "ambi.calibration.red": "Roodniveau",
+      "ambi.calibration.redDescription": "Bij 0% staat rood uit; bij 100% blijft rood ongewijzigd.",
+      "ambi.calibration.redAria": "Rode kleurkalibratie",
+      "ambi.calibration.green": "Groenniveau",
+      "ambi.calibration.greenDescription": "Bij 0% staat groen uit; bij 100% blijft groen ongewijzigd.",
+      "ambi.calibration.greenAria": "Groene kleurkalibratie",
+      "ambi.calibration.blue": "Blauwniveau",
+      "ambi.calibration.blueDescription": "Bij 0% staat blauw uit; bij 100% blijft blauw ongewijzigd.",
+      "ambi.calibration.blueAria": "Blauwe kleurkalibratie",
+      "ambi.section.response": "Reactie",
+      "ambi.response.fps": "Updates per seconde",
+      "ambi.response.fpsDescription": "Met meer updates reageert Ambilight sneller, maar gebruikt het meer processorkracht en Bluetooth-capaciteit.",
+      "ambi.response.fpsAria": "Updates per seconde",
+      "ambi.response.smoothing": "Vloeiendheid",
+      "ambi.response.smoothingDescription": "Een hogere waarde maakt kleurveranderingen vloeiender, maar laat de lamp trager reageren.",
+      "ambi.response.smoothingAria": "Vloeiendheid",
+      "ambi.response.vividness": "Kleurintensiteit",
+      "ambi.response.vividnessDescription": "Verhoog de waarde voor levendigere kleuren of verlaag hem voor een natuurlijker resultaat.",
+      "ambi.response.vividnessAria": "Kleurintensiteit",
+      "ambi.response.brightness": "Helderheid",
+      "ambi.response.brightnessDescription": "Beperkt de helderheid van de lamp. Het voorbeeld blijft ongewijzigd.",
+      "ambi.response.brightnessAria": "Helderheid",
+      "ambi.response.allowTurnOff": "Lamp volledig laten uitschakelen",
+      "ambi.response.allowTurnOffDescription": "Als deze optie uitstaat, blijft de lamp bij een volledig zwart beeld wit branden op de laagste helderheid.",
+      "ambi.response.reset": "Reset",
+      "ambi.wizard.open": "Kalibratiewizard",
+      "ambi.wizard.title": "Wizard voor kleurkalibratie",
+      "ambi.wizard.intro": "De synchronisatie pauzeert tijdens de test en wordt hervat zodra je de wizard sluit.",
+      "ambi.wizard.progress": "Test {current} van {total}",
+      "ambi.wizard.adjustHint": "Pas de kleurkanalen aan tot de lamp zo goed mogelijk overeenkomt met de referentiekleur.",
+      "ambi.wizard.reference": "Voorbeeldkleur",
+      "ambi.wizard.sent": "Lampkleur",
+      "ambi.wizard.cancel": "Annuleren",
+      "ambi.wizard.previous": "Vorige",
+      "ambi.wizard.next": "Volgende",
+      "ambi.wizard.finish": "Voltooien",
+      "ambi.wizard.noConnection": "Verbind de lamp om te kalibreren.",
+      "ambi.wizard.disconnected": "Lamp niet verbonden. Verbind opnieuw om verder te gaan.",
+      "ambi.wizard.color.red": "Rood",
+      "ambi.wizard.color.redDescription": "Stem rood van de lamp af op de referentie.",
+      "ambi.wizard.color.orange": "Oranje",
+      "ambi.wizard.color.orangeDescription": "Controleer de balans tussen rood en groen.",
+      "ambi.wizard.color.yellow": "Geel",
+      "ambi.wizard.color.yellowDescription": "Controleer de gecombineerde rode en groene uitvoer.",
+      "ambi.wizard.color.green": "Groen",
+      "ambi.wizard.color.greenDescription": "Stem groen van de lamp af op de referentie.",
+      "ambi.wizard.color.cyan": "Cyaan",
+      "ambi.wizard.color.cyanDescription": "Controleer de gecombineerde groene en blauwe uitvoer.",
+      "ambi.wizard.color.blue": "Blauw",
+      "ambi.wizard.color.blueDescription": "Stem blauw van de lamp af op de referentie.",
+      "ambi.wizard.color.purple": "Paars",
+      "ambi.wizard.color.purpleDescription": "Controleer de balans tussen rood en blauw.",
+      "ambi.wizard.color.pink": "Roze",
+      "ambi.wizard.color.pinkDescription": "Stel de lichte rood-blauwmix af.",
+      "ambi.capture.dominant": "Dominante kleuren voorrang geven",
+      "ambi.capture.dominantDescription": "Geeft levendige delen van het beeld meer gewicht dan grijze, zodat de lamp geen modderig gemiddelde van het hele scherm toont.",
+      "ambi.status.recovering": "Schermopname wordt hersteld…",
+      "schedule.summaryOn": "Zet de lamp aan om {time} ({days})",
+      "schedule.summaryOff": "Zet de lamp uit om {time} ({days})",
+      "schedule.summaryDisabled": "Uitgeschakeld: {time} ({days})",
+      "schedule.weekdays": "werkdagen",
+      "schedule.weekends": "weekend",
+      "error.outOfRange": "De lamp is buiten bereik of uitgeschakeld.",
+      "error.connection": "De lamp is niet bereikbaar. Controleer of de lamp aanstaat, binnen bereik is en niet met een andere app is verbonden.",
+      "connection.autoConnectNotFound": "De laatst gebruikte lamp is niet in de buurt gevonden. De app blijft het proberen.",
+      "effectWords": {
+        "Auto play": "Automatisch",
+        "Magic reverse": "Magie omgekeerd",
+        "Magic": "Magie",
+        "Energy": "Energie",
+        "Jump": "Sprong",
+        "Strobe": "Flits",
+        "Fade": "Vervagen",
+        "Transition reverse": "Overgang omgekeerd",
+        "Transition": "Overgang",
+        "Marquee": "Lichtkrant",
+        "Race reverse": "Race omgekeerd",
+        "Race": "Race",
+        "Wave reverse": "Golf omgekeerd",
+        "Wave": "Golf",
+        "Flush close": "Vegen sluiten",
+        "Flush open": "Vegen openen",
+        "Flush reverse": "Vegen omgekeerd",
+        "Flush": "Vegen",
+        "Curtain close": "Gordijn sluiten",
+        "Curtain open": "Gordijn openen",
+        "Curtain": "Gordijn",
+        "Water reverse": "Water omgekeerd",
+        "Water": "Water",
+        "Flow reverse": "Stroom omgekeerd",
+        "Flow": "Stroom",
+        "Tail reverse": "Staart omgekeerd",
+        "Tail": "Staart",
+        "Running reverse": "Lopend omgekeerd",
+        "Running": "Lopend",
+        "Sunrise": "Zonsopgang",
+        "Sunset": "Zonsondergang",
+        "Birthday": "Verjaardag",
+        "Candlelight": "Kaarslicht",
+        "Fireworks": "Vuurwerk",
+        "Party": "Feest",
+        "Destiny": "Lot",
+        "Starry sky": "Sterrenhemel",
+        "Romantic": "Romantisch",
+        "Disco": "Disco",
+        "Rainbow": "Regenboog",
+        "Movie": "Film",
+        "Christmas": "Kerstmis",
+        "Flowing": "Stromend",
+        "Sleeping": "Slapen",
+        "Ocean": "Oceaan",
+        "Forest": "Bos",
+        "Reading": "Lezen",
+        "Working": "Werken",
+        "Dazzle": "Verblinden",
+        "Gentle": "Zacht",
+        "Wedding": "Bruiloft",
+        "Snow": "Sneeuw",
+        "Fire": "Vuur",
+        "Lightning": "Bliksem",
+        "Valentine's Day": "Valentijnsdag",
+        "Halloween": "Halloween",
+        "Warning": "Waarschuwing",
+      },
+      "effectSpec": {
+        "colors": {
+                "multicolor": "meerkleurig",
+                "red": "rood",
+                "green": "groen",
+                "blue": "blauw",
+                "yellow": "geel",
+                "cyan": "cyaan",
+                "purple": "paars",
+                "white": "wit"
+        },
+        "colorsDot": {
+                "multicolor": "meerkleurige",
+                "red": "rode",
+                "green": "groene",
+                "blue": "blauwe",
+                "yellow": "gele",
+                "cyan": "cyaan",
+                "purple": "paarse",
+                "white": "witte"
+        },
+        "sep": ", ",
+        "colon": ": ",
+        "and": "{a} en {b}",
+        "dotOn": "{a:d} stip op {b}",
+        "on": "{a} op {b}",
+        "sixTo": "zes kleuren naar {c}"
       },
     },
-    'zh-CN': {
-      language: '语言',
-      languageName: '简体中文',
-      'app.title': 'JSK-P22 灯光控制',
-      'nav.color': '颜色',
-      'nav.effects': '效果',
-      'nav.music': '音乐',
-      'nav.schedule': '定时',
-      'nav.ambilight': '氛围灯',
-      'nav.settings': '设置',
-      'settings.title': '设置',
-      'settings.languageDescription': '选择应用程序使用的语言。',
-      'settings.trayTitle': '最小化到系统托盘',
-      'settings.trayDescription': '关闭窗口时，应用程序会隐藏到系统托盘。使用托盘菜单打开应用、断开灯具连接或退出应用。',
-      'settings.autoConnectTitle': '自动重新连接到上次使用的灯具',
-      'settings.autoConnectDescription': '应用启动时以及意外断开后尝试重新连接。请先手动连接一次灯具。',
-      'tray.open': '打开应用',
-      'tray.startSync': '开始同步',
-      'tray.stopSync': '停止同步',
-      'tray.disconnect': '断开灯具连接',
-      'tray.connect': '打开以连接',
-      'tray.turnOn': '打开灯具',
-      'tray.turnOff': '关闭灯具',
-      'tray.quit': '退出',
-      'connection.disconnected': '未连接',
-      'connection.connect': '连接',
-      'connection.reconnect': '重新连接',
-      'connection.disconnect': '断开连接',
-      'connection.connecting': '正在连接…',
-      'connection.connected': '已连接到 {name}',
-      'connection.disconnectedStatus': '已断开连接',
-      'connection.noBluetooth': '此浏览器不支持 Web Bluetooth。',
-      'connection.bluetoothOff': '蓝牙已关闭。请在 Windows 设置中启用蓝牙后重试。',
-      'connection.openBluetoothSettings': '打开蓝牙设置',
-      'connection.settingsFailed': '无法打开蓝牙设置：{message}',
-      'connection.noDevice': '未选择设备或设备没有 0xFFF0 服务。请检查蓝牙是否已启用，并确认灯具已打开且在附近。',
-      'connection.failed': '连接失败：{message}',
-      'connection.autoConnectUnavailable': '此应用不支持自动重新连接。请使用“连接”按钮选择灯具。',
-      'connection.autoConnectNoDevice': '请先手动连接一次灯具，以启用自动重新连接。',
-      'connection.autoConnectNotAuthorized': '无法再访问上次使用的灯具。请使用“连接”按钮重新选择。',
-      'connection.autoConnectFailed': '自动重新连接失败：{message}',
-      'connection.writeFailed': '写入失败：{message}',
-      'power.title': '电源',
-      'power.description': '打开或关闭灯。状态显示最后发送的命令；灯具不会反馈电源状态。',
-      'power.on': '开',
-      'power.off': '关',
-      'brightness.title': '亮度',
-      'brightness.description': '灯光亮度',
-      'color.pick': '选择颜色',
-      'color.wheelLabel': '色轮：拖动以选择色调和饱和度',
-      'color.hexLabel': '十六进制颜色',
-      'effects.title': '效果',
-      'effects.nowPlaying': '当前效果',
-      'effects.stop': '停止效果',
-      'effects.colorDisabled': '效果播放时，颜色选择器不可用。',
-      'effects.none': '无',
-      'effects.speed': '效果速度',
-      'effects.speedDescription': '效果播放速度',
-      'effects.search': '搜索效果',
-      'effects.categories': '效果类别',
-      'effects.scrollLeft': '向左滚动类别',
-      'effects.scrollRight': '向右滚动类别',
-      'effects.colors': '按颜色筛选',
-      'effects.all': '全部',
-      'effects.noMatches': '没有匹配的效果。',
-      'effects.onlyColor': '仅显示{color}效果',
-      'effects.multicolor': '多色',
-      'music.title': '音乐',
-      'music.sync': '音乐同步',
-      'music.description': '灯光跟随内置麦克风接收到的声音变化',
-      'music.unknown': '未知',
-      'music.running': '运行中',
-      'music.stopped': '已停止',
-      'music.start': '开始',
-      'music.stop': '停止',
-      'music.mode': '模式',
-      'music.modeDescription': '灯光对声音的响应方式',
-      'music.eqEnergetic': '活力',
-      'music.eqRhythm': '节奏',
-      'music.eqSpectrum': '频谱',
-      'music.eqRolling': '滚动',
-      'music.eqEnergetic2': '活力 2',
-      'music.eqRhythm2': '节奏 2',
-      'music.eqSpectrum2': '频谱 2',
-      'music.eqRolling2': '滚动 2',
-      'music.sensitivity': '灵敏度',
-      'music.sensitivityDescription': '数值越高，对较轻的声音也越敏感',
-      'music.noMicrophone': '此型号没有麦克风。',
-      'schedule.title': '定时',
-      'schedule.timers': '定时器',
-      'schedule.on': '定时开灯',
-      'schedule.off': '定时关灯',
-      'schedule.enabled': '已启用',
-      'schedule.repeat': '重复',
-      'schedule.everyDay': '每天',
-      'schedule.noDays': '无日期',
-      'schedule.days': '{count} 天',
-      'schedule.oneDay': '{count} 天',
-      'schedule.connectFirst': '请先连接灯具',
-      'schedule.chooseTime': '请选择时间和至少一天',
-      'schedule.sent': '已发送：{time}，{days}，{state}',
-      'schedule.onState': '开启',
-      'schedule.offState': '关闭',
-      'schedule.notSet': '未设置',
-      'schedule.onLamp': '灯具设置：{time}，{days}，{state}',
-      'schedule.reading': '正在从灯具读取…',
-      'schedule.noReport': '灯具未返回定时信息',
-      'schedule.readFailed': '读取失败：{message}',
-      'schedule.dayMon': '星期一',
-      'schedule.dayTue': '星期二',
-      'schedule.dayWed': '星期三',
-      'schedule.dayThu': '星期四',
-      'schedule.dayFri': '星期五',
-      'schedule.daySat': '星期六',
-      'schedule.daySun': '星期日',
-      'schedule.shortMon': '一',
-      'schedule.shortTue': '二',
-      'schedule.shortWed': '三',
-      'schedule.shortThu': '四',
-      'schedule.shortFri': '五',
-      'schedule.shortSat': '六',
-      'schedule.shortSun': '日',
-      'category.special': '特别',
-      'category.jump': '跳变与频闪',
-      'category.fade': '渐变与过渡',
-      'category.marquee': '跑马灯',
-      'category.race': '竞速与波浪',
-      'category.flush': '扫动与窗帘',
-      'category.water': '流水',
-      'category.flow': '流动',
-      'category.tail': '尾迹',
-      'category.running': '跑动',
-      'category.runningReverse': '跑动反向',
-      'category.scenes': '场景',
-      'picker.title': '选择灯具',
-      'picker.searchingHint': '正在搜索。灯具名称通常以 MELK- 开头',
-      'picker.pickHint': '从列表中选择你的灯具。',
-      'picker.rangeHint': '请确认灯具已通电且在蓝牙范围内。',
-      'picker.cancel': '取消',
-      'picker.unnamed': '未命名设备',
-      'picker.searching': '正在搜索附近的灯具…',
-      'effectWords': {
-        'Auto play': '自动播放',
-        'Magic reverse': '魔幻反向',
-        'Magic': '魔幻',
-        'Energy': '能量',
-        'Jump': '跳变',
-        'Strobe': '频闪',
-        'Fade': '渐变',
-        'Transition reverse': '过渡反向',
-        'Transition': '过渡',
-        'Marquee': '跑马灯',
-        'Race reverse': '竞速反向',
-        'Race': '竞速',
-        'Wave reverse': '波浪反向',
-        'Wave': '波浪',
-        'Flush close': '扫动关闭',
-        'Flush open': '扫动打开',
-        'Flush reverse': '扫动反向',
-        'Flush': '扫动',
-        'Curtain close': '窗帘关闭',
-        'Curtain open': '窗帘打开',
-        'Curtain': '窗帘',
-        'Water reverse': '流水反向',
-        'Water': '流水',
-        'Flow reverse': '流动反向',
-        'Flow': '流动',
-        'Tail reverse': '尾迹反向',
-        'Tail': '尾迹',
-        'Running reverse': '跑动反向',
-        'Running': '跑动',
-        'Sunrise': '日出',
-        'Sunset': '日落',
-        'Birthday': '生日',
-        'Candlelight': '烛光',
-        'Fireworks': '烟花',
-        'Party': '派对',
-        'Destiny': '命运',
-        'Starry sky': '星空',
-        'Romantic': '浪漫',
-        'Disco': '迪斯科',
-        'Rainbow': '彩虹',
-        'Movie': '电影',
-        'Christmas': '圣诞节',
-        'Flowing': '流动',
-        'Sleeping': '睡眠',
-        'Ocean': '海洋',
-        'Forest': '森林',
-        'Reading': '阅读',
-        'Working': '工作',
-        'Dazzle': '炫彩',
-        'Gentle': '柔和',
-        'Wedding': '婚礼',
-        'Snow': '雪景',
-        'Fire': '火焰',
-        'Lightning': '闪电',
-        "Valentine's Day": '情人节',
-        'Halloween': '万圣节',
-        'Warning': '警告',
-        'multicolor': '多色',
-        'six colors': '六色',
-        'red': '红色',
-        'green': '绿色',
-        'blue': '蓝色',
-        'yellow': '黄色',
-        'cyan': '青色',
-        'purple': '紫色',
-        'white': '白色',
-        'reverse': '反向',
-        'and': '和',
-        'to': '至',
-        'dot': '点',
-        'on': '在',
+    "zh-CN": {
+      "language": "语言",
+      "languageName": "简体中文",
+      "app.title": "JSK-P22 灯光控制",
+      "nav.color": "颜色",
+      "nav.effects": "效果",
+      "nav.music": "音乐",
+      "nav.schedule": "定时",
+      "nav.ambilight": "氛围灯",
+      "nav.settings": "设置",
+      "settings.title": "设置",
+      "settings.languageDescription": "选择应用程序使用的语言。",
+      "settings.trayTitle": "最小化到系统托盘",
+      "settings.trayDescription": "关闭窗口时，应用程序会隐藏到系统托盘。使用托盘菜单打开应用、断开灯具连接或退出应用。",
+      "settings.autoConnectTitle": "自动重新连接到上次使用的灯具",
+      "settings.autoConnectDescription": "应用会在启动时和意外断开后重新连接，并在灯具不在范围内时持续尝试。如果氛围灯正在运行，则会自动恢复。请先连接一次灯具，以便应用记住它。",
+      "tray.open": "打开应用",
+      "tray.startSync": "开始同步",
+      "tray.stopSync": "停止同步",
+      "tray.disconnect": "断开灯具连接",
+      "tray.connect": "打开以连接",
+      "tray.turnOn": "打开灯具",
+      "tray.turnOff": "关闭灯具",
+      "tray.quit": "退出",
+      "connection.disconnected": "未连接",
+      "connection.connect": "连接",
+      "connection.reconnect": "重新连接",
+      "connection.disconnect": "断开连接",
+      "connection.connecting": "正在连接…",
+      "connection.connected": "已连接到 {name}",
+      "connection.disconnectedStatus": "已断开连接",
+      "connection.noBluetooth": "此浏览器不支持 Web Bluetooth。",
+      "connection.bluetoothOff": "蓝牙已关闭。请在 Windows 设置中启用蓝牙后重试。",
+      "connection.openBluetoothSettings": "打开蓝牙设置",
+      "connection.settingsFailed": "无法打开蓝牙设置：{message}",
+      "connection.noDevice": "未选择设备或设备没有 0xFFF0 服务。请检查蓝牙是否已启用，并确认灯具已打开且在附近。",
+      "connection.failed": "连接失败：{message}",
+      "connection.autoConnectNoDevice": "请先手动连接一次灯具，以启用自动重新连接。",
+      "connection.autoConnectFailed": "自动重新连接失败：{message}",
+      "connection.writeFailed": "写入失败：{message}",
+      "power.title": "电源",
+      "power.description": "打开或关闭灯。状态显示最后发送的命令；灯具不会反馈电源状态。",
+      "power.on": "开",
+      "power.off": "关",
+      "brightness.title": "亮度",
+      "brightness.description": "灯光亮度。",
+      "color.pick": "选择颜色",
+      "color.wheelLabel": "色轮：拖动或使用方向键选择色相和饱和度",
+      "color.hexLabel": "十六进制颜色",
+      "effects.title": "效果",
+      "effects.nowPlaying": "当前效果",
+      "effects.stop": "停止效果",
+      "effects.colorDisabled": "效果播放时，颜色选择器不可用。",
+      "effects.none": "无",
+      "effects.speed": "效果速度",
+      "effects.speedDescription": "效果播放速度。",
+      "effects.search": "搜索效果",
+      "effects.categories": "效果类别",
+      "effects.scrollLeft": "向左滚动类别",
+      "effects.scrollRight": "向右滚动类别",
+      "effects.colors": "按颜色筛选",
+      "effects.all": "全部",
+      "effects.noMatches": "没有匹配的效果。",
+      "effects.onlyColor": "仅显示{color}效果",
+      "effects.multicolor": "多色",
+      "music.title": "音乐",
+      "music.sync": "音乐同步",
+      "music.description": "灯光跟随内置麦克风接收到的声音变化。",
+      "music.unknown": "未知",
+      "music.running": "运行中",
+      "music.stopped": "已停止",
+      "music.start": "开始",
+      "music.stop": "停止",
+      "music.mode": "模式",
+      "music.modeDescription": "灯光对声音的响应方式。",
+      "music.eqEnergetic": "活力",
+      "music.eqRhythm": "节奏",
+      "music.eqSpectrum": "频谱",
+      "music.eqRolling": "滚动",
+      "music.eqEnergetic2": "活力 2",
+      "music.eqRhythm2": "节奏 2",
+      "music.eqSpectrum2": "频谱 2",
+      "music.eqRolling2": "滚动 2",
+      "music.sensitivity": "灵敏度",
+      "music.sensitivityDescription": "数值越高，对较轻的声音也越敏感。",
+      "music.noMicrophone": "此型号没有麦克风。",
+      "schedule.title": "定时",
+      "schedule.timers": "定时器",
+      "schedule.on": "开灯",
+      "schedule.off": "关灯",
+      "schedule.enabled": "已启用",
+      "schedule.repeat": "重复",
+      "schedule.everyDay": "每天",
+      "schedule.noDays": "无日期",
+      "schedule.connectFirst": "请先连接灯具",
+      "schedule.chooseTime": "请选择时间和至少一天",
+      "schedule.notSet": "未设置",
+      "schedule.reading": "正在从灯具读取…",
+      "schedule.noReport": "灯具未返回定时信息。",
+      "schedule.readFailed": "读取失败：{message}",
+      "schedule.dayMon": "星期一",
+      "schedule.dayTue": "星期二",
+      "schedule.dayWed": "星期三",
+      "schedule.dayThu": "星期四",
+      "schedule.dayFri": "星期五",
+      "schedule.daySat": "星期六",
+      "schedule.daySun": "星期日",
+      "schedule.shortMon": "一",
+      "schedule.shortTue": "二",
+      "schedule.shortWed": "三",
+      "schedule.shortThu": "四",
+      "schedule.shortFri": "五",
+      "schedule.shortSat": "六",
+      "schedule.shortSun": "日",
+      "category.special": "特别",
+      "category.jump": "跳变与频闪",
+      "category.fade": "渐变与过渡",
+      "category.marquee": "跑马灯",
+      "category.race": "竞速与波浪",
+      "category.flush": "扫动与窗帘",
+      "category.water": "流水",
+      "category.flow": "流动",
+      "category.tail": "尾迹",
+      "category.running": "跑动",
+      "category.runningReverse": "跑动反向",
+      "category.scenes": "场景",
+      "picker.title": "选择灯具",
+      "picker.searchingHint": "正在搜索。灯具名称通常以 MELK- 开头",
+      "picker.pickHint": "从列表中选择你的灯具。",
+      "picker.rangeHint": "请确认灯具已通电且在蓝牙范围内。",
+      "picker.cancel": "取消",
+      "picker.unnamed": "未命名设备",
+      "picker.searching": "正在搜索附近的灯具…",
+      "ambi.sync.heading": "屏幕氛围灯",
+      "ambi.sync.preview": "当前灯光颜色",
+      "ambi.status.notConnected": "未连接",
+      "ambi.status.lampOff": "灯具当前标记为关闭。请先打开灯具，再启动氛围灯。",
+      "ambi.status.syncing": "同步中",
+      "ambi.status.stopped": "已停止",
+      "ambi.status.captureFailed": "屏幕捕获失败：{message}",
+      "ambi.status.screensFailed": "无法加载显示器：{message}",
+      "ambi.button.startSync": "开始同步",
+      "ambi.button.stopSync": "停止同步",
+      "ambi.button.reset": "重置",
+      "ambi.section.capture": "捕获",
+      "ambi.capture.screen": "屏幕",
+      "ambi.capture.screenDescription": "选择灯光跟随的显示器。",
+      "ambi.capture.screenAria": "要跟随的屏幕",
+      "ambi.capture.ignoreBars": "忽略黑边",
+      "ambi.capture.ignoreBarsDescription": "确定屏幕颜色时忽略黑边。",
+      "ambi.capture.ignoreBarsAria": "忽略黑边",
+      "ambi.section.hdr": "HDR",
+      "ambi.hdr.display": "应用 HDR 校正",
+      "ambi.hdr.displayAria": "应用 HDR 校正",
+      "ambi.hdr.manualNote": "Windows 不会告知应用显示器是否启用了 HDR，因此这是手动调整。它可以减轻画面发灰，但无法找回捕获时丢失的细节。",
+      "ambi.hdr.correction": "校正强度",
+      "ambi.hdr.correctionDescription": "调整伽马和颜色，以改善发灰的 HDR 捕获画面。",
+      "ambi.hdr.correctionAria": "HDR 校正强度",
+      "ambi.section.calibration": "颜色校准",
+      "ambi.calibration.description": "调整灯光以匹配预览。预览不会改变。",
+      "ambi.calibration.red": "红色输出",
+      "ambi.calibration.redDescription": "0% 关闭红色；100% 保持不变。",
+      "ambi.calibration.redAria": "红色校准",
+      "ambi.calibration.green": "绿色输出",
+      "ambi.calibration.greenDescription": "0% 关闭绿色；100% 保持不变。",
+      "ambi.calibration.greenAria": "绿色校准",
+      "ambi.calibration.blue": "蓝色输出",
+      "ambi.calibration.blueDescription": "0% 关闭蓝色；100% 保持不变。",
+      "ambi.calibration.blueAria": "蓝色校准",
+      "ambi.section.response": "响应",
+      "ambi.response.fps": "每秒更新次数",
+      "ambi.response.fpsDescription": "数值越高，更新越快，但处理器和蓝牙负载也越大。",
+      "ambi.response.fpsAria": "每秒更新次数",
+      "ambi.response.smoothing": "平滑度",
+      "ambi.response.smoothingDescription": "数值越高，过渡越平滑、越慢。",
+      "ambi.response.smoothingAria": "平滑度",
+      "ambi.response.vividness": "鲜艳度",
+      "ambi.response.vividnessDescription": "数值越高，颜色越鲜艳；调低则更自然。",
+      "ambi.response.vividnessAria": "鲜艳度",
+      "ambi.response.brightness": "亮度",
+      "ambi.response.brightnessDescription": "限制灯具亮度，不影响预览。",
+      "ambi.response.brightnessAria": "亮度",
+      "ambi.response.allowTurnOff": "允许灯光完全关闭",
+      "ambi.response.allowTurnOffDescription": "关闭此选项后，纯黑画面将以最低亮度显示白光。",
+      "ambi.response.reset": "重置",
+      "ambi.wizard.open": "颜色校准向导",
+      "ambi.wizard.title": "颜色校准向导",
+      "ambi.wizard.intro": "校准时同步会暂停，关闭向导后会继续。",
+      "ambi.wizard.progress": "第 {current} 项，共 {total} 项",
+      "ambi.wizard.adjustHint": "调整各通道，让灯光接近参考颜色。",
+      "ambi.wizard.reference": "参考颜色",
+      "ambi.wizard.sent": "发送给灯具的颜色",
+      "ambi.wizard.cancel": "取消",
+      "ambi.wizard.previous": "上一步",
+      "ambi.wizard.next": "下一步",
+      "ambi.wizard.finish": "完成",
+      "ambi.wizard.noConnection": "连接灯具后即可校准。",
+      "ambi.wizard.disconnected": "灯具已断开。重新连接后即可继续。",
+      "ambi.wizard.color.red": "红色",
+      "ambi.wizard.color.redDescription": "让灯具的红色接近参考颜色。",
+      "ambi.wizard.color.orange": "橙色",
+      "ambi.wizard.color.orangeDescription": "检查红色与绿色的平衡。",
+      "ambi.wizard.color.yellow": "黄色",
+      "ambi.wizard.color.yellowDescription": "检查红色与绿色通道的组合输出。",
+      "ambi.wizard.color.green": "绿色",
+      "ambi.wizard.color.greenDescription": "让灯具的绿色接近参考颜色。",
+      "ambi.wizard.color.cyan": "青色",
+      "ambi.wizard.color.cyanDescription": "检查绿色与蓝色通道的组合输出。",
+      "ambi.wizard.color.blue": "蓝色",
+      "ambi.wizard.color.blueDescription": "让灯具的蓝色接近参考颜色。",
+      "ambi.wizard.color.purple": "紫色",
+      "ambi.wizard.color.purpleDescription": "检查红色与蓝色的平衡。",
+      "ambi.wizard.color.pink": "粉色",
+      "ambi.wizard.color.pinkDescription": "微调较浅的红蓝混合色。",
+      "ambi.capture.dominant": "优先使用主色调",
+      "ambi.capture.dominantDescription": "鲜艳区域的权重高于灰色区域，避免整个屏幕的平均色发灰发暗。",
+      "ambi.status.recovering": "正在恢复屏幕捕获…",
+      "schedule.summaryOn": "在 {time} 开灯（{days}）",
+      "schedule.summaryOff": "在 {time} 关灯（{days}）",
+      "schedule.summaryDisabled": "已停用：{time}（{days}）",
+      "schedule.weekdays": "工作日",
+      "schedule.weekends": "周末",
+      "error.outOfRange": "灯具超出范围或已关闭。",
+      "error.connection": "无法连接到灯具。请确认灯具已开启、在范围内，且未连接到其他应用。",
+      "connection.autoConnectNotFound": "附近未找到上次使用的灯具，将继续尝试。",
+      "effectWords": {
+        "Auto play": "自动播放",
+        "Magic reverse": "魔幻反向",
+        "Magic": "魔幻",
+        "Energy": "能量",
+        "Jump": "跳变",
+        "Strobe": "频闪",
+        "Fade": "渐变",
+        "Transition reverse": "过渡反向",
+        "Transition": "过渡",
+        "Marquee": "跑马灯",
+        "Race reverse": "竞速反向",
+        "Race": "竞速",
+        "Wave reverse": "波浪反向",
+        "Wave": "波浪",
+        "Flush close": "扫动关闭",
+        "Flush open": "扫动打开",
+        "Flush reverse": "扫动反向",
+        "Flush": "扫动",
+        "Curtain close": "窗帘关闭",
+        "Curtain open": "窗帘打开",
+        "Curtain": "窗帘",
+        "Water reverse": "流水反向",
+        "Water": "流水",
+        "Flow reverse": "流动反向",
+        "Flow": "流动",
+        "Tail reverse": "尾迹反向",
+        "Tail": "尾迹",
+        "Running reverse": "跑动反向",
+        "Running": "跑动",
+        "Sunrise": "日出",
+        "Sunset": "日落",
+        "Birthday": "生日",
+        "Candlelight": "烛光",
+        "Fireworks": "烟花",
+        "Party": "派对",
+        "Destiny": "命运",
+        "Starry sky": "星空",
+        "Romantic": "浪漫",
+        "Disco": "迪斯科",
+        "Rainbow": "彩虹",
+        "Movie": "电影",
+        "Christmas": "圣诞节",
+        "Flowing": "流光",
+        "Sleeping": "睡眠",
+        "Ocean": "海洋",
+        "Forest": "森林",
+        "Reading": "阅读",
+        "Working": "工作",
+        "Dazzle": "炫彩",
+        "Gentle": "柔和",
+        "Wedding": "婚礼",
+        "Snow": "雪景",
+        "Fire": "火焰",
+        "Lightning": "闪电",
+        "Valentine's Day": "情人节",
+        "Halloween": "万圣节",
+        "Warning": "警告",
+      },
+      "effectSpec": {
+        "colors": {
+                "multicolor": "多色",
+                "red": "红色",
+                "green": "绿色",
+                "blue": "蓝色",
+                "yellow": "黄色",
+                "cyan": "青色",
+                "purple": "紫色",
+                "white": "白色"
+        },
+        "colorsShort": {
+                "multicolor": "多色",
+                "red": "红",
+                "green": "绿",
+                "blue": "蓝",
+                "yellow": "黄",
+                "cyan": "青",
+                "purple": "紫",
+                "white": "白"
+        },
+        "sep": "、",
+        "colon": "：",
+        "and": "{a}和{b}",
+        "dotOn": "{b:s}底{a:s}点",
+        "on": "{b:s}底{a}",
+        "sixTo": "六色至{c}"
+      },
+    },
+    "fr": {
+      "language": "Langue",
+      "languageName": "Français",
+      "app.title": "Contrôle de la lampe JSK-P22",
+      "nav.color": "Couleur",
+      "nav.effects": "Effets",
+      "nav.music": "Musique",
+      "nav.schedule": "Programmation",
+      "nav.ambilight": "Ambilight",
+      "nav.settings": "Paramètres",
+      "settings.title": "Paramètres",
+      "settings.languageDescription": "Choisissez la langue de l’application.",
+      "settings.trayTitle": "Garder dans la zone de notification",
+      "settings.trayDescription": "À la fermeture, l’application est masquée dans la zone de notification. Utilisez son menu pour la rouvrir, déconnecter la lampe ou quitter.",
+      "settings.autoConnectTitle": "Se reconnecter automatiquement à la dernière lampe",
+      "settings.autoConnectDescription": "L’application se reconnecte au démarrage et après une déconnexion inattendue, et réessaie tant que la lampe est hors de portée. Si Ambilight était actif, il reprend. Connectez-vous une fois à la lampe pour que l’application la mémorise.",
+      "tray.open": "Ouvrir l’application",
+      "tray.startSync": "Démarrer la synchronisation",
+      "tray.stopSync": "Arrêter la synchronisation",
+      "tray.disconnect": "Déconnecter la lampe",
+      "tray.connect": "Ouvrir pour se connecter",
+      "tray.turnOn": "Allumer la lampe",
+      "tray.turnOff": "Éteindre la lampe",
+      "tray.quit": "Quitter",
+      "connection.disconnected": "Non connecté",
+      "connection.connect": "Connecter",
+      "connection.reconnect": "Reconnecter",
+      "connection.disconnect": "Déconnecter",
+      "connection.connecting": "Connexion…",
+      "connection.connected": "Connecté à {name}",
+      "connection.disconnectedStatus": "Déconnecté",
+      "connection.noBluetooth": "Web Bluetooth n’est pas disponible dans ce navigateur.",
+      "connection.bluetoothOff": "Le Bluetooth est désactivé. Activez-le dans les paramètres Windows, puis réessayez.",
+      "connection.openBluetoothSettings": "Ouvrir les paramètres Bluetooth",
+      "connection.settingsFailed": "Impossible d’ouvrir les paramètres Bluetooth : {message}",
+      "connection.noDevice": "Aucun appareil sélectionné ou aucun service 0xFFF0. Vérifiez que le Bluetooth est activé et que la lampe est allumée et à proximité.",
+      "connection.failed": "Échec de la connexion : {message}",
+      "connection.autoConnectNoDevice": "Connectez d’abord une lampe manuellement pour activer la reconnexion automatique.",
+      "connection.autoConnectFailed": "Échec de la reconnexion automatique : {message}",
+      "connection.writeFailed": "Échec de l’écriture : {message}",
+      "power.title": "Alimentation",
+      "power.description": "Allumez ou éteignez la lampe. L’état indique la dernière commande envoyée ; la lampe ne signale pas son état d’alimentation.",
+      "power.on": "Allumer",
+      "power.off": "Éteindre",
+      "brightness.title": "Luminosité",
+      "brightness.description": "Niveau de luminosité de la lampe.",
+      "color.pick": "Choisir une couleur",
+      "color.wheelLabel": "Roue chromatique : faites glisser ou utilisez les flèches pour choisir la teinte et la saturation",
+      "color.hexLabel": "Code couleur hexadécimal",
+      "effects.title": "Effets",
+      "effects.nowPlaying": "Effet en cours",
+      "effects.stop": "Arrêter l’effet",
+      "effects.colorDisabled": "Le sélecteur de couleur est désactivé pendant la lecture d’un effet.",
+      "effects.none": "Aucun",
+      "effects.speed": "Vitesse de l’effet",
+      "effects.speedDescription": "Vitesse de lecture de l’effet.",
+      "effects.search": "Rechercher des effets",
+      "effects.categories": "Catégories d’effets",
+      "effects.scrollLeft": "Faire défiler les catégories vers la gauche",
+      "effects.scrollRight": "Faire défiler les catégories vers la droite",
+      "effects.colors": "Filtrer par couleur",
+      "effects.all": "Tout",
+      "effects.noMatches": "Aucun effet ne correspond.",
+      "effects.onlyColor": "Afficher uniquement les effets de couleur {color}",
+      "effects.multicolor": "Multicolore",
+      "music.title": "Musique",
+      "music.sync": "Synchronisation musicale",
+      "music.description": "La lampe réagit aux sons captés par son microphone intégré.",
+      "music.unknown": "Inconnu",
+      "music.running": "En cours",
+      "music.stopped": "Arrêté",
+      "music.start": "Démarrer",
+      "music.stop": "Arrêter",
+      "music.mode": "Mode",
+      "music.modeDescription": "Réaction de la lampe au son.",
+      "music.eqEnergetic": "Énergique",
+      "music.eqRhythm": "Rythme",
+      "music.eqSpectrum": "Spectre",
+      "music.eqRolling": "Défilement",
+      "music.eqEnergetic2": "Énergique 2",
+      "music.eqRhythm2": "Rythme 2",
+      "music.eqSpectrum2": "Spectre 2",
+      "music.eqRolling2": "Défilement 2",
+      "music.sensitivity": "Sensibilité",
+      "music.sensitivityDescription": "Une valeur élevée permet de détecter les sons plus faibles.",
+      "music.noMicrophone": "Ce modèle n’a pas de microphone.",
+      "schedule.title": "Programmation",
+      "schedule.timers": "Minuteries",
+      "schedule.on": "Allumage",
+      "schedule.off": "Extinction",
+      "schedule.enabled": "Activé",
+      "schedule.repeat": "Répéter",
+      "schedule.everyDay": "tous les jours",
+      "schedule.noDays": "aucun jour",
+      "schedule.connectFirst": "Connectez d’abord la lampe",
+      "schedule.chooseTime": "Choisissez une heure et au moins un jour",
+      "schedule.notSet": "Non défini",
+      "schedule.reading": "Lecture depuis la lampe…",
+      "schedule.noReport": "La lampe n’a pas renvoyé de programmation.",
+      "schedule.readFailed": "Échec de la lecture : {message}",
+      "schedule.dayMon": "Lundi",
+      "schedule.dayTue": "Mardi",
+      "schedule.dayWed": "Mercredi",
+      "schedule.dayThu": "Jeudi",
+      "schedule.dayFri": "Vendredi",
+      "schedule.daySat": "Samedi",
+      "schedule.daySun": "Dimanche",
+      "schedule.shortMon": "L",
+      "schedule.shortTue": "M",
+      "schedule.shortWed": "M",
+      "schedule.shortThu": "J",
+      "schedule.shortFri": "V",
+      "schedule.shortSat": "S",
+      "schedule.shortSun": "D",
+      "category.special": "Spécial",
+      "category.jump": "Sauts et stroboscope",
+      "category.fade": "Fondus et transitions",
+      "category.marquee": "Défilement",
+      "category.race": "Courses et vagues",
+      "category.flush": "Balayages et rideaux",
+      "category.water": "Eau",
+      "category.flow": "Flux",
+      "category.tail": "Traînée",
+      "category.running": "Défilement",
+      "category.runningReverse": "Défilement inversé",
+      "category.scenes": "Scènes",
+      "picker.title": "Choisissez votre lampe",
+      "picker.searchingHint": "Recherche en cours. Les lampes s’appellent généralement MELK-.",
+      "picker.pickHint": "Sélectionnez votre lampe dans la liste.",
+      "picker.rangeHint": "Vérifiez que la lampe est allumée et à portée.",
+      "picker.cancel": "Annuler",
+      "picker.unnamed": "Appareil sans nom",
+      "picker.searching": "Recherche des appareils à proximité…",
+      "ambi.sync.heading": "Ambilight",
+      "ambi.sync.preview": "Couleur actuelle de la lampe",
+      "ambi.status.notConnected": "Non connecté",
+      "ambi.status.lampOff": "La lampe est indiquée comme éteinte. Allumez-la avant de démarrer Ambilight.",
+      "ambi.status.syncing": "Synchronisation en cours",
+      "ambi.status.stopped": "Arrêtée",
+      "ambi.status.captureFailed": "Échec de la capture d’écran : {message}",
+      "ambi.status.screensFailed": "Impossible de charger les écrans : {message}",
+      "ambi.button.startSync": "Démarrer la synchronisation",
+      "ambi.button.stopSync": "Arrêter la synchronisation",
+      "ambi.button.reset": "Réinitialiser",
+      "ambi.section.capture": "Capture",
+      "ambi.capture.screen": "Écran",
+      "ambi.capture.screenDescription": "Choisissez l’écran que la lampe suit.",
+      "ambi.capture.screenAria": "Écran à suivre",
+      "ambi.capture.ignoreBars": "Ignorer les bandes noires",
+      "ambi.capture.ignoreBarsDescription": "Ne pas tenir compte des bandes noires pour déterminer la couleur de l’écran.",
+      "ambi.capture.ignoreBarsAria": "Ignorer les bandes noires",
+      "ambi.section.hdr": "HDR",
+      "ambi.hdr.display": "Appliquer la correction HDR",
+      "ambi.hdr.displayAria": "Appliquer la correction HDR",
+      "ambi.hdr.manualNote": "Windows n’indique pas à l’application si un écran utilise le HDR ; il s’agit donc d’un réglage manuel. Il peut atténuer les couleurs délavées, mais ne restitue pas les détails perdus lors de la capture.",
+      "ambi.hdr.correction": "Intensité de la correction",
+      "ambi.hdr.correctionDescription": "Ajuste le gamma et les couleurs pour compenser une capture HDR délavée.",
+      "ambi.hdr.correctionAria": "Intensité de la correction HDR",
+      "ambi.section.calibration": "Étalonnage des couleurs",
+      "ambi.calibration.description": "Faites correspondre la lampe à l’aperçu. Celui-ci reste inchangé.",
+      "ambi.calibration.red": "Sortie rouge",
+      "ambi.calibration.redDescription": "0 % désactive le rouge ; 100 % le laisse inchangé.",
+      "ambi.calibration.redAria": "Étalonnage du rouge",
+      "ambi.calibration.green": "Sortie verte",
+      "ambi.calibration.greenDescription": "0 % désactive le vert ; 100 % le laisse inchangé.",
+      "ambi.calibration.greenAria": "Étalonnage du vert",
+      "ambi.calibration.blue": "Sortie bleue",
+      "ambi.calibration.blueDescription": "0 % désactive le bleu ; 100 % le laisse inchangé.",
+      "ambi.calibration.blueAria": "Étalonnage du bleu",
+      "ambi.section.response": "Réponse",
+      "ambi.response.fps": "Mises à jour par seconde",
+      "ambi.response.fpsDescription": "Une fréquence plus élevée accélère les mises à jour, mais sollicite davantage le processeur et le Bluetooth.",
+      "ambi.response.fpsAria": "Mises à jour par seconde",
+      "ambi.response.smoothing": "Lissage",
+      "ambi.response.smoothingDescription": "Une valeur plus élevée rend les transitions plus fluides et plus lentes.",
+      "ambi.response.smoothingAria": "Lissage",
+      "ambi.response.vividness": "Éclat",
+      "ambi.response.vividnessDescription": "Augmentez cette valeur pour des couleurs plus vives ; réduisez-la pour un rendu plus naturel.",
+      "ambi.response.vividnessAria": "Éclat",
+      "ambi.response.brightness": "Luminosité",
+      "ambi.response.brightnessDescription": "Limite la luminosité de la lampe. L’aperçu reste inchangé.",
+      "ambi.response.brightnessAria": "Luminosité",
+      "ambi.response.allowTurnOff": "Autoriser l’extinction complète",
+      "ambi.response.allowTurnOffDescription": "Si cette option est désactivée, les scènes noires affichent du blanc à la luminosité minimale.",
+      "ambi.response.reset": "Réinitialiser",
+      "ambi.wizard.open": "Assistant d’étalonnage",
+      "ambi.wizard.title": "Assistant d’étalonnage des couleurs",
+      "ambi.wizard.intro": "La synchronisation est suspendue pendant le test et reprend à la fermeture de l’assistant.",
+      "ambi.wizard.progress": "Test {current} sur {total}",
+      "ambi.wizard.adjustHint": "Réglez les canaux pour que la lampe corresponde à la couleur de référence.",
+      "ambi.wizard.reference": "Couleur de référence",
+      "ambi.wizard.sent": "Couleur envoyée à la lampe",
+      "ambi.wizard.cancel": "Annuler",
+      "ambi.wizard.previous": "Précédent",
+      "ambi.wizard.next": "Suivant",
+      "ambi.wizard.finish": "Terminer",
+      "ambi.wizard.noConnection": "Connectez la lampe pour commencer l’étalonnage.",
+      "ambi.wizard.disconnected": "Lampe déconnectée. Reconnectez-la pour continuer.",
+      "ambi.wizard.color.red": "Rouge",
+      "ambi.wizard.color.redDescription": "Faites correspondre le rouge de la lampe à la référence.",
+      "ambi.wizard.color.orange": "Orange",
+      "ambi.wizard.color.orangeDescription": "Vérifiez l’équilibre entre le rouge et le vert.",
+      "ambi.wizard.color.yellow": "Jaune",
+      "ambi.wizard.color.yellowDescription": "Vérifiez la combinaison des sorties rouge et verte.",
+      "ambi.wizard.color.green": "Vert",
+      "ambi.wizard.color.greenDescription": "Faites correspondre le vert de la lampe à la référence.",
+      "ambi.wizard.color.cyan": "Cyan",
+      "ambi.wizard.color.cyanDescription": "Vérifiez la combinaison des sorties verte et bleue.",
+      "ambi.wizard.color.blue": "Bleu",
+      "ambi.wizard.color.blueDescription": "Faites correspondre le bleu de la lampe à la référence.",
+      "ambi.wizard.color.purple": "Violet",
+      "ambi.wizard.color.purpleDescription": "Vérifiez l’équilibre entre le rouge et le bleu.",
+      "ambi.wizard.color.pink": "Rose",
+      "ambi.wizard.color.pinkDescription": "Affinez le mélange plus clair de rouge et de bleu.",
+      "ambi.capture.dominant": "Privilégier les couleurs dominantes",
+      "ambi.capture.dominantDescription": "Donne plus de poids aux zones vives qu’aux zones grises, pour éviter une moyenne terne de tout l’écran.",
+      "ambi.status.recovering": "Reconnexion de la capture d’écran…",
+      "schedule.summaryOn": "Allume la lampe à {time} ({days})",
+      "schedule.summaryOff": "Éteint la lampe à {time} ({days})",
+      "schedule.summaryDisabled": "Désactivé : {time} ({days})",
+      "schedule.weekdays": "en semaine",
+      "schedule.weekends": "le week-end",
+      "error.outOfRange": "La lampe est hors de portée ou éteinte.",
+      "error.connection": "Impossible de joindre la lampe. Vérifiez qu’elle est allumée, à portée et non connectée à une autre application.",
+      "connection.autoConnectNotFound": "La dernière lampe n’a pas été trouvée à proximité. Nouvelles tentatives en cours.",
+      "effectWords": {
+        "Auto play": "Lecture automatique",
+        "Magic reverse": "Magie inversée",
+        "Magic": "Magie",
+        "Energy": "Énergie",
+        "Jump": "Saut",
+        "Strobe": "Stroboscope",
+        "Fade": "Fondu",
+        "Transition reverse": "Transition inversée",
+        "Transition": "Transition",
+        "Marquee": "Chenillard",
+        "Race reverse": "Course inversée",
+        "Race": "Course",
+        "Wave reverse": "Vague inversée",
+        "Wave": "Vague",
+        "Flush close": "Balayage fermé",
+        "Flush open": "Balayage ouvert",
+        "Flush reverse": "Balayage inversé",
+        "Flush": "Balayage",
+        "Curtain close": "Fermeture du rideau",
+        "Curtain open": "Ouverture du rideau",
+        "Curtain": "Rideau",
+        "Water reverse": "Eau inversée",
+        "Water": "Eau",
+        "Flow reverse": "Flux inversé",
+        "Flow": "Flux",
+        "Tail reverse": "Traînée inversée",
+        "Tail": "Traînée",
+        "Running reverse": "Défilement inversé",
+        "Running": "Défilement",
+        "Sunrise": "Lever de soleil",
+        "Sunset": "Coucher de soleil",
+        "Birthday": "Anniversaire",
+        "Candlelight": "Lueur de bougie",
+        "Fireworks": "Feux d’artifice",
+        "Party": "Fête",
+        "Destiny": "Destin",
+        "Starry sky": "Ciel étoilé",
+        "Romantic": "Romantique",
+        "Disco": "Disco",
+        "Rainbow": "Arc-en-ciel",
+        "Movie": "Film",
+        "Christmas": "Noël",
+        "Flowing": "Fluide",
+        "Sleeping": "Sommeil",
+        "Ocean": "Océan",
+        "Forest": "Forêt",
+        "Reading": "Lecture",
+        "Working": "Travail",
+        "Dazzle": "Éblouissant",
+        "Gentle": "Doux",
+        "Wedding": "Mariage",
+        "Snow": "Neige",
+        "Fire": "Feu",
+        "Lightning": "Éclair",
+        "Valentine's Day": "Saint-Valentin",
+        "Halloween": "Halloween",
+        "Warning": "Avertissement",
+      },
+      "effectSpec": {
+        "colors": {
+                "multicolor": "multicolore",
+                "red": "rouge",
+                "green": "vert",
+                "blue": "bleu",
+                "yellow": "jaune",
+                "cyan": "cyan",
+                "purple": "violet",
+                "white": "blanc"
+        },
+        "sep": ", ",
+        "colon": " : ",
+        "and": "{a} et {b}",
+        "dotOn": "point {a} sur {b}",
+        "on": "{a} sur {b}",
+        "sixTo": "six couleurs vers {c}"
+      },
+    },
+    "de": {
+      "language": "Sprache",
+      "languageName": "Deutsch",
+      "app.title": "JSK-P22-Lampensteuerung",
+      "nav.color": "Farbe",
+      "nav.effects": "Effekte",
+      "nav.music": "Musik",
+      "nav.schedule": "Zeitplan",
+      "nav.ambilight": "Ambilight",
+      "nav.settings": "Einstellungen",
+      "settings.title": "Einstellungen",
+      "settings.languageDescription": "Wählen Sie die Sprache der Anwendung aus.",
+      "settings.trayTitle": "Im Infobereich behalten",
+      "settings.trayDescription": "Beim Schließen wird die Anwendung im Infobereich ausgeblendet. Über das Infobereichsmenü können Sie die App öffnen, die Lampe trennen oder die App beenden.",
+      "settings.autoConnectTitle": "Automatisch wieder mit der zuletzt verwendeten Lampe verbinden",
+      "settings.autoConnectDescription": "Die App verbindet sich beim Start und nach einer unerwarteten Trennung erneut und versucht es weiter, solange die Lampe nicht erreichbar ist. Lief Ambilight, wird es fortgesetzt. Verbinden Sie sich einmal mit der Lampe, damit die App sie sich merken kann.",
+      "tray.open": "App öffnen",
+      "tray.startSync": "Synchronisierung starten",
+      "tray.stopSync": "Synchronisierung stoppen",
+      "tray.disconnect": "Verbindung zur Lampe trennen",
+      "tray.connect": "Zum Verbinden öffnen",
+      "tray.turnOn": "Lampe einschalten",
+      "tray.turnOff": "Lampe ausschalten",
+      "tray.quit": "Beenden",
+      "connection.disconnected": "Nicht verbunden",
+      "connection.connect": "Verbinden",
+      "connection.reconnect": "Erneut verbinden",
+      "connection.disconnect": "Verbindung trennen",
+      "connection.connecting": "Verbindung wird hergestellt…",
+      "connection.connected": "Verbunden mit {name}",
+      "connection.disconnectedStatus": "Verbindung getrennt",
+      "connection.noBluetooth": "Web Bluetooth ist in diesem Browser nicht verfügbar.",
+      "connection.bluetoothOff": "Bluetooth ist ausgeschaltet. Schalten Sie es in den Windows-Einstellungen ein und versuchen Sie es erneut.",
+      "connection.openBluetoothSettings": "Bluetooth-Einstellungen öffnen",
+      "connection.settingsFailed": "Bluetooth-Einstellungen konnten nicht geöffnet werden: {message}",
+      "connection.noDevice": "Kein Gerät ausgewählt oder kein 0xFFF0-Dienst verfügbar. Prüfe, ob Bluetooth aktiviert und die Lampe eingeschaltet und in der Nähe ist.",
+      "connection.failed": "Verbindung fehlgeschlagen: {message}",
+      "connection.autoConnectNoDevice": "Verbinden Sie einmal manuell eine Lampe, um die automatische Wiederverbindung zu aktivieren.",
+      "connection.autoConnectFailed": "Automatische Wiederverbindung fehlgeschlagen: {message}",
+      "connection.writeFailed": "Schreiben fehlgeschlagen: {message}",
+      "power.title": "Stromversorgung",
+      "power.description": "Schalten Sie die Lampe ein oder aus. Der Status zeigt den zuletzt gesendeten Befehl an; die Lampe meldet ihren Stromzustand nicht zurück.",
+      "power.on": "Ein",
+      "power.off": "Aus",
+      "brightness.title": "Helligkeit",
+      "brightness.description": "Helligkeit der Lampe.",
+      "color.pick": "Farbe auswählen",
+      "color.wheelLabel": "Farbrad: Ziehen oder Pfeiltasten verwenden, um Farbton und Sättigung zu wählen",
+      "color.hexLabel": "Hex-Farbwert",
+      "effects.title": "Effekte",
+      "effects.nowPlaying": "Aktueller Effekt",
+      "effects.stop": "Effekt stoppen",
+      "effects.colorDisabled": "Während ein Effekt läuft, ist die Farbauswahl deaktiviert.",
+      "effects.none": "Kein",
+      "effects.speed": "Effektgeschwindigkeit",
+      "effects.speedDescription": "Wie schnell der Effekt abläuft.",
+      "effects.search": "Effekte suchen",
+      "effects.categories": "Effektkategorien",
+      "effects.scrollLeft": "Kategorien nach links verschieben",
+      "effects.scrollRight": "Kategorien nach rechts verschieben",
+      "effects.colors": "Nach Farbe filtern",
+      "effects.all": "Alle",
+      "effects.noMatches": "Keine passenden Effekte gefunden.",
+      "effects.onlyColor": "Nur Effekte mit der Farbe {color}",
+      "effects.multicolor": "Mehrfarbig",
+      "music.title": "Musik",
+      "music.sync": "Musiksynchronisierung",
+      "music.description": "Die Lampe reagiert auf Geräusche, die ihr integriertes Mikrofon aufnimmt.",
+      "music.unknown": "Unbekannt",
+      "music.running": "Läuft",
+      "music.stopped": "Gestoppt",
+      "music.start": "Starten",
+      "music.stop": "Stoppen",
+      "music.mode": "Modus",
+      "music.modeDescription": "So reagiert die Lampe auf Geräusche.",
+      "music.eqEnergetic": "Energetisch",
+      "music.eqRhythm": "Rhythmus",
+      "music.eqSpectrum": "Spektrum",
+      "music.eqRolling": "Lauflicht",
+      "music.eqEnergetic2": "Energetisch 2",
+      "music.eqRhythm2": "Rhythmus 2",
+      "music.eqSpectrum2": "Spektrum 2",
+      "music.eqRolling2": "Lauflicht 2",
+      "music.sensitivity": "Empfindlichkeit",
+      "music.sensitivityDescription": "Bei höherer Empfindlichkeit reagiert die Lampe auch auf leisere Geräusche.",
+      "music.noMicrophone": "Dieses Modell hat kein Mikrofon.",
+      "schedule.title": "Zeitplan",
+      "schedule.timers": "Timer",
+      "schedule.on": "Einschalten",
+      "schedule.off": "Ausschalten",
+      "schedule.enabled": "Aktiviert",
+      "schedule.repeat": "Wiederholen",
+      "schedule.everyDay": "jeden Tag",
+      "schedule.noDays": "keine Tage",
+      "schedule.connectFirst": "Verbinden Sie zuerst die Lampe",
+      "schedule.chooseTime": "Wählen Sie eine Uhrzeit und mindestens einen Tag aus",
+      "schedule.notSet": "Nicht festgelegt",
+      "schedule.reading": "Daten werden von der Lampe gelesen…",
+      "schedule.noReport": "Die Lampe hat keinen Zeitplan zurückgemeldet.",
+      "schedule.readFailed": "Lesen fehlgeschlagen: {message}",
+      "schedule.dayMon": "Montag",
+      "schedule.dayTue": "Dienstag",
+      "schedule.dayWed": "Mittwoch",
+      "schedule.dayThu": "Donnerstag",
+      "schedule.dayFri": "Freitag",
+      "schedule.daySat": "Samstag",
+      "schedule.daySun": "Sonntag",
+      "schedule.shortMon": "Mo",
+      "schedule.shortTue": "Di",
+      "schedule.shortWed": "Mi",
+      "schedule.shortThu": "Do",
+      "schedule.shortFri": "Fr",
+      "schedule.shortSat": "Sa",
+      "schedule.shortSun": "So",
+      "category.special": "Spezial",
+      "category.jump": "Sprung und Stroboskop",
+      "category.fade": "Überblenden und Übergang",
+      "category.marquee": "Lauflicht",
+      "category.race": "Rennen und Wellen",
+      "category.flush": "Wischen und Vorhang",
+      "category.water": "Wasser",
+      "category.flow": "Fließen",
+      "category.tail": "Schweif",
+      "category.running": "Lauflicht",
+      "category.runningReverse": "Rückwärts laufend",
+      "category.scenes": "Szenen",
+      "picker.title": "Lampe auswählen",
+      "picker.searchingHint": "Suche läuft. Lampen heißen normalerweise MELK-.",
+      "picker.pickHint": "Wählen Sie Ihre Lampe aus der Liste aus.",
+      "picker.rangeHint": "Vergewissern Sie sich, dass die Lampe eingeschaltet und in Reichweite ist.",
+      "picker.cancel": "Abbrechen",
+      "picker.unnamed": "Unbenanntes Gerät",
+      "picker.searching": "Suche nach Geräten in der Nähe…",
+      "ambi.sync.heading": "Ambilight",
+      "ambi.sync.preview": "Aktuelle Lampenfarbe",
+      "ambi.status.notConnected": "Nicht verbunden",
+      "ambi.status.lampOff": "Die Lampe ist als ausgeschaltet markiert. Schalten Sie sie ein, bevor Sie Ambilight starten.",
+      "ambi.status.syncing": "Synchronisierung läuft",
+      "ambi.status.stopped": "Angehalten",
+      "ambi.status.captureFailed": "Bildschirmaufnahme fehlgeschlagen: {message}",
+      "ambi.status.screensFailed": "Bildschirme konnten nicht geladen werden: {message}",
+      "ambi.button.startSync": "Synchronisierung starten",
+      "ambi.button.stopSync": "Synchronisierung stoppen",
+      "ambi.button.reset": "Zurücksetzen",
+      "ambi.section.capture": "Aufnahme",
+      "ambi.capture.screen": "Bildschirm",
+      "ambi.capture.screenDescription": "Wählen Sie den Bildschirm, dem die Lampe folgt.",
+      "ambi.capture.screenAria": "Zu verfolgender Bildschirm",
+      "ambi.capture.ignoreBars": "Schwarze Balken ignorieren",
+      "ambi.capture.ignoreBarsDescription": "Schwarze Balken bei der Bestimmung der Bildschirmfarbe nicht berücksichtigen.",
+      "ambi.capture.ignoreBarsAria": "Schwarze Balken ignorieren",
+      "ambi.section.hdr": "HDR",
+      "ambi.hdr.display": "HDR-Korrektur anwenden",
+      "ambi.hdr.displayAria": "HDR-Korrektur anwenden",
+      "ambi.hdr.manualNote": "Windows teilt der App nicht mit, ob ein Bildschirm HDR verwendet; daher ist dies eine manuelle Anpassung. Sie kann blasse Farben abmildern, aber bei der Aufnahme verlorene Details nicht wiederherstellen.",
+      "ambi.hdr.correction": "Korrekturstärke",
+      "ambi.hdr.correctionDescription": "Passt Gamma und Farben an, um eine blasse HDR-Aufnahme auszugleichen.",
+      "ambi.hdr.correctionAria": "Stärke der HDR-Korrektur",
+      "ambi.section.calibration": "Farbkalibrierung",
+      "ambi.calibration.description": "Stimmen Sie die Lampe auf die Vorschau ab. Die Vorschau bleibt unverändert.",
+      "ambi.calibration.red": "Rot-Ausgabe",
+      "ambi.calibration.redDescription": "0 % schaltet Rot aus; bei 100 % bleibt Rot unverändert.",
+      "ambi.calibration.redAria": "Rotkalibrierung",
+      "ambi.calibration.green": "Grün-Ausgabe",
+      "ambi.calibration.greenDescription": "0 % schaltet Grün aus; bei 100 % bleibt Grün unverändert.",
+      "ambi.calibration.greenAria": "Grünkalibrierung",
+      "ambi.calibration.blue": "Blau-Ausgabe",
+      "ambi.calibration.blueDescription": "0 % schaltet Blau aus; bei 100 % bleibt Blau unverändert.",
+      "ambi.calibration.blueAria": "Blaukalibrierung",
+      "ambi.section.response": "Reaktion",
+      "ambi.response.fps": "Aktualisierungen pro Sekunde",
+      "ambi.response.fpsDescription": "Höhere Werte aktualisieren schneller, beanspruchen aber mehr Prozessorleistung und Bluetooth.",
+      "ambi.response.fpsAria": "Aktualisierungen pro Sekunde",
+      "ambi.response.smoothing": "Übergänge glätten",
+      "ambi.response.smoothingDescription": "Höhere Werte machen Übergänge fließender und langsamer.",
+      "ambi.response.smoothingAria": "Übergänge glätten",
+      "ambi.response.vividness": "Farbintensität",
+      "ambi.response.vividnessDescription": "Höhere Werte sorgen für kräftigere Farben, niedrigere für ein natürlicheres Bild.",
+      "ambi.response.vividnessAria": "Farbintensität",
+      "ambi.response.brightness": "Helligkeit",
+      "ambi.response.brightnessDescription": "Begrenzt die Helligkeit der Lampe. Die Vorschau bleibt unverändert.",
+      "ambi.response.brightnessAria": "Helligkeit",
+      "ambi.response.allowTurnOff": "Vollständiges Ausschalten erlauben",
+      "ambi.response.allowTurnOffDescription": "Wenn deaktiviert, zeigt die Lampe bei rein schwarzen Szenen Weiß mit niedrigster Helligkeit.",
+      "ambi.response.reset": "Zurücksetzen",
+      "ambi.wizard.open": "Kalibrierungsassistent",
+      "ambi.wizard.title": "Farbkalibrierungsassistent",
+      "ambi.wizard.intro": "Die Synchronisierung wird während des Tests pausiert und beim Schließen des Assistenten fortgesetzt.",
+      "ambi.wizard.progress": "Test {current} von {total}",
+      "ambi.wizard.adjustHint": "Passen Sie die Kanäle so an, dass die Lampe der Referenzfarbe entspricht.",
+      "ambi.wizard.reference": "Referenzfarbe",
+      "ambi.wizard.sent": "An die Lampe gesendete Farbe",
+      "ambi.wizard.cancel": "Abbrechen",
+      "ambi.wizard.previous": "Zurück",
+      "ambi.wizard.next": "Weiter",
+      "ambi.wizard.finish": "Fertig",
+      "ambi.wizard.noConnection": "Verbinden Sie die Lampe, um mit der Kalibrierung zu beginnen.",
+      "ambi.wizard.disconnected": "Lampe getrennt. Verbinden Sie sie erneut, um fortzufahren.",
+      "ambi.wizard.color.red": "Rot",
+      "ambi.wizard.color.redDescription": "Gleichen Sie das Rot der Lampe an die Referenz an.",
+      "ambi.wizard.color.orange": "Orange",
+      "ambi.wizard.color.orangeDescription": "Prüfen Sie das Verhältnis von Rot und Grün.",
+      "ambi.wizard.color.yellow": "Gelb",
+      "ambi.wizard.color.yellowDescription": "Prüfen Sie die kombinierte Ausgabe von Rot und Grün.",
+      "ambi.wizard.color.green": "Grün",
+      "ambi.wizard.color.greenDescription": "Gleichen Sie das Grün der Lampe an die Referenz an.",
+      "ambi.wizard.color.cyan": "Cyan",
+      "ambi.wizard.color.cyanDescription": "Prüfen Sie die kombinierte Ausgabe von Grün und Blau.",
+      "ambi.wizard.color.blue": "Blau",
+      "ambi.wizard.color.blueDescription": "Gleichen Sie das Blau der Lampe an die Referenz an.",
+      "ambi.wizard.color.purple": "Lila",
+      "ambi.wizard.color.purpleDescription": "Prüfen Sie das Verhältnis von Rot und Blau.",
+      "ambi.wizard.color.pink": "Rosa",
+      "ambi.wizard.color.pinkDescription": "Stimmen Sie die hellere Mischung aus Rot und Blau ab.",
+      "ambi.capture.dominant": "Dominante Farben bevorzugen",
+      "ambi.capture.dominantDescription": "Gewichtet leuchtende Bildbereiche stärker als graue, damit die Lampe keinen trüben Mittelwert des ganzen Bildschirms zeigt.",
+      "ambi.status.recovering": "Bildschirmaufnahme wird wiederhergestellt…",
+      "schedule.summaryOn": "Schaltet die Lampe um {time} Uhr ein ({days})",
+      "schedule.summaryOff": "Schaltet die Lampe um {time} Uhr aus ({days})",
+      "schedule.summaryDisabled": "Deaktiviert: {time} Uhr ({days})",
+      "schedule.weekdays": "werktags",
+      "schedule.weekends": "am Wochenende",
+      "error.outOfRange": "Die Lampe ist außer Reichweite oder ausgeschaltet.",
+      "error.connection": "Die Lampe ist nicht erreichbar. Stellen Sie sicher, dass sie eingeschaltet und in Reichweite ist und nicht mit einer anderen App verbunden ist.",
+      "connection.autoConnectNotFound": "Die zuletzt verwendete Lampe wurde in der Nähe nicht gefunden. Es wird weiter versucht.",
+      "effectWords": {
+        "Auto play": "Automatische Wiedergabe",
+        "Magic reverse": "Magie rückwärts",
+        "Magic": "Magie",
+        "Energy": "Energie",
+        "Jump": "Sprung",
+        "Strobe": "Stroboskop",
+        "Fade": "Überblenden",
+        "Transition reverse": "Übergang rückwärts",
+        "Transition": "Übergang",
+        "Marquee": "Laufschrift",
+        "Race reverse": "Rennen rückwärts",
+        "Race": "Rennen",
+        "Wave reverse": "Welle rückwärts",
+        "Wave": "Welle",
+        "Flush close": "Wisch schließen",
+        "Flush open": "Wisch öffnen",
+        "Flush reverse": "Wisch rückwärts",
+        "Flush": "Wisch",
+        "Curtain close": "Vorhang schließen",
+        "Curtain open": "Vorhang öffnen",
+        "Curtain": "Vorhang",
+        "Water reverse": "Wasser rückwärts",
+        "Water": "Wasser",
+        "Flow reverse": "Fluss rückwärts",
+        "Flow": "Fluss",
+        "Tail reverse": "Schweif rückwärts",
+        "Tail": "Schweif",
+        "Running reverse": "Lauflicht rückwärts",
+        "Running": "Lauflicht",
+        "Sunrise": "Sonnenaufgang",
+        "Sunset": "Sonnenuntergang",
+        "Birthday": "Geburtstag",
+        "Candlelight": "Kerzenlicht",
+        "Fireworks": "Feuerwerk",
+        "Party": "Party",
+        "Destiny": "Schicksal",
+        "Starry sky": "Sternenhimmel",
+        "Romantic": "Romantisch",
+        "Disco": "Disco",
+        "Rainbow": "Regenbogen",
+        "Movie": "Film",
+        "Christmas": "Weihnachten",
+        "Flowing": "Fließend",
+        "Sleeping": "Schlafen",
+        "Ocean": "Ozean",
+        "Forest": "Wald",
+        "Reading": "Lesen",
+        "Working": "Arbeiten",
+        "Dazzle": "Blendend",
+        "Gentle": "Sanft",
+        "Wedding": "Hochzeit",
+        "Snow": "Schnee",
+        "Fire": "Feuer",
+        "Lightning": "Blitz",
+        "Valentine's Day": "Valentinstag",
+        "Halloween": "Halloween",
+        "Warning": "Warnung",
+      },
+      "effectSpec": {
+        "colors": {
+                "multicolor": "mehrfarbig",
+                "red": "Rot",
+                "green": "Grün",
+                "blue": "Blau",
+                "yellow": "Gelb",
+                "cyan": "Türkis",
+                "purple": "Lila",
+                "white": "Weiß"
+        },
+        "sep": ", ",
+        "colon": ": ",
+        "and": "{a} und {b}",
+        "dotOn": "{a}punkt auf {b}",
+        "on": "{a} auf {b}",
+        "sixTo": "sechs Farben zu {c}"
+      },
+    },
+    "es": {
+      "language": "Idioma",
+      "languageName": "Español",
+      "app.title": "Control de lámpara JSK-P22",
+      "nav.color": "Color",
+      "nav.effects": "Efectos",
+      "nav.music": "Música",
+      "nav.schedule": "Programación",
+      "nav.ambilight": "Luz ambiental",
+      "nav.settings": "Ajustes",
+      "settings.title": "Ajustes",
+      "settings.languageDescription": "Elige el idioma de la aplicación.",
+      "settings.trayTitle": "Mantener en la bandeja del sistema",
+      "settings.trayDescription": "Al cerrar la ventana, la aplicación se oculta en la bandeja del sistema. Usa su menú para abrirla, desconectar la lámpara o salir.",
+      "settings.autoConnectTitle": "Volver a conectarse automáticamente a la última lámpara",
+      "settings.autoConnectDescription": "La aplicación se reconecta al iniciarse y tras una desconexión inesperada, y sigue intentándolo mientras la lámpara esté fuera de alcance. Si Ambilight estaba en marcha, se reanuda. Conéctate una vez a la lámpara para que la aplicación la recuerde.",
+      "tray.open": "Abrir aplicación",
+      "tray.startSync": "Iniciar sincronización",
+      "tray.stopSync": "Detener sincronización",
+      "tray.disconnect": "Desconectar la lámpara",
+      "tray.connect": "Abrir para conectar",
+      "tray.turnOn": "Encender lámpara",
+      "tray.turnOff": "Apagar lámpara",
+      "tray.quit": "Salir",
+      "connection.disconnected": "Desconectado",
+      "connection.connect": "Conectar",
+      "connection.reconnect": "Volver a conectar",
+      "connection.disconnect": "Desconectar",
+      "connection.connecting": "Conectando…",
+      "connection.connected": "Conectado a {name}",
+      "connection.disconnectedStatus": "Desconectado",
+      "connection.noBluetooth": "Web Bluetooth no está disponible en este navegador.",
+      "connection.bluetoothOff": "Bluetooth está desactivado. Actívalo en la configuración de Windows y vuelve a intentarlo.",
+      "connection.openBluetoothSettings": "Abrir la configuración de Bluetooth",
+      "connection.settingsFailed": "No se pudo abrir la configuración de Bluetooth: {message}",
+      "connection.noDevice": "No se ha seleccionado ningún dispositivo o no ofrece el servicio 0xFFF0. Comprueba que Bluetooth esté activado y que la lámpara esté encendida y cerca.",
+      "connection.failed": "No se pudo conectar: {message}",
+      "connection.autoConnectNoDevice": "Conecta una lámpara manualmente una vez para activar la reconexión automática.",
+      "connection.autoConnectFailed": "No se pudo reconectar automáticamente: {message}",
+      "connection.writeFailed": "Error al escribir: {message}",
+      "power.title": "Encendido",
+      "power.description": "Enciende o apaga la lámpara. El estado muestra el último comando enviado; la lámpara no informa de su estado de encendido.",
+      "power.on": "Encender",
+      "power.off": "Apagar",
+      "brightness.title": "Brillo",
+      "brightness.description": "Nivel de brillo de la lámpara.",
+      "color.pick": "Elegir un color",
+      "color.wheelLabel": "Rueda de color: arrastra o usa las flechas para elegir el tono y la saturación",
+      "color.hexLabel": "Código de color hexadecimal",
+      "effects.title": "Efectos",
+      "effects.nowPlaying": "Efecto actual",
+      "effects.stop": "Detener efecto",
+      "effects.colorDisabled": "El selector de color está desactivado mientras se reproduce un efecto.",
+      "effects.none": "Ninguno",
+      "effects.speed": "Velocidad del efecto",
+      "effects.speedDescription": "Velocidad a la que se reproduce el efecto.",
+      "effects.search": "Buscar efectos",
+      "effects.categories": "Categorías de efectos",
+      "effects.scrollLeft": "Desplazar las categorías a la izquierda",
+      "effects.scrollRight": "Desplazar las categorías a la derecha",
+      "effects.colors": "Filtrar por color",
+      "effects.all": "Todos",
+      "effects.noMatches": "No hay efectos que coincidan.",
+      "effects.onlyColor": "Solo efectos en color {color}",
+      "effects.multicolor": "Multicolor",
+      "music.title": "Música",
+      "music.sync": "Sincronización con música",
+      "music.description": "La lámpara reacciona al sonido que capta su micrófono integrado.",
+      "music.unknown": "Desconocido",
+      "music.running": "En marcha",
+      "music.stopped": "Detenido",
+      "music.start": "Iniciar",
+      "music.stop": "Detener",
+      "music.mode": "Modo",
+      "music.modeDescription": "Cómo reacciona la lámpara al sonido.",
+      "music.eqEnergetic": "Enérgico",
+      "music.eqRhythm": "Ritmo",
+      "music.eqSpectrum": "Espectro",
+      "music.eqRolling": "Rodante",
+      "music.eqEnergetic2": "Enérgico 2",
+      "music.eqRhythm2": "Ritmo 2",
+      "music.eqSpectrum2": "Espectro 2",
+      "music.eqRolling2": "Rodante 2",
+      "music.sensitivity": "Sensibilidad",
+      "music.sensitivityDescription": "Con un valor más alto, la lámpara reacciona a sonidos más suaves.",
+      "music.noMicrophone": "Este modelo no tiene micrófono.",
+      "schedule.title": "Programación",
+      "schedule.timers": "Temporizadores",
+      "schedule.on": "Encendido",
+      "schedule.off": "Apagado",
+      "schedule.enabled": "Activado",
+      "schedule.repeat": "Repetir",
+      "schedule.everyDay": "todos los días",
+      "schedule.noDays": "ningún día",
+      "schedule.connectFirst": "Conecta primero la lámpara",
+      "schedule.chooseTime": "Elige una hora y al menos un día",
+      "schedule.notSet": "Sin configurar",
+      "schedule.reading": "Leyendo de la lámpara…",
+      "schedule.noReport": "La lámpara no ha informado de ningún horario.",
+      "schedule.readFailed": "Error al leer: {message}",
+      "schedule.dayMon": "Lunes",
+      "schedule.dayTue": "Martes",
+      "schedule.dayWed": "Miércoles",
+      "schedule.dayThu": "Jueves",
+      "schedule.dayFri": "Viernes",
+      "schedule.daySat": "Sábado",
+      "schedule.daySun": "Domingo",
+      "schedule.shortMon": "L",
+      "schedule.shortTue": "M",
+      "schedule.shortWed": "X",
+      "schedule.shortThu": "J",
+      "schedule.shortFri": "V",
+      "schedule.shortSat": "S",
+      "schedule.shortSun": "D",
+      "category.special": "Especial",
+      "category.jump": "Saltos y estrobos",
+      "category.fade": "Fundidos y transiciones",
+      "category.marquee": "Letrero luminoso",
+      "category.race": "Carreras y ondas",
+      "category.flush": "Barridos y cortinas",
+      "category.water": "Agua",
+      "category.flow": "Flujo",
+      "category.tail": "Estela",
+      "category.running": "En movimiento",
+      "category.runningReverse": "Movimiento inverso",
+      "category.scenes": "Escenas",
+      "picker.title": "Elige tu lámpara",
+      "picker.searchingHint": "Buscando. Las lámparas suelen llamarse MELK-.",
+      "picker.pickHint": "Elige tu lámpara de la lista.",
+      "picker.rangeHint": "Comprueba que la lámpara esté encendida y dentro del alcance.",
+      "picker.cancel": "Cancelar",
+      "picker.unnamed": "Dispositivo sin nombre",
+      "picker.searching": "Buscando dispositivos cercanos…",
+      "ambi.sync.heading": "Ambilight",
+      "ambi.sync.preview": "Color actual de la lámpara",
+      "ambi.status.notConnected": "Sin conexión",
+      "ambi.status.lampOff": "La lámpara figura como apagada. Enciéndela antes de iniciar Ambilight.",
+      "ambi.status.syncing": "Sincronizando",
+      "ambi.status.stopped": "Detenida",
+      "ambi.status.captureFailed": "Error al capturar la pantalla: {message}",
+      "ambi.status.screensFailed": "No se pudieron cargar las pantallas: {message}",
+      "ambi.button.startSync": "Iniciar sincronización",
+      "ambi.button.stopSync": "Detener sincronización",
+      "ambi.button.reset": "Restablecer",
+      "ambi.section.capture": "Captura",
+      "ambi.capture.screen": "Pantalla",
+      "ambi.capture.screenDescription": "Elige la pantalla que sigue la lámpara.",
+      "ambi.capture.screenAria": "Pantalla que se seguirá",
+      "ambi.capture.ignoreBars": "Ignorar las franjas negras",
+      "ambi.capture.ignoreBarsDescription": "No tener en cuenta las franjas negras al determinar el color de la pantalla.",
+      "ambi.capture.ignoreBarsAria": "Ignorar las franjas negras",
+      "ambi.section.hdr": "HDR",
+      "ambi.hdr.display": "Aplicar corrección HDR",
+      "ambi.hdr.displayAria": "Aplicar corrección HDR",
+      "ambi.hdr.manualNote": "Windows no informa a la aplicación de si una pantalla usa HDR, por lo que es un ajuste manual. Puede atenuar los colores apagados, pero no recupera los detalles perdidos durante la captura.",
+      "ambi.hdr.correction": "Intensidad de la corrección",
+      "ambi.hdr.correctionDescription": "Ajusta la gamma y el color para compensar una captura HDR apagada.",
+      "ambi.hdr.correctionAria": "Intensidad de la corrección HDR",
+      "ambi.section.calibration": "Calibración del color",
+      "ambi.calibration.description": "Ajusta la lámpara para que coincida con la vista previa. La vista previa no cambia.",
+      "ambi.calibration.red": "Salida roja",
+      "ambi.calibration.redDescription": "0 % apaga el rojo; 100 % lo deja sin cambios.",
+      "ambi.calibration.redAria": "Calibración del rojo",
+      "ambi.calibration.green": "Salida verde",
+      "ambi.calibration.greenDescription": "0 % apaga el verde; 100 % lo deja sin cambios.",
+      "ambi.calibration.greenAria": "Calibración del verde",
+      "ambi.calibration.blue": "Salida azul",
+      "ambi.calibration.blueDescription": "0 % apaga el azul; 100 % lo deja sin cambios.",
+      "ambi.calibration.blueAria": "Calibración del azul",
+      "ambi.section.response": "Respuesta",
+      "ambi.response.fps": "Actualizaciones por segundo",
+      "ambi.response.fpsDescription": "Una frecuencia mayor actualiza más rápido, pero exige más al procesador y al Bluetooth.",
+      "ambi.response.fpsAria": "Actualizaciones por segundo",
+      "ambi.response.smoothing": "Suavizado",
+      "ambi.response.smoothingDescription": "Los valores altos hacen las transiciones más suaves y lentas.",
+      "ambi.response.smoothingAria": "Suavizado",
+      "ambi.response.vividness": "Intensidad del color",
+      "ambi.response.vividnessDescription": "Auméntala para obtener colores más vivos; redúcela para un aspecto más natural.",
+      "ambi.response.vividnessAria": "Intensidad del color",
+      "ambi.response.brightness": "Brillo",
+      "ambi.response.brightnessDescription": "Limita el brillo de la lámpara. La vista previa no cambia.",
+      "ambi.response.brightnessAria": "Brillo",
+      "ambi.response.allowTurnOff": "Permitir que la luz se apague por completo",
+      "ambi.response.allowTurnOffDescription": "Si se desactiva, las escenas negras mostrarán blanco con el brillo mínimo.",
+      "ambi.response.reset": "Restablecer",
+      "ambi.wizard.open": "Asistente de calibración",
+      "ambi.wizard.title": "Asistente de calibración del color",
+      "ambi.wizard.intro": "La sincronización se pausa durante la prueba y se reanuda al cerrar el asistente.",
+      "ambi.wizard.progress": "Prueba {current} de {total}",
+      "ambi.wizard.adjustHint": "Ajusta los canales hasta que la lámpara coincida con el color de referencia.",
+      "ambi.wizard.reference": "Color de referencia",
+      "ambi.wizard.sent": "Color enviado a la lámpara",
+      "ambi.wizard.cancel": "Cancelar",
+      "ambi.wizard.previous": "Anterior",
+      "ambi.wizard.next": "Siguiente",
+      "ambi.wizard.finish": "Finalizar",
+      "ambi.wizard.noConnection": "Conecta la lámpara para iniciar la calibración.",
+      "ambi.wizard.disconnected": "La lámpara se ha desconectado. Vuelve a conectarla para continuar.",
+      "ambi.wizard.color.red": "Rojo",
+      "ambi.wizard.color.redDescription": "Ajusta el rojo de la lámpara para que coincida con la referencia.",
+      "ambi.wizard.color.orange": "Naranja",
+      "ambi.wizard.color.orangeDescription": "Comprueba el equilibrio entre el rojo y el verde.",
+      "ambi.wizard.color.yellow": "Amarillo",
+      "ambi.wizard.color.yellowDescription": "Comprueba la salida combinada de rojo y verde.",
+      "ambi.wizard.color.green": "Verde",
+      "ambi.wizard.color.greenDescription": "Ajusta el verde de la lámpara para que coincida con la referencia.",
+      "ambi.wizard.color.cyan": "Cian",
+      "ambi.wizard.color.cyanDescription": "Comprueba la salida combinada de verde y azul.",
+      "ambi.wizard.color.blue": "Azul",
+      "ambi.wizard.color.blueDescription": "Ajusta el azul de la lámpara para que coincida con la referencia.",
+      "ambi.wizard.color.purple": "Morado",
+      "ambi.wizard.color.purpleDescription": "Comprueba el equilibrio entre el rojo y el azul.",
+      "ambi.wizard.color.pink": "Rosa",
+      "ambi.wizard.color.pinkDescription": "Ajusta la mezcla más clara de rojo y azul.",
+      "ambi.capture.dominant": "Dar prioridad a los colores dominantes",
+      "ambi.capture.dominantDescription": "Da más peso a las zonas vivas que a las grises, para evitar un promedio apagado de toda la pantalla.",
+      "ambi.status.recovering": "Restableciendo la captura de pantalla…",
+      "schedule.summaryOn": "Enciende la lámpara a las {time} ({days})",
+      "schedule.summaryOff": "Apaga la lámpara a las {time} ({days})",
+      "schedule.summaryDisabled": "Desactivado: {time} ({days})",
+      "schedule.weekdays": "entre semana",
+      "schedule.weekends": "fines de semana",
+      "error.outOfRange": "La lámpara está fuera de alcance o apagada.",
+      "error.connection": "No se pudo conectar con la lámpara. Comprueba que esté encendida, al alcance y sin conexión con otra aplicación.",
+      "connection.autoConnectNotFound": "No se encontró la última lámpara cerca. Se seguirá intentando.",
+      "effectWords": {
+        "Auto play": "Reproducción automática",
+        "Magic reverse": "Magia inversa",
+        "Magic": "Magia",
+        "Energy": "Energía",
+        "Jump": "Salto",
+        "Strobe": "Estrobo",
+        "Fade": "Fundido",
+        "Transition reverse": "Transición inversa",
+        "Transition": "Transición",
+        "Marquee": "Letrero luminoso",
+        "Race reverse": "Carrera inversa",
+        "Race": "Carrera",
+        "Wave reverse": "Onda inversa",
+        "Wave": "Onda",
+        "Flush close": "Barrido hacia dentro",
+        "Flush open": "Barrido hacia fuera",
+        "Flush reverse": "Barrido inverso",
+        "Flush": "Barrido",
+        "Curtain close": "Cerrar cortina",
+        "Curtain open": "Abrir cortina",
+        "Curtain": "Cortina",
+        "Water reverse": "Agua inversa",
+        "Water": "Agua",
+        "Flow reverse": "Flujo inverso",
+        "Flow": "Flujo",
+        "Tail reverse": "Estela inversa",
+        "Tail": "Estela",
+        "Running reverse": "Persecución inversa",
+        "Running": "Persecución",
+        "Sunrise": "Amanecer",
+        "Sunset": "Atardecer",
+        "Birthday": "Cumpleaños",
+        "Candlelight": "Luz de vela",
+        "Fireworks": "Fuegos artificiales",
+        "Party": "Fiesta",
+        "Destiny": "Destino",
+        "Starry sky": "Cielo estrellado",
+        "Romantic": "Romántico",
+        "Disco": "Discoteca",
+        "Rainbow": "Arcoíris",
+        "Movie": "Cine",
+        "Christmas": "Navidad",
+        "Flowing": "Fluido",
+        "Sleeping": "Sueño",
+        "Ocean": "Océano",
+        "Forest": "Bosque",
+        "Reading": "Lectura",
+        "Working": "Trabajo",
+        "Dazzle": "Deslumbrante",
+        "Gentle": "Suave",
+        "Wedding": "Boda",
+        "Snow": "Nieve",
+        "Fire": "Fuego",
+        "Lightning": "Relámpago",
+        "Valentine's Day": "San Valentín",
+        "Halloween": "Halloween",
+        "Warning": "Aviso",
+      },
+      "effectSpec": {
+        "colors": {
+                "multicolor": "multicolor",
+                "red": "rojo",
+                "green": "verde",
+                "blue": "azul",
+                "yellow": "amarillo",
+                "cyan": "cian",
+                "purple": "morado",
+                "white": "blanco"
+        },
+        "sep": ", ",
+        "colon": ": ",
+        "and": "{a} y {b}",
+        "dotOn": "punto {a} sobre {b}",
+        "on": "{a} sobre {b}",
+        "sixTo": "seis colores hacia {c}"
+      },
+    },
+    "it": {
+      "language": "Lingua",
+      "languageName": "Italiano",
+      "app.title": "Controllo lampada JSK-P22",
+      "nav.color": "Colore",
+      "nav.effects": "Effetti",
+      "nav.music": "Musica",
+      "nav.schedule": "Programmazione",
+      "nav.ambilight": "Luce ambientale",
+      "nav.settings": "Impostazioni",
+      "settings.title": "Impostazioni",
+      "settings.languageDescription": "Scegli la lingua dell’applicazione.",
+      "settings.trayTitle": "Mantieni nell’area di notifica",
+      "settings.trayDescription": "Quando chiudi la finestra, l’applicazione viene nascosta nell’area di notifica. Usa il menu per aprirla, disconnettere la lampada o uscire.",
+      "settings.autoConnectTitle": "Riconnetti automaticamente all’ultima lampada",
+      "settings.autoConnectDescription": "L’app si riconnette all’avvio e dopo una disconnessione imprevista e continua a provare finché la lampada è fuori portata. Se Ambilight era attivo, riprende. Collegati una volta alla lampada così l’app può ricordarla.",
+      "tray.open": "Apri applicazione",
+      "tray.startSync": "Avvia sincronizzazione",
+      "tray.stopSync": "Interrompi sincronizzazione",
+      "tray.disconnect": "Disconnetti la lampada",
+      "tray.connect": "Apri per connetterti",
+      "tray.turnOn": "Accendi la lampada",
+      "tray.turnOff": "Spegni la lampada",
+      "tray.quit": "Esci",
+      "connection.disconnected": "Non connessa",
+      "connection.connect": "Connetti",
+      "connection.reconnect": "Riconnetti",
+      "connection.disconnect": "Disconnetti",
+      "connection.connecting": "Connessione in corso…",
+      "connection.connected": "Connessa a {name}",
+      "connection.disconnectedStatus": "Disconnessa",
+      "connection.noBluetooth": "Web Bluetooth non è disponibile in questo browser.",
+      "connection.bluetoothOff": "Il Bluetooth è disattivato. Attivalo nelle impostazioni di Windows e riprova.",
+      "connection.openBluetoothSettings": "Apri le impostazioni Bluetooth",
+      "connection.settingsFailed": "Impossibile aprire le impostazioni Bluetooth: {message}",
+      "connection.noDevice": "Nessun dispositivo selezionato o servizio 0xFFF0 non disponibile. Verifica che il Bluetooth sia attivo e che la lampada sia accesa e vicina.",
+      "connection.failed": "Connessione non riuscita: {message}",
+      "connection.autoConnectNoDevice": "Connetti una lampada manualmente una volta per attivare la riconnessione automatica.",
+      "connection.autoConnectFailed": "Riconnessione automatica non riuscita: {message}",
+      "connection.writeFailed": "Scrittura non riuscita: {message}",
+      "power.title": "Alimentazione",
+      "power.description": "Accendi o spegni la lampada. Lo stato indica l’ultimo comando inviato; la lampada non comunica lo stato dell’alimentazione.",
+      "power.on": "Accendi",
+      "power.off": "Spegni",
+      "brightness.title": "Luminosità",
+      "brightness.description": "Livello di luminosità della lampada.",
+      "color.pick": "Scegli un colore",
+      "color.wheelLabel": "Ruota dei colori: trascina o usa le frecce per scegliere tonalità e saturazione",
+      "color.hexLabel": "Codice colore esadecimale",
+      "effects.title": "Effetti",
+      "effects.nowPlaying": "Effetto in corso",
+      "effects.stop": "Interrompi effetto",
+      "effects.colorDisabled": "Il selettore colore è disattivato mentre è in esecuzione un effetto.",
+      "effects.none": "Nessuno",
+      "effects.speed": "Velocità dell’effetto",
+      "effects.speedDescription": "Velocità di riproduzione dell’effetto.",
+      "effects.search": "Cerca effetti",
+      "effects.categories": "Categorie di effetti",
+      "effects.scrollLeft": "Scorri le categorie a sinistra",
+      "effects.scrollRight": "Scorri le categorie a destra",
+      "effects.colors": "Filtra per colore",
+      "effects.all": "Tutti",
+      "effects.noMatches": "Nessun effetto corrispondente.",
+      "effects.onlyColor": "Solo effetti di colore {color}",
+      "effects.multicolor": "Multicolore",
+      "music.title": "Musica",
+      "music.sync": "Sincronizzazione con la musica",
+      "music.description": "La lampada reagisce ai suoni rilevati dal microfono integrato.",
+      "music.unknown": "Sconosciuto",
+      "music.running": "In esecuzione",
+      "music.stopped": "Interrotto",
+      "music.start": "Avvia",
+      "music.stop": "Interrompi",
+      "music.mode": "Modalità",
+      "music.modeDescription": "Come reagisce la lampada ai suoni.",
+      "music.eqEnergetic": "Energetica",
+      "music.eqRhythm": "Ritmo",
+      "music.eqSpectrum": "Spettro",
+      "music.eqRolling": "Scorrimento",
+      "music.eqEnergetic2": "Energetica 2",
+      "music.eqRhythm2": "Ritmo 2",
+      "music.eqSpectrum2": "Spettro 2",
+      "music.eqRolling2": "Scorrimento 2",
+      "music.sensitivity": "Sensibilità",
+      "music.sensitivityDescription": "Un valore più alto fa reagire la lampada anche ai suoni più deboli.",
+      "music.noMicrophone": "Questo modello non ha un microfono.",
+      "schedule.title": "Programmazione",
+      "schedule.timers": "Timer",
+      "schedule.on": "Accensione",
+      "schedule.off": "Spegnimento",
+      "schedule.enabled": "Attivato",
+      "schedule.repeat": "Ripeti",
+      "schedule.everyDay": "ogni giorno",
+      "schedule.noDays": "nessun giorno",
+      "schedule.connectFirst": "Connetti prima la lampada",
+      "schedule.chooseTime": "Scegli un orario e almeno un giorno",
+      "schedule.notSet": "Non impostato",
+      "schedule.reading": "Lettura dalla lampada…",
+      "schedule.noReport": "La lampada non ha comunicato alcun programma.",
+      "schedule.readFailed": "Lettura non riuscita: {message}",
+      "schedule.dayMon": "Lunedì",
+      "schedule.dayTue": "Martedì",
+      "schedule.dayWed": "Mercoledì",
+      "schedule.dayThu": "Giovedì",
+      "schedule.dayFri": "Venerdì",
+      "schedule.daySat": "Sabato",
+      "schedule.daySun": "Domenica",
+      "schedule.shortMon": "L",
+      "schedule.shortTue": "M",
+      "schedule.shortWed": "M",
+      "schedule.shortThu": "G",
+      "schedule.shortFri": "V",
+      "schedule.shortSat": "S",
+      "schedule.shortSun": "D",
+      "category.special": "Speciale",
+      "category.jump": "Salti e strobo",
+      "category.fade": "Dissolvenze e transizioni",
+      "category.marquee": "Scorrimento",
+      "category.race": "Gare e onde",
+      "category.flush": "Scansioni e tendine",
+      "category.water": "Acqua",
+      "category.flow": "Flusso",
+      "category.tail": "Scia",
+      "category.running": "Scorrimento",
+      "category.runningReverse": "Scorrimento inverso",
+      "category.scenes": "Scene",
+      "picker.title": "Scegli la lampada",
+      "picker.searchingHint": "Ricerca in corso. Le lampade si chiamano solitamente MELK-.",
+      "picker.pickHint": "Scegli la lampada dall’elenco.",
+      "picker.rangeHint": "Assicurati che la lampada sia accesa e nelle vicinanze.",
+      "picker.cancel": "Annulla",
+      "picker.unnamed": "Dispositivo senza nome",
+      "picker.searching": "Ricerca dei dispositivi nelle vicinanze…",
+      "ambi.sync.heading": "Ambilight",
+      "ambi.sync.preview": "Colore attuale della lampada",
+      "ambi.status.notConnected": "Non connessa",
+      "ambi.status.lampOff": "La lampada risulta spenta. Accendila prima di avviare Ambilight.",
+      "ambi.status.syncing": "Sincronizzazione in corso",
+      "ambi.status.stopped": "Interrotta",
+      "ambi.status.captureFailed": "Acquisizione dello schermo non riuscita: {message}",
+      "ambi.status.screensFailed": "Impossibile caricare gli schermi: {message}",
+      "ambi.button.startSync": "Avvia sincronizzazione",
+      "ambi.button.stopSync": "Interrompi sincronizzazione",
+      "ambi.button.reset": "Ripristina",
+      "ambi.section.capture": "Acquisizione",
+      "ambi.capture.screen": "Schermo",
+      "ambi.capture.screenDescription": "Scegli lo schermo che la lampada segue.",
+      "ambi.capture.screenAria": "Schermo da seguire",
+      "ambi.capture.ignoreBars": "Ignora le bande nere",
+      "ambi.capture.ignoreBarsDescription": "Non considerare le bande nere nel determinare il colore dello schermo.",
+      "ambi.capture.ignoreBarsAria": "Ignora le bande nere",
+      "ambi.section.hdr": "HDR",
+      "ambi.hdr.display": "Applica correzione HDR",
+      "ambi.hdr.displayAria": "Applica correzione HDR",
+      "ambi.hdr.manualNote": "Windows non comunica all’app se uno schermo usa l’HDR, quindi si tratta di una regolazione manuale. Può ridurre i colori sbiaditi, ma non recupera i dettagli persi durante l’acquisizione.",
+      "ambi.hdr.correction": "Intensità della correzione",
+      "ambi.hdr.correctionDescription": "Regola gamma e colore per compensare un’acquisizione HDR sbiadita.",
+      "ambi.hdr.correctionAria": "Intensità della correzione HDR",
+      "ambi.section.calibration": "Calibrazione del colore",
+      "ambi.calibration.description": "Regola la lampada in base all’anteprima. L’anteprima resta invariata.",
+      "ambi.calibration.red": "Uscita rossa",
+      "ambi.calibration.redDescription": "0% disattiva il rosso; 100% lo lascia invariato.",
+      "ambi.calibration.redAria": "Calibrazione del rosso",
+      "ambi.calibration.green": "Uscita verde",
+      "ambi.calibration.greenDescription": "0% disattiva il verde; 100% lo lascia invariato.",
+      "ambi.calibration.greenAria": "Calibrazione del verde",
+      "ambi.calibration.blue": "Uscita blu",
+      "ambi.calibration.blueDescription": "0% disattiva il blu; 100% lo lascia invariato.",
+      "ambi.calibration.blueAria": "Calibrazione del blu",
+      "ambi.section.response": "Risposta",
+      "ambi.response.fps": "Aggiornamenti al secondo",
+      "ambi.response.fpsDescription": "Valori più alti aggiornano più rapidamente, ma usano più CPU e Bluetooth.",
+      "ambi.response.fpsAria": "Aggiornamenti al secondo",
+      "ambi.response.smoothing": "Fluidità",
+      "ambi.response.smoothingDescription": "Valori più alti rendono le transizioni più fluide e lente.",
+      "ambi.response.smoothingAria": "Fluidità",
+      "ambi.response.vividness": "Vividezza",
+      "ambi.response.vividnessDescription": "Aumentala per colori più intensi; riducila per un aspetto più naturale.",
+      "ambi.response.vividnessAria": "Vividezza",
+      "ambi.response.brightness": "Luminosità",
+      "ambi.response.brightnessDescription": "Limita la luminosità della lampada. L’anteprima resta invariata.",
+      "ambi.response.brightnessAria": "Luminosità",
+      "ambi.response.allowTurnOff": "Consenti lo spegnimento completo",
+      "ambi.response.allowTurnOffDescription": "Se disattivato, nelle scene nere la lampada mostra bianco alla luminosità minima.",
+      "ambi.response.reset": "Ripristina",
+      "ambi.wizard.open": "Procedura guidata di calibrazione",
+      "ambi.wizard.title": "Procedura guidata di calibrazione del colore",
+      "ambi.wizard.intro": "La sincronizzazione si interrompe durante il test e riprende quando chiudi la procedura guidata.",
+      "ambi.wizard.progress": "Test {current} di {total}",
+      "ambi.wizard.adjustHint": "Regola i canali finché la lampada non corrisponde al colore di riferimento.",
+      "ambi.wizard.reference": "Colore di riferimento",
+      "ambi.wizard.sent": "Colore inviato alla lampada",
+      "ambi.wizard.cancel": "Annulla",
+      "ambi.wizard.previous": "Indietro",
+      "ambi.wizard.next": "Avanti",
+      "ambi.wizard.finish": "Fine",
+      "ambi.wizard.noConnection": "Connetti la lampada per avviare la calibrazione.",
+      "ambi.wizard.disconnected": "Lampada disconnessa. Riconnettila per continuare.",
+      "ambi.wizard.color.red": "Rosso",
+      "ambi.wizard.color.redDescription": "Regola il rosso della lampada in base al riferimento.",
+      "ambi.wizard.color.orange": "Arancione",
+      "ambi.wizard.color.orangeDescription": "Controlla il bilanciamento tra rosso e verde.",
+      "ambi.wizard.color.yellow": "Giallo",
+      "ambi.wizard.color.yellowDescription": "Controlla l’uscita combinata di rosso e verde.",
+      "ambi.wizard.color.green": "Verde",
+      "ambi.wizard.color.greenDescription": "Regola il verde della lampada in base al riferimento.",
+      "ambi.wizard.color.cyan": "Ciano",
+      "ambi.wizard.color.cyanDescription": "Controlla l’uscita combinata di verde e blu.",
+      "ambi.wizard.color.blue": "Blu",
+      "ambi.wizard.color.blueDescription": "Regola il blu della lampada in base al riferimento.",
+      "ambi.wizard.color.purple": "Viola",
+      "ambi.wizard.color.purpleDescription": "Controlla il bilanciamento tra rosso e blu.",
+      "ambi.wizard.color.pink": "Rosa",
+      "ambi.wizard.color.pinkDescription": "Regola la miscela più chiara di rosso e blu.",
+      "ambi.capture.dominant": "Privilegia i colori dominanti",
+      "ambi.capture.dominantDescription": "Dà più peso alle zone vivaci rispetto a quelle grigie, per evitare una media spenta dell’intero schermo.",
+      "ambi.status.recovering": "Ripristino dell’acquisizione dello schermo…",
+      "schedule.summaryOn": "Accende la lampada alle {time} ({days})",
+      "schedule.summaryOff": "Spegne la lampada alle {time} ({days})",
+      "schedule.summaryDisabled": "Disattivato: {time} ({days})",
+      "schedule.weekdays": "giorni feriali",
+      "schedule.weekends": "fine settimana",
+      "error.outOfRange": "La lampada è fuori portata o spenta.",
+      "error.connection": "Impossibile raggiungere la lampada. Verifica che sia accesa, nel raggio d’azione e non collegata a un’altra app.",
+      "connection.autoConnectNotFound": "Non è stata trovata la lampada usata l’ultima volta. Si continuerà a provare.",
+      "effectWords": {
+        "Auto play": "Riproduzione automatica",
+        "Magic reverse": "Magia inversa",
+        "Magic": "Magia",
+        "Energy": "Energia",
+        "Jump": "Salto",
+        "Strobe": "Strobo",
+        "Fade": "Dissolvenza",
+        "Transition reverse": "Transizione inversa",
+        "Transition": "Transizione",
+        "Marquee": "Insegna luminosa",
+        "Race reverse": "Corsa inversa",
+        "Race": "Corsa",
+        "Wave reverse": "Onda inversa",
+        "Wave": "Onda",
+        "Flush close": "Scansione chiusa",
+        "Flush open": "Scansione aperta",
+        "Flush reverse": "Scansione inversa",
+        "Flush": "Scansione",
+        "Curtain close": "Chiusura della tendina",
+        "Curtain open": "Apertura della tendina",
+        "Curtain": "Tendina",
+        "Water reverse": "Acqua inversa",
+        "Water": "Acqua",
+        "Flow reverse": "Flusso inverso",
+        "Flow": "Flusso",
+        "Tail reverse": "Scia inversa",
+        "Tail": "Scia",
+        "Running reverse": "Scorrimento inverso",
+        "Running": "Scorrimento",
+        "Sunrise": "Alba",
+        "Sunset": "Tramonto",
+        "Birthday": "Compleanno",
+        "Candlelight": "Luce di candela",
+        "Fireworks": "Fuochi d’artificio",
+        "Party": "Festa",
+        "Destiny": "Destino",
+        "Starry sky": "Cielo stellato",
+        "Romantic": "Romantico",
+        "Disco": "Discoteca",
+        "Rainbow": "Arcobaleno",
+        "Movie": "Film",
+        "Christmas": "Natale",
+        "Flowing": "Fluido",
+        "Sleeping": "Sonno",
+        "Ocean": "Oceano",
+        "Forest": "Foresta",
+        "Reading": "Lettura",
+        "Working": "Lavoro",
+        "Dazzle": "Abbagliante",
+        "Gentle": "Delicato",
+        "Wedding": "Matrimonio",
+        "Snow": "Neve",
+        "Fire": "Fuoco",
+        "Lightning": "Fulmine",
+        "Valentine's Day": "San Valentino",
+        "Halloween": "Halloween",
+        "Warning": "Avviso",
+      },
+      "effectSpec": {
+        "colors": {
+                "multicolor": "multicolore",
+                "red": "rosso",
+                "green": "verde",
+                "blue": "blu",
+                "yellow": "giallo",
+                "cyan": "ciano",
+                "purple": "viola",
+                "white": "bianco"
+        },
+        "sep": ", ",
+        "colon": ": ",
+        "and": "{a} e {b}",
+        "dotOn": "punto {a} su {b}",
+        "on": "{a} su {b}",
+        "sixTo": "sei colori verso {c}"
+      },
+    },
+    "pt-BR": {
+      "language": "Idioma",
+      "languageName": "Português (Brasil)",
+      "app.title": "Controle da lâmpada JSK-P22",
+      "nav.color": "Cor",
+      "nav.effects": "Efeitos",
+      "nav.music": "Música",
+      "nav.schedule": "Programação",
+      "nav.ambilight": "Luz ambiente",
+      "nav.settings": "Configurações",
+      "settings.title": "Configurações",
+      "settings.languageDescription": "Escolha o idioma do aplicativo.",
+      "settings.trayTitle": "Manter na bandeja do sistema",
+      "settings.trayDescription": "Ao fechar a janela, o aplicativo fica oculto na bandeja do sistema. Use o menu para abrir o aplicativo, desconectar a lâmpada ou sair.",
+      "settings.autoConnectTitle": "Reconectar automaticamente à última lâmpada",
+      "settings.autoConnectDescription": "O aplicativo se reconecta na inicialização e após uma desconexão inesperada, e continua tentando enquanto a lâmpada estiver fora de alcance. Se o Ambilight estava ativo, ele é retomado. Conecte-se à lâmpada uma vez para o aplicativo se lembrar dela.",
+      "tray.open": "Abrir aplicativo",
+      "tray.startSync": "Iniciar sincronização",
+      "tray.stopSync": "Parar sincronização",
+      "tray.disconnect": "Desconectar da lâmpada",
+      "tray.connect": "Abrir para conectar",
+      "tray.turnOn": "Acender a lâmpada",
+      "tray.turnOff": "Apagar a lâmpada",
+      "tray.quit": "Sair",
+      "connection.disconnected": "Desconectado",
+      "connection.connect": "Conectar",
+      "connection.reconnect": "Reconectar",
+      "connection.disconnect": "Desconectar",
+      "connection.connecting": "Conectando…",
+      "connection.connected": "Conectado a {name}",
+      "connection.disconnectedStatus": "Desconectado",
+      "connection.noBluetooth": "O Web Bluetooth não está disponível neste navegador.",
+      "connection.bluetoothOff": "O Bluetooth está desligado. Ative-o nas configurações do Windows e tente novamente.",
+      "connection.openBluetoothSettings": "Abrir configurações de Bluetooth",
+      "connection.settingsFailed": "Não foi possível abrir as configurações de Bluetooth: {message}",
+      "connection.noDevice": "Nenhum dispositivo selecionado ou serviço 0xFFF0 indisponível. Verifique se o Bluetooth está ativado e se a lâmpada está ligada e próxima.",
+      "connection.failed": "Não foi possível conectar: {message}",
+      "connection.autoConnectNoDevice": "Conecte uma lâmpada manualmente uma vez para ativar a reconexão automática.",
+      "connection.autoConnectFailed": "Não foi possível reconectar automaticamente: {message}",
+      "connection.writeFailed": "Falha ao gravar: {message}",
+      "power.title": "Energia",
+      "power.description": "Acenda ou apague a lâmpada. O status mostra o último comando enviado; a lâmpada não informa o próprio estado de energia.",
+      "power.on": "Ligar",
+      "power.off": "Desligar",
+      "brightness.title": "Brilho",
+      "brightness.description": "Nível de brilho da lâmpada.",
+      "color.pick": "Escolher uma cor",
+      "color.wheelLabel": "Roda de cores: arraste ou use as setas para escolher matiz e saturação",
+      "color.hexLabel": "Código de cor hexadecimal",
+      "effects.title": "Efeitos",
+      "effects.nowPlaying": "Efeito atual",
+      "effects.stop": "Parar efeito",
+      "effects.colorDisabled": "O seletor de cores fica desativado enquanto um efeito está em execução.",
+      "effects.none": "Nenhum",
+      "effects.speed": "Velocidade do efeito",
+      "effects.speedDescription": "Velocidade de reprodução do efeito.",
+      "effects.search": "Buscar efeitos",
+      "effects.categories": "Categorias de efeitos",
+      "effects.scrollLeft": "Rolar categorias para a esquerda",
+      "effects.scrollRight": "Rolar categorias para a direita",
+      "effects.colors": "Filtrar por cor",
+      "effects.all": "Todos",
+      "effects.noMatches": "Nenhum efeito encontrado.",
+      "effects.onlyColor": "Somente efeitos na cor {color}",
+      "effects.multicolor": "Multicolorido",
+      "music.title": "Música",
+      "music.sync": "Sincronização com música",
+      "music.description": "A lâmpada reage aos sons captados pelo microfone integrado.",
+      "music.unknown": "Desconhecido",
+      "music.running": "Em execução",
+      "music.stopped": "Parado",
+      "music.start": "Iniciar",
+      "music.stop": "Parar",
+      "music.mode": "Modo",
+      "music.modeDescription": "Como a lâmpada reage ao som.",
+      "music.eqEnergetic": "Energético",
+      "music.eqRhythm": "Ritmo",
+      "music.eqSpectrum": "Espectro",
+      "music.eqRolling": "Rolante",
+      "music.eqEnergetic2": "Energético 2",
+      "music.eqRhythm2": "Ritmo 2",
+      "music.eqSpectrum2": "Espectro 2",
+      "music.eqRolling2": "Rolante 2",
+      "music.sensitivity": "Sensibilidade",
+      "music.sensitivityDescription": "Um valor mais alto faz a lâmpada reagir a sons mais baixos.",
+      "music.noMicrophone": "Este modelo não tem microfone.",
+      "schedule.title": "Programação",
+      "schedule.timers": "Temporizadores",
+      "schedule.on": "Ligar",
+      "schedule.off": "Desligar",
+      "schedule.enabled": "Ativado",
+      "schedule.repeat": "Repetir",
+      "schedule.everyDay": "todos os dias",
+      "schedule.noDays": "nenhum dia",
+      "schedule.connectFirst": "Conecte a lâmpada primeiro",
+      "schedule.chooseTime": "Escolha um horário e pelo menos um dia",
+      "schedule.notSet": "Não definido",
+      "schedule.reading": "Lendo da lâmpada…",
+      "schedule.noReport": "A lâmpada não informou uma programação.",
+      "schedule.readFailed": "Falha ao ler: {message}",
+      "schedule.dayMon": "Segunda-feira",
+      "schedule.dayTue": "Terça-feira",
+      "schedule.dayWed": "Quarta-feira",
+      "schedule.dayThu": "Quinta-feira",
+      "schedule.dayFri": "Sexta-feira",
+      "schedule.daySat": "Sábado",
+      "schedule.daySun": "Domingo",
+      "schedule.shortMon": "S",
+      "schedule.shortTue": "T",
+      "schedule.shortWed": "Q",
+      "schedule.shortThu": "Q",
+      "schedule.shortFri": "S",
+      "schedule.shortSat": "S",
+      "schedule.shortSun": "D",
+      "category.special": "Especial",
+      "category.jump": "Saltos e estroboscópio",
+      "category.fade": "Desvanecimento e transição",
+      "category.marquee": "Letreiro",
+      "category.race": "Corrida e onda",
+      "category.flush": "Varredura e cortina",
+      "category.water": "Água",
+      "category.flow": "Fluxo",
+      "category.tail": "Rastro",
+      "category.running": "Corrida",
+      "category.runningReverse": "Corrida inversa",
+      "category.scenes": "Cenas",
+      "picker.title": "Escolha sua lâmpada",
+      "picker.searchingHint": "Buscando. As lâmpadas geralmente se chamam MELK-.",
+      "picker.pickHint": "Escolha sua lâmpada na lista.",
+      "picker.rangeHint": "Verifique se a lâmpada está ligada e dentro do alcance.",
+      "picker.cancel": "Cancelar",
+      "picker.unnamed": "Dispositivo sem nome",
+      "picker.searching": "Buscando dispositivos próximos…",
+      "ambi.sync.heading": "Ambilight",
+      "ambi.sync.preview": "Cor atual da lâmpada",
+      "ambi.status.notConnected": "Desconectada",
+      "ambi.status.lampOff": "A lâmpada está marcada como desligada. Ligue-a antes de iniciar o Ambilight.",
+      "ambi.status.syncing": "Sincronizando",
+      "ambi.status.stopped": "Parada",
+      "ambi.status.captureFailed": "Falha ao capturar a tela: {message}",
+      "ambi.status.screensFailed": "Não foi possível carregar as telas: {message}",
+      "ambi.button.startSync": "Iniciar sincronização",
+      "ambi.button.stopSync": "Parar sincronização",
+      "ambi.button.reset": "Redefinir",
+      "ambi.section.capture": "Captura",
+      "ambi.capture.screen": "Tela",
+      "ambi.capture.screenDescription": "Escolha a tela que a lâmpada acompanha.",
+      "ambi.capture.screenAria": "Tela a acompanhar",
+      "ambi.capture.ignoreBars": "Ignorar barras pretas",
+      "ambi.capture.ignoreBarsDescription": "Não considerar as barras pretas ao determinar a cor da tela.",
+      "ambi.capture.ignoreBarsAria": "Ignorar barras pretas",
+      "ambi.section.hdr": "HDR",
+      "ambi.hdr.display": "Aplicar correção HDR",
+      "ambi.hdr.displayAria": "Aplicar correção HDR",
+      "ambi.hdr.manualNote": "O Windows não informa ao aplicativo se uma tela usa HDR, então este é um ajuste manual. Ele pode reduzir cores desbotadas, mas não recupera detalhes perdidos durante a captura.",
+      "ambi.hdr.correction": "Intensidade da correção",
+      "ambi.hdr.correctionDescription": "Ajusta o gama e a cor para compensar uma captura HDR desbotada.",
+      "ambi.hdr.correctionAria": "Intensidade da correção HDR",
+      "ambi.section.calibration": "Calibração de cores",
+      "ambi.calibration.description": "Ajuste a lâmpada para combinar com a prévia. A prévia não muda.",
+      "ambi.calibration.red": "Saída vermelha",
+      "ambi.calibration.redDescription": "0% desativa o vermelho; 100% mantém o valor original.",
+      "ambi.calibration.redAria": "Calibração do vermelho",
+      "ambi.calibration.green": "Saída verde",
+      "ambi.calibration.greenDescription": "0% desativa o verde; 100% mantém o valor original.",
+      "ambi.calibration.greenAria": "Calibração do verde",
+      "ambi.calibration.blue": "Saída azul",
+      "ambi.calibration.blueDescription": "0% desativa o azul; 100% mantém o valor original.",
+      "ambi.calibration.blueAria": "Calibração do azul",
+      "ambi.section.response": "Resposta",
+      "ambi.response.fps": "Atualizações por segundo",
+      "ambi.response.fpsDescription": "Valores maiores atualizam mais rápido, mas exigem mais do processador e do Bluetooth.",
+      "ambi.response.fpsAria": "Atualizações por segundo",
+      "ambi.response.smoothing": "Suavização",
+      "ambi.response.smoothingDescription": "Valores maiores deixam as transições mais suaves e lentas.",
+      "ambi.response.smoothingAria": "Suavização",
+      "ambi.response.vividness": "Vivacidade",
+      "ambi.response.vividnessDescription": "Aumente para cores mais vivas; reduza para um visual mais natural.",
+      "ambi.response.vividnessAria": "Vivacidade",
+      "ambi.response.brightness": "Brilho",
+      "ambi.response.brightnessDescription": "Limita o brilho da lâmpada. A prévia permanece inalterada.",
+      "ambi.response.brightnessAria": "Brilho",
+      "ambi.response.allowTurnOff": "Permitir que a luz se apague completamente",
+      "ambi.response.allowTurnOffDescription": "Se desativado, cenas totalmente pretas exibem branco no brilho mínimo.",
+      "ambi.response.reset": "Redefinir",
+      "ambi.wizard.open": "Assistente de calibração",
+      "ambi.wizard.title": "Assistente de calibração de cores",
+      "ambi.wizard.intro": "A sincronização é pausada durante o teste e retomada ao fechar o assistente.",
+      "ambi.wizard.progress": "Teste {current} de {total}",
+      "ambi.wizard.adjustHint": "Ajuste os canais até a lâmpada corresponder à cor de referência.",
+      "ambi.wizard.reference": "Cor de referência",
+      "ambi.wizard.sent": "Cor enviada à lâmpada",
+      "ambi.wizard.cancel": "Cancelar",
+      "ambi.wizard.previous": "Anterior",
+      "ambi.wizard.next": "Próximo",
+      "ambi.wizard.finish": "Concluir",
+      "ambi.wizard.noConnection": "Conecte a lâmpada para iniciar a calibração.",
+      "ambi.wizard.disconnected": "A lâmpada foi desconectada. Reconecte-a para continuar.",
+      "ambi.wizard.color.red": "Vermelho",
+      "ambi.wizard.color.redDescription": "Ajuste o vermelho da lâmpada para corresponder à referência.",
+      "ambi.wizard.color.orange": "Laranja",
+      "ambi.wizard.color.orangeDescription": "Verifique o equilíbrio entre vermelho e verde.",
+      "ambi.wizard.color.yellow": "Amarelo",
+      "ambi.wizard.color.yellowDescription": "Verifique a saída combinada de vermelho e verde.",
+      "ambi.wizard.color.green": "Verde",
+      "ambi.wizard.color.greenDescription": "Ajuste o verde da lâmpada para corresponder à referência.",
+      "ambi.wizard.color.cyan": "Ciano",
+      "ambi.wizard.color.cyanDescription": "Verifique a saída combinada de verde e azul.",
+      "ambi.wizard.color.blue": "Azul",
+      "ambi.wizard.color.blueDescription": "Ajuste o azul da lâmpada para corresponder à referência.",
+      "ambi.wizard.color.purple": "Roxo",
+      "ambi.wizard.color.purpleDescription": "Verifique o equilíbrio entre vermelho e azul.",
+      "ambi.wizard.color.pink": "Rosa",
+      "ambi.wizard.color.pinkDescription": "Ajuste a mistura mais clara de vermelho e azul.",
+      "ambi.capture.dominant": "Priorizar as cores dominantes",
+      "ambi.capture.dominantDescription": "Dá mais peso às áreas vivas do que às cinzas, evitando uma média apagada de toda a tela.",
+      "ambi.status.recovering": "Restabelecendo a captura de tela…",
+      "schedule.summaryOn": "Liga a lâmpada às {time} ({days})",
+      "schedule.summaryOff": "Desliga a lâmpada às {time} ({days})",
+      "schedule.summaryDisabled": "Desativado: {time} ({days})",
+      "schedule.weekdays": "dias úteis",
+      "schedule.weekends": "fins de semana",
+      "error.outOfRange": "A lâmpada está fora de alcance ou desligada.",
+      "error.connection": "Não foi possível alcançar a lâmpada. Verifique se ela está ligada, ao alcance e não conectada a outro aplicativo.",
+      "connection.autoConnectNotFound": "A última lâmpada não foi encontrada por perto. As tentativas continuarão.",
+      "effectWords": {
+        "Auto play": "Reprodução automática",
+        "Magic reverse": "Magia reversa",
+        "Magic": "Magia",
+        "Energy": "Energia",
+        "Jump": "Salto",
+        "Strobe": "Estroboscópio",
+        "Fade": "Desvanecimento",
+        "Transition reverse": "Transição reversa",
+        "Transition": "Transição",
+        "Marquee": "Letreiro",
+        "Race reverse": "Corrida reversa",
+        "Race": "Corrida",
+        "Wave reverse": "Onda reversa",
+        "Wave": "Onda",
+        "Flush close": "Varredura fechada",
+        "Flush open": "Varredura aberta",
+        "Flush reverse": "Varredura reversa",
+        "Flush": "Varredura",
+        "Curtain close": "Fechar cortina",
+        "Curtain open": "Abrir cortina",
+        "Curtain": "Cortina",
+        "Water reverse": "Água reversa",
+        "Water": "Água",
+        "Flow reverse": "Fluxo reverso",
+        "Flow": "Fluxo",
+        "Tail reverse": "Rastro reverso",
+        "Tail": "Rastro",
+        "Running reverse": "Sequencial reverso",
+        "Running": "Sequencial",
+        "Sunrise": "Nascer do sol",
+        "Sunset": "Pôr do sol",
+        "Birthday": "Aniversário",
+        "Candlelight": "Luz de vela",
+        "Fireworks": "Fogos de artifício",
+        "Party": "Festa",
+        "Destiny": "Destino",
+        "Starry sky": "Céu estrelado",
+        "Romantic": "Romântico",
+        "Disco": "Discoteca",
+        "Rainbow": "Arco-íris",
+        "Movie": "Filme",
+        "Christmas": "Natal",
+        "Flowing": "Fluido",
+        "Sleeping": "Sono",
+        "Ocean": "Oceano",
+        "Forest": "Floresta",
+        "Reading": "Leitura",
+        "Working": "Trabalho",
+        "Dazzle": "Deslumbrante",
+        "Gentle": "Suave",
+        "Wedding": "Casamento",
+        "Snow": "Neve",
+        "Fire": "Fogo",
+        "Lightning": "Relâmpago",
+        "Valentine's Day": "Dia dos Namorados",
+        "Halloween": "Halloween",
+        "Warning": "Aviso",
+      },
+      "effectSpec": {
+        "colors": {
+                "multicolor": "multicolorido",
+                "red": "vermelho",
+                "green": "verde",
+                "blue": "azul",
+                "yellow": "amarelo",
+                "cyan": "ciano",
+                "purple": "roxo",
+                "white": "branco"
+        },
+        "sep": ", ",
+        "colon": ": ",
+        "and": "{a} e {b}",
+        "dotOn": "ponto {a} sobre {b}",
+        "on": "{a} sobre {b}",
+        "sixTo": "seis cores para {c}"
       },
     },
   }
 
-  function addLocale(code, languageName, labels, effectLabels) {
-    const entries = (source) => Object.fromEntries(
-      source.trim().split('\n').map((line) => {
-        const separator = line.indexOf('|')
-        return [line.slice(0, separator), line.slice(separator + 1)]
-      }),
-    )
-
-    translations[code] = {
-      ...translations.en,
-      ...entries(labels),
-      languageName,
-      effectWords: entries(effectLabels),
-    }
-  }
-
-  addLocale('fr', 'Français', `
-language|Langue
-app.title|Contrôle de la lampe JSK-P22
-nav.color|Couleur
-nav.effects|Effets
-nav.music|Musique
-nav.schedule|Programmation
-nav.ambilight|Ambilight
-nav.settings|Paramètres
-settings.title|Paramètres
-settings.languageDescription|Choisissez la langue de l’application.
-settings.trayTitle|Garder dans la zone de notification
-settings.trayDescription|À la fermeture, l’application est masquée dans la zone de notification. Utilisez son menu pour la rouvrir, déconnecter la lampe ou quitter.
-settings.autoConnectTitle|Se reconnecter automatiquement à la dernière lampe
-settings.autoConnectDescription|La reconnexion est tentée au démarrage de l’application et après une déconnexion inattendue. Connectez d’abord la lampe manuellement.
-tray.open|Ouvrir l’application
-tray.startSync|Démarrer la synchronisation
-tray.stopSync|Arrêter la synchronisation
-tray.disconnect|Déconnecter la lampe
-tray.connect|Ouvrir pour se connecter
-tray.turnOn|Allumer la lampe
-tray.turnOff|Éteindre la lampe
-tray.quit|Quitter
-connection.disconnected|Non connecté
-connection.connect|Connecter
-connection.reconnect|Reconnecter
-connection.disconnect|Déconnecter
-connection.connecting|Connexion…
-connection.connected|Connecté à {name}
-connection.disconnectedStatus|Déconnecté
-connection.noBluetooth|Web Bluetooth n’est pas disponible dans ce navigateur.
-connection.bluetoothOff|Le Bluetooth est désactivé. Activez-le dans les paramètres Windows, puis réessayez.
-connection.openBluetoothSettings|Ouvrir les paramètres Bluetooth
-connection.settingsFailed|Impossible d’ouvrir les paramètres Bluetooth : {message}
-connection.noDevice|Aucun appareil sélectionné ou aucun service 0xFFF0. Vérifiez que le Bluetooth est activé et que la lampe est allumée et à proximité.
-connection.failed|Échec de la connexion : {message}
-connection.autoConnectUnavailable|La reconnexion automatique n’est pas disponible dans cette application. Utilisez le bouton Connecter pour choisir la lampe.
-connection.autoConnectNoDevice|Connectez d’abord une lampe manuellement pour activer la reconnexion automatique.
-connection.autoConnectNotAuthorized|La dernière lampe n’est plus accessible. Utilisez le bouton Connecter pour la sélectionner à nouveau.
-connection.autoConnectFailed|Échec de la reconnexion automatique : {message}
-connection.writeFailed|Échec de l’écriture : {message}
-power.title|Alimentation
-power.description|Allumez ou éteignez la lampe. L’état indique la dernière commande envoyée ; la lampe ne signale pas son état d’alimentation.
-power.on|Allumer
-power.off|Éteindre
-brightness.title|Luminosité
-brightness.description|Niveau de luminosité de la lampe
-color.pick|Choisir une couleur
-color.wheelLabel|Palette de couleurs : faites glisser pour choisir la teinte et la saturation
-color.hexLabel|Code couleur hexadécimal
-effects.title|Effets
-effects.nowPlaying|Effet en cours
-effects.stop|Arrêter l’effet
-effects.colorDisabled|Le sélecteur de couleur est désactivé pendant la lecture d’un effet.
-effects.none|aucun
-effects.speed|Vitesse de l’effet
-effects.speedDescription|Vitesse de lecture de l’effet
-effects.search|Rechercher des effets
-effects.categories|Catégories d’effets
-effects.scrollLeft|Faire défiler les catégories vers la gauche
-effects.scrollRight|Faire défiler les catégories vers la droite
-effects.colors|Filtrer par couleur
-effects.all|Tout
-effects.noMatches|Aucun effet ne correspond.
-effects.onlyColor|Afficher uniquement les effets de couleur {color}
-effects.multicolor|Multicolore
-music.title|Musique
-music.sync|Synchronisation musicale
-music.description|La lampe réagit aux sons captés par son microphone intégré
-music.unknown|Inconnu
-music.running|En cours
-music.stopped|Arrêté
-music.start|Démarrer
-music.stop|Arrêter
-music.mode|Mode
-music.modeDescription|Réaction de la lampe au son
-music.eqEnergetic|Énergique
-music.eqRhythm|Rythme
-music.eqSpectrum|Spectre
-music.eqRolling|Défilement
-music.eqEnergetic2|Énergique 2
-music.eqRhythm2|Rythme 2
-music.eqSpectrum2|Spectre 2
-music.eqRolling2|Défilement 2
-music.sensitivity|Sensibilité
-music.sensitivityDescription|Une valeur élevée permet de détecter les sons plus faibles.
-music.noMicrophone|Ce modèle n’a pas de microphone.
-schedule.title|Programmation
-schedule.timers|Minuteries
-schedule.on|Programmer l’allumage
-schedule.off|Programmer l’extinction
-schedule.enabled|Activé
-schedule.repeat|Répéter
-schedule.everyDay|tous les jours
-schedule.noDays|aucun jour
-schedule.days|{count} jours
-schedule.oneDay|{count} jour
-schedule.connectFirst|Connectez d’abord la lampe
-schedule.chooseTime|Choisissez une heure et au moins un jour
-schedule.sent|Envoyé : {time}, {days}, {state}
-schedule.onState|activé
-schedule.offState|désactivé
-schedule.notSet|Non défini
-schedule.onLamp|Sur la lampe : {time}, {days}, {state}
-schedule.reading|Lecture depuis la lampe…
-schedule.noReport|La lampe n’a pas renvoyé de programmation
-schedule.readFailed|Échec de la lecture : {message}
-schedule.dayMon|Lundi
-schedule.dayTue|Mardi
-schedule.dayWed|Mercredi
-schedule.dayThu|Jeudi
-schedule.dayFri|Vendredi
-schedule.daySat|Samedi
-schedule.daySun|Dimanche
-schedule.shortMon|L
-schedule.shortTue|M
-schedule.shortWed|M
-schedule.shortThu|J
-schedule.shortFri|V
-schedule.shortSat|S
-schedule.shortSun|D
-category.special|Spécial
-category.jump|Sauts et stroboscope
-category.fade|Fondus et transitions
-category.marquee|Défilement
-category.race|Courses et vagues
-category.flush|Balayages et rideaux
-category.water|Eau
-category.flow|Flux
-category.tail|Traînée
-category.running|Défilement
-category.runningReverse|Défilement inversé
-category.scenes|Scènes
-picker.title|Choisissez votre lampe
-picker.searchingHint|Recherche en cours. Les lampes s’appellent généralement MELK-.
-picker.pickHint|Sélectionnez votre lampe dans la liste.
-picker.rangeHint|Vérifiez que la lampe est allumée et à portée.
-picker.cancel|Annuler
-picker.unnamed|Appareil sans nom
-picker.searching|Recherche des appareils à proximité…
-`, `
-Auto play|Lecture automatique
-Magic reverse|Magie inversée
-Magic|Magie
-Energy|Énergie
-Jump|Saut
-Strobe|Stroboscope
-Fade|Fondu
-Transition reverse|Transition inversée
-Transition|Transition
-Marquee|Défilement
-Race reverse|Course inversée
-Race|Course
-Wave reverse|Vague inversée
-Wave|Vague
-Flush close|Balayage fermé
-Flush open|Balayage ouvert
-Flush reverse|Balayage inversé
-Flush|Balayage
-Curtain close|Fermeture du rideau
-Curtain open|Ouverture du rideau
-Curtain|Rideau
-Water reverse|Eau inversée
-Water|Eau
-Flow reverse|Flux inversé
-Flow|Flux
-Tail reverse|Traînée inversée
-Tail|Traînée
-Running reverse|Défilement inversé
-Running|Défilement
-Sunrise|Lever de soleil
-Sunset|Coucher de soleil
-Birthday|Anniversaire
-Candlelight|Lueur de bougie
-Fireworks|Feux d’artifice
-Party|Fête
-Destiny|Destin
-Starry sky|Ciel étoilé
-Romantic|Romantique
-Disco|Disco
-Rainbow|Arc-en-ciel
-Movie|Film
-Christmas|Noël
-Flowing|Fluide
-Sleeping|Sommeil
-Ocean|Océan
-Forest|Forêt
-Reading|Lecture
-Working|Travail
-Dazzle|Éblouissant
-Gentle|Doux
-Wedding|Mariage
-Snow|Neige
-Fire|Feu
-Lightning|Éclair
-Valentine's Day|Saint-Valentin
-Halloween|Halloween
-Warning|Avertissement
-multicolor|multicolore
-six colors|six couleurs
-red|rouge
-green|vert
-blue|bleu
-yellow|jaune
-cyan|cyan
-purple|violet
-white|blanc
-reverse|inversé
-and|et
-to|vers
-dot|point
-on|sur
-`)
-
-  addLocale('de', 'Deutsch', `
-language|Sprache
-app.title|JSK-P22-Lampensteuerung
-nav.color|Farbe
-nav.effects|Effekte
-nav.music|Musik
-nav.schedule|Zeitplan
-nav.ambilight|Ambilight
-nav.settings|Einstellungen
-settings.title|Einstellungen
-settings.languageDescription|Wählen Sie die Sprache der Anwendung aus.
-settings.trayTitle|Im Infobereich behalten
-settings.trayDescription|Beim Schließen wird die Anwendung im Infobereich ausgeblendet. Über das Infobereichsmenü können Sie die App öffnen, die Lampe trennen oder die App beenden.
-settings.autoConnectTitle|Automatisch wieder mit der zuletzt verwendeten Lampe verbinden
-settings.autoConnectDescription|Die App versucht beim Start und nach einem unerwarteten Verbindungsabbruch, die Lampe erneut zu verbinden. Verbinde sie zuerst einmal manuell.
-tray.open|App öffnen
-tray.startSync|Synchronisierung starten
-tray.stopSync|Synchronisierung stoppen
-tray.disconnect|Verbindung zur Lampe trennen
-tray.connect|Zum Verbinden öffnen
-tray.turnOn|Lampe einschalten
-tray.turnOff|Lampe ausschalten
-tray.quit|Beenden
-connection.disconnected|Nicht verbunden
-connection.connect|Verbinden
-connection.reconnect|Erneut verbinden
-connection.disconnect|Verbindung trennen
-connection.connecting|Verbindung wird hergestellt…
-connection.connected|Verbunden mit {name}
-connection.disconnectedStatus|Verbindung getrennt
-connection.noBluetooth|Web Bluetooth ist in diesem Browser nicht verfügbar.
-connection.bluetoothOff|Bluetooth ist ausgeschaltet. Schalten Sie es in den Windows-Einstellungen ein und versuchen Sie es erneut.
-connection.openBluetoothSettings|Bluetooth-Einstellungen öffnen
-connection.settingsFailed|Bluetooth-Einstellungen konnten nicht geöffnet werden: {message}
-connection.noDevice|Kein Gerät ausgewählt oder kein 0xFFF0-Dienst verfügbar. Prüfe, ob Bluetooth aktiviert und die Lampe eingeschaltet und in der Nähe ist.
-connection.failed|Verbindung fehlgeschlagen: {message}
-connection.autoConnectUnavailable|Die automatische Wiederverbindung wird von dieser App nicht unterstützt. Wähle die Lampe über „Verbinden“ aus.
-connection.autoConnectNoDevice|Verbinde zuerst einmal manuell eine Lampe, um die automatische Wiederverbindung zu aktivieren.
-connection.autoConnectNotAuthorized|Die zuletzt verwendete Lampe ist nicht mehr verfügbar. Wähle sie über „Verbinden“ erneut aus.
-connection.autoConnectFailed|Automatische Wiederverbindung fehlgeschlagen: {message}
-connection.writeFailed|Schreiben fehlgeschlagen: {message}
-power.title|Stromversorgung
-power.description|Schalten Sie die Lampe ein oder aus. Der Status zeigt den zuletzt gesendeten Befehl an; die Lampe meldet ihren Stromzustand nicht zurück.
-power.on|Ein
-power.off|Aus
-brightness.title|Helligkeit
-brightness.description|Helligkeit der Lampe
-color.pick|Farbe auswählen
-color.wheelLabel|Farbkreis: Ziehen Sie, um Farbton und Sättigung auszuwählen
-color.hexLabel|Hex-Farbwert
-effects.title|Effekte
-effects.nowPlaying|Aktueller Effekt
-effects.stop|Effekt stoppen
-effects.colorDisabled|Während ein Effekt läuft, ist die Farbauswahl deaktiviert.
-effects.none|kein
-effects.speed|Effektgeschwindigkeit
-effects.speedDescription|Wie schnell der Effekt abläuft
-effects.search|Effekte suchen
-effects.categories|Effektkategorien
-effects.scrollLeft|Kategorien nach links verschieben
-effects.scrollRight|Kategorien nach rechts verschieben
-effects.colors|Nach Farbe filtern
-effects.all|Alle
-effects.noMatches|Keine passenden Effekte gefunden.
-effects.onlyColor|Nur Effekte mit der Farbe {color}
-effects.multicolor|Mehrfarbig
-music.title|Musik
-music.sync|Musiksynchronisierung
-music.description|Die Lampe reagiert auf Geräusche, die ihr integriertes Mikrofon aufnimmt.
-music.unknown|Unbekannt
-music.running|Läuft
-music.stopped|Gestoppt
-music.start|Starten
-music.stop|Stoppen
-music.mode|Modus
-music.modeDescription|So reagiert die Lampe auf Geräusche
-music.eqEnergetic|Energetisch
-music.eqRhythm|Rhythmus
-music.eqSpectrum|Spektrum
-music.eqRolling|Lauflicht
-music.eqEnergetic2|Energetisch 2
-music.eqRhythm2|Rhythmus 2
-music.eqSpectrum2|Spektrum 2
-music.eqRolling2|Lauflicht 2
-music.sensitivity|Empfindlichkeit
-music.sensitivityDescription|Bei höherer Empfindlichkeit reagiert die Lampe auch auf leisere Geräusche.
-music.noMicrophone|Dieses Modell hat kein Mikrofon.
-schedule.title|Zeitplan
-schedule.timers|Timer
-schedule.on|Einschalten planen
-schedule.off|Ausschalten planen
-schedule.enabled|Aktiviert
-schedule.repeat|Wiederholen
-schedule.everyDay|jeden Tag
-schedule.noDays|keine Tage
-schedule.days|{count} Tage
-schedule.oneDay|{count} Tag
-schedule.connectFirst|Verbinden Sie zuerst die Lampe.
-schedule.chooseTime|Wählen Sie eine Uhrzeit und mindestens einen Tag aus.
-schedule.sent|Gesendet: {time}, {days}, {state}
-schedule.onState|ein
-schedule.offState|aus
-schedule.notSet|Nicht festgelegt
-schedule.onLamp|Auf der Lampe: {time}, {days}, {state}
-schedule.reading|Daten werden von der Lampe gelesen…
-schedule.noReport|Die Lampe hat keinen Zeitplan zurückgemeldet.
-schedule.readFailed|Lesen fehlgeschlagen: {message}
-schedule.dayMon|Montag
-schedule.dayTue|Dienstag
-schedule.dayWed|Mittwoch
-schedule.dayThu|Donnerstag
-schedule.dayFri|Freitag
-schedule.daySat|Samstag
-schedule.daySun|Sonntag
-schedule.shortMon|Mo
-schedule.shortTue|Di
-schedule.shortWed|Mi
-schedule.shortThu|Do
-schedule.shortFri|Fr
-schedule.shortSat|Sa
-schedule.shortSun|So
-category.special|Spezial
-category.jump|Sprung und Stroboskop
-category.fade|Überblenden und Übergang
-category.marquee|Lauflicht
-category.race|Rennen und Wellen
-category.flush|Wischen und Vorhang
-category.water|Wasser
-category.flow|Fließen
-category.tail|Schweif
-category.running|Lauflicht
-category.runningReverse|Rückwärts laufend
-category.scenes|Szenen
-picker.title|Lampe auswählen
-picker.searchingHint|Suche läuft. Lampen heißen normalerweise MELK-.
-picker.pickHint|Wählen Sie Ihre Lampe aus der Liste aus.
-picker.rangeHint|Vergewissern Sie sich, dass die Lampe eingeschaltet und in Reichweite ist.
-picker.cancel|Abbrechen
-picker.unnamed|Unbenanntes Gerät
-picker.searching|Suche nach Geräten in der Nähe…
-`, `
-Auto play|Automatische Wiedergabe
-Magic reverse|Magie rückwärts
-Magic|Magie
-Energy|Energie
-Jump|Sprung
-Strobe|Stroboskop
-Fade|Überblenden
-Transition reverse|Übergang rückwärts
-Transition|Übergang
-Marquee|Lauflicht
-Race reverse|Rennen rückwärts
-Race|Rennen
-Wave reverse|Welle rückwärts
-Wave|Welle
-Flush close|Wisch schließen
-Flush open|Wisch öffnen
-Flush reverse|Wisch rückwärts
-Flush|Wisch
-Curtain close|Vorhang schließen
-Curtain open|Vorhang öffnen
-Curtain|Vorhang
-Water reverse|Wasser rückwärts
-Water|Wasser
-Flow reverse|Fluss rückwärts
-Flow|Fluss
-Tail reverse|Schweif rückwärts
-Tail|Schweif
-Running reverse|Lauflicht rückwärts
-Running|Lauflicht
-Sunrise|Sonnenaufgang
-Sunset|Sonnenuntergang
-Birthday|Geburtstag
-Candlelight|Kerzenlicht
-Fireworks|Feuerwerk
-Party|Party
-Destiny|Schicksal
-Starry sky|Sternenhimmel
-Romantic|Romantisch
-Disco|Disco
-Rainbow|Regenbogen
-Movie|Film
-Christmas|Weihnachten
-Flowing|Fließend
-Sleeping|Schlafen
-Ocean|Ozean
-Forest|Wald
-Reading|Lesen
-Working|Arbeiten
-Dazzle|Blendend
-Gentle|Sanft
-Wedding|Hochzeit
-Snow|Schnee
-Fire|Feuer
-Lightning|Blitz
-Valentine's Day|Valentinstag
-Halloween|Halloween
-Warning|Warnung
-multicolor|mehrfarbig
-six colors|sechs Farben
-red|rot
-green|grün
-blue|blau
-yellow|gelb
-cyan|türkis
-purple|lila
-white|weiß
-reverse|rückwärts
-and|und
-to|bis
-dot|Punkt
-on|an
-`)
-
-  addLocale('es', 'Español', `
-language|Idioma
-app.title|Control de lámpara JSK-P22
-nav.color|Color
-nav.effects|Efectos
-nav.music|Música
-nav.schedule|Programación
-nav.ambilight|Luz ambiental
-nav.settings|Ajustes
-settings.title|Ajustes
-settings.languageDescription|Elige el idioma de la aplicación.
-settings.trayTitle|Mantener en la bandeja del sistema
-settings.trayDescription|Al cerrar la ventana, la aplicación se oculta en la bandeja del sistema. Usa su menú para abrirla, desconectar la lámpara o salir.
-settings.autoConnectTitle|Volver a conectarse automáticamente a la última lámpara
-settings.autoConnectDescription|La aplicación intentará reconectarse al iniciarse y tras una desconexión inesperada. Primero, conecta la lámpara manualmente.
-tray.open|Abrir aplicación
-tray.startSync|Iniciar sincronización
-tray.stopSync|Detener sincronización
-tray.disconnect|Desconectar la lámpara
-tray.connect|Abrir para conectar
-tray.turnOn|Encender lámpara
-tray.turnOff|Apagar lámpara
-tray.quit|Salir
-connection.disconnected|Desconectado
-connection.connect|Conectar
-connection.reconnect|Volver a conectar
-connection.disconnect|Desconectar
-connection.connecting|Conectando…
-connection.connected|Conectado a {name}
-connection.disconnectedStatus|Desconectado
-connection.noBluetooth|Web Bluetooth no está disponible en este navegador.
-connection.bluetoothOff|Bluetooth está desactivado. Actívalo en la configuración de Windows y vuelve a intentarlo.
-connection.openBluetoothSettings|Abrir la configuración de Bluetooth
-connection.settingsFailed|No se pudo abrir la configuración de Bluetooth: {message}
-connection.noDevice|No se ha seleccionado ningún dispositivo o no ofrece el servicio 0xFFF0. Comprueba que Bluetooth esté activado y que la lámpara esté encendida y cerca.
-connection.failed|No se pudo conectar: {message}
-connection.autoConnectUnavailable|Esta aplicación no permite la reconexión automática. Usa el botón Conectar para elegir la lámpara.
-connection.autoConnectNoDevice|Conecta una lámpara manualmente una vez para activar la reconexión automática.
-connection.autoConnectNotAuthorized|La última lámpara ya no está disponible. Usa el botón Conectar para volver a elegirla.
-connection.autoConnectFailed|No se pudo reconectar automáticamente: {message}
-connection.writeFailed|Error al escribir: {message}
-power.title|Encendido
-power.description|Enciende o apaga la lámpara. El estado muestra el último comando enviado; la lámpara no informa de su estado de encendido.
-power.on|Encender
-power.off|Apagar
-brightness.title|Brillo
-brightness.description|Nivel de brillo de la lámpara
-color.pick|Elegir un color
-color.wheelLabel|Rueda de color: arrastra para elegir el tono y la saturación
-color.hexLabel|Código de color hexadecimal
-effects.title|Efectos
-effects.nowPlaying|Efecto actual
-effects.stop|Detener efecto
-effects.colorDisabled|El selector de color está desactivado mientras se reproduce un efecto.
-effects.none|ninguno
-effects.speed|Velocidad del efecto
-effects.speedDescription|Velocidad a la que se reproduce el efecto
-effects.search|Buscar efectos
-effects.categories|Categorías de efectos
-effects.scrollLeft|Desplazar las categorías a la izquierda
-effects.scrollRight|Desplazar las categorías a la derecha
-effects.colors|Filtrar por color
-effects.all|Todos
-effects.noMatches|No hay efectos que coincidan.
-effects.onlyColor|Solo efectos en color {color}
-effects.multicolor|Multicolor
-music.title|Música
-music.sync|Sincronización con música
-music.description|La lámpara reacciona al sonido que capta su micrófono integrado
-music.unknown|Desconocido
-music.running|En marcha
-music.stopped|Detenido
-music.start|Iniciar
-music.stop|Detener
-music.mode|Modo
-music.modeDescription|Cómo reacciona la lámpara al sonido
-music.eqEnergetic|Enérgico
-music.eqRhythm|Ritmo
-music.eqSpectrum|Espectro
-music.eqRolling|Rodante
-music.eqEnergetic2|Enérgico 2
-music.eqRhythm2|Ritmo 2
-music.eqSpectrum2|Espectro 2
-music.eqRolling2|Rodante 2
-music.sensitivity|Sensibilidad
-music.sensitivityDescription|Con un valor más alto, la lámpara reacciona a sonidos más suaves.
-music.noMicrophone|Este modelo no tiene micrófono.
-schedule.title|Programación
-schedule.timers|Temporizadores
-schedule.on|Programar encendido
-schedule.off|Programar apagado
-schedule.enabled|Activado
-schedule.repeat|Repetir
-schedule.everyDay|todos los días
-schedule.noDays|ningún día
-schedule.days|{count} días
-schedule.oneDay|{count} día
-schedule.connectFirst|Conecta primero la lámpara.
-schedule.chooseTime|Elige una hora y al menos un día.
-schedule.sent|Enviado: {time}, {days}, {state}
-schedule.onState|encendido
-schedule.offState|apagado
-schedule.notSet|Sin configurar
-schedule.onLamp|En la lámpara: {time}, {days}, {state}
-schedule.reading|Leyendo de la lámpara…
-schedule.noReport|La lámpara no ha informado de ningún horario.
-schedule.readFailed|Error al leer: {message}
-schedule.dayMon|Lunes
-schedule.dayTue|Martes
-schedule.dayWed|Miércoles
-schedule.dayThu|Jueves
-schedule.dayFri|Viernes
-schedule.daySat|Sábado
-schedule.daySun|Domingo
-schedule.shortMon|L
-schedule.shortTue|M
-schedule.shortWed|X
-schedule.shortThu|J
-schedule.shortFri|V
-schedule.shortSat|S
-schedule.shortSun|D
-category.special|Especial
-category.jump|Saltos y estrobos
-category.fade|Fundidos y transiciones
-category.marquee|Letrero luminoso
-category.race|Carreras y ondas
-category.flush|Barridos y cortinas
-category.water|Agua
-category.flow|Flujo
-category.tail|Estela
-category.running|En movimiento
-category.runningReverse|Movimiento inverso
-category.scenes|Escenas
-picker.title|Elige tu lámpara
-picker.searchingHint|Buscando. Las lámparas suelen llamarse MELK-.
-picker.pickHint|Elige tu lámpara de la lista.
-picker.rangeHint|Comprueba que la lámpara esté encendida y dentro del alcance.
-picker.cancel|Cancelar
-picker.unnamed|Dispositivo sin nombre
-picker.searching|Buscando dispositivos cercanos…
-`, `
-Auto play|Reproducción automática
-Magic reverse|Magia inversa
-Magic|Magia
-Energy|Energía
-Jump|Salto
-Strobe|Estrobo
-Fade|Fundido
-Transition reverse|Transición inversa
-Transition|Transición
-Marquee|Letrero luminoso
-Race reverse|Carrera inversa
-Race|Carrera
-Wave reverse|Onda inversa
-Wave|Onda
-Flush close|Barrido hacia dentro
-Flush open|Barrido hacia fuera
-Flush reverse|Barrido inverso
-Flush|Barrido
-Curtain close|Cerrar cortina
-Curtain open|Abrir cortina
-Curtain|Cortina
-Water reverse|Agua inversa
-Water|Agua
-Flow reverse|Flujo inverso
-Flow|Flujo
-Tail reverse|Estela inversa
-Tail|Estela
-Running reverse|Movimiento inverso
-Running|En movimiento
-Sunrise|Amanecer
-Sunset|Atardecer
-Birthday|Cumpleaños
-Candlelight|Luz de vela
-Fireworks|Fuegos artificiales
-Party|Fiesta
-Destiny|Destino
-Starry sky|Cielo estrellado
-Romantic|Romántico
-Disco|Discoteca
-Rainbow|Arcoíris
-Movie|Cine
-Christmas|Navidad
-Flowing|Fluido
-Sleeping|Sueño
-Ocean|Océano
-Forest|Bosque
-Reading|Lectura
-Working|Trabajo
-Dazzle|Deslumbrante
-Gentle|Suave
-Wedding|Boda
-Snow|Nieve
-Fire|Fuego
-Lightning|Relámpago
-Valentine's Day|San Valentín
-Halloween|Halloween
-Warning|Aviso
-multicolor|multicolor
-six colors|seis colores
-red|rojo
-green|verde
-blue|azul
-yellow|amarillo
-cyan|cian
-purple|morado
-white|blanco
-reverse|inverso
-and|y
-to|a
-dot|punto
-on|en
-`)
-
-  addLocale('it', 'Italiano', `
-language|Lingua
-app.title|Controllo lampada JSK-P22
-nav.color|Colore
-nav.effects|Effetti
-nav.music|Musica
-nav.schedule|Programmazione
-nav.ambilight|Luce ambientale
-nav.settings|Impostazioni
-settings.title|Impostazioni
-settings.languageDescription|Scegli la lingua dell’applicazione.
-settings.trayTitle|Mantieni nell’area di notifica
-settings.trayDescription|Quando chiudi la finestra, l’applicazione viene nascosta nell’area di notifica. Usa il menu per aprirla, disconnettere la lampada o uscire.
-settings.autoConnectTitle|Riconnetti automaticamente all’ultima lampada
-settings.autoConnectDescription|L’app proverà a riconnettersi all’avvio e dopo una disconnessione imprevista. Connetti prima la lampada una volta manualmente.
-tray.open|Apri applicazione
-tray.startSync|Avvia sincronizzazione
-tray.stopSync|Interrompi sincronizzazione
-tray.disconnect|Disconnetti la lampada
-tray.connect|Apri per connetterti
-tray.turnOn|Accendi la lampada
-tray.turnOff|Spegni la lampada
-tray.quit|Esci
-connection.disconnected|Non connessa
-connection.connect|Connetti
-connection.reconnect|Riconnetti
-connection.disconnect|Disconnetti
-connection.connecting|Connessione in corso…
-connection.connected|Connessa a {name}
-connection.disconnectedStatus|Disconnessa
-connection.noBluetooth|Web Bluetooth non è disponibile in questo browser.
-connection.bluetoothOff|Il Bluetooth è disattivato. Attivalo nelle impostazioni di Windows e riprova.
-connection.openBluetoothSettings|Apri le impostazioni Bluetooth
-connection.settingsFailed|Impossibile aprire le impostazioni Bluetooth: {message}
-connection.noDevice|Nessun dispositivo selezionato o servizio 0xFFF0 non disponibile. Verifica che il Bluetooth sia attivo e che la lampada sia accesa e vicina.
-connection.failed|Connessione non riuscita: {message}
-connection.autoConnectUnavailable|La riconnessione automatica non è disponibile in questa app. Usa il pulsante Connetti per scegliere la lampada.
-connection.autoConnectNoDevice|Connetti una lampada manualmente una volta per attivare la riconnessione automatica.
-connection.autoConnectNotAuthorized|L’ultima lampada usata non è più disponibile. Usa il pulsante Connetti per selezionarla di nuovo.
-connection.autoConnectFailed|Riconnessione automatica non riuscita: {message}
-connection.writeFailed|Scrittura non riuscita: {message}
-power.title|Alimentazione
-power.description|Accendi o spegni la lampada. Lo stato indica l’ultimo comando inviato; la lampada non comunica lo stato dell’alimentazione.
-power.on|Accendi
-power.off|Spegni
-brightness.title|Luminosità
-brightness.description|Livello di luminosità della lampada
-color.pick|Scegli un colore
-color.wheelLabel|Ruota dei colori: trascina per scegliere tonalità e saturazione
-color.hexLabel|Codice colore esadecimale
-effects.title|Effetti
-effects.nowPlaying|Effetto in corso
-effects.stop|Interrompi effetto
-effects.colorDisabled|Il selettore colore è disattivato mentre è in esecuzione un effetto.
-effects.none|nessuno
-effects.speed|Velocità dell’effetto
-effects.speedDescription|Velocità di riproduzione dell’effetto
-effects.search|Cerca effetti
-effects.categories|Categorie di effetti
-effects.scrollLeft|Scorri le categorie a sinistra
-effects.scrollRight|Scorri le categorie a destra
-effects.colors|Filtra per colore
-effects.all|Tutti
-effects.noMatches|Nessun effetto corrispondente.
-effects.onlyColor|Solo effetti di colore {color}
-effects.multicolor|Multicolore
-music.title|Musica
-music.sync|Sincronizzazione con la musica
-music.description|La lampada reagisce ai suoni rilevati dal microfono integrato
-music.unknown|Sconosciuto
-music.running|In esecuzione
-music.stopped|Interrotto
-music.start|Avvia
-music.stop|Interrompi
-music.mode|Modalità
-music.modeDescription|Come reagisce la lampada ai suoni
-music.eqEnergetic|Energetica
-music.eqRhythm|Ritmo
-music.eqSpectrum|Spettro
-music.eqRolling|Scorrimento
-music.eqEnergetic2|Energetica 2
-music.eqRhythm2|Ritmo 2
-music.eqSpectrum2|Spettro 2
-music.eqRolling2|Scorrimento 2
-music.sensitivity|Sensibilità
-music.sensitivityDescription|Un valore più alto fa reagire la lampada anche ai suoni più deboli.
-music.noMicrophone|Questo modello non ha un microfono.
-schedule.title|Programmazione
-schedule.timers|Timer
-schedule.on|Programma l’accensione
-schedule.off|Programma lo spegnimento
-schedule.enabled|Attivato
-schedule.repeat|Ripeti
-schedule.everyDay|ogni giorno
-schedule.noDays|nessun giorno
-schedule.days|{count} giorni
-schedule.oneDay|{count} giorno
-schedule.connectFirst|Connetti prima la lampada.
-schedule.chooseTime|Scegli un orario e almeno un giorno.
-schedule.sent|Inviato: {time}, {days}, {state}
-schedule.onState|accesa
-schedule.offState|spenta
-schedule.notSet|Non impostato
-schedule.onLamp|Sulla lampada: {time}, {days}, {state}
-schedule.reading|Lettura dalla lampada…
-schedule.noReport|La lampada non ha comunicato alcun programma.
-schedule.readFailed|Lettura non riuscita: {message}
-schedule.dayMon|Lunedì
-schedule.dayTue|Martedì
-schedule.dayWed|Mercoledì
-schedule.dayThu|Giovedì
-schedule.dayFri|Venerdì
-schedule.daySat|Sabato
-schedule.daySun|Domenica
-schedule.shortMon|L
-schedule.shortTue|M
-schedule.shortWed|M
-schedule.shortThu|G
-schedule.shortFri|V
-schedule.shortSat|S
-schedule.shortSun|D
-category.special|Speciale
-category.jump|Salti e strobo
-category.fade|Dissolvenze e transizioni
-category.marquee|Scorrimento
-category.race|Gare e onde
-category.flush|Scansioni e tendine
-category.water|Acqua
-category.flow|Flusso
-category.tail|Scia
-category.running|Scorrimento
-category.runningReverse|Scorrimento inverso
-category.scenes|Scene
-picker.title|Scegli la lampada
-picker.searchingHint|Ricerca in corso. Le lampade si chiamano solitamente MELK-.
-picker.pickHint|Scegli la lampada dall’elenco.
-picker.rangeHint|Assicurati che la lampada sia accesa e nelle vicinanze.
-picker.cancel|Annulla
-picker.unnamed|Dispositivo senza nome
-picker.searching|Ricerca dei dispositivi nelle vicinanze…
-`, `
-Auto play|Riproduzione automatica
-Magic reverse|Magia inversa
-Magic|Magia
-Energy|Energia
-Jump|Salto
-Strobe|Strobo
-Fade|Dissolvenza
-Transition reverse|Transizione inversa
-Transition|Transizione
-Marquee|Scorrimento
-Race reverse|Corsa inversa
-Race|Corsa
-Wave reverse|Onda inversa
-Wave|Onda
-Flush close|Scansione chiusa
-Flush open|Scansione aperta
-Flush reverse|Scansione inversa
-Flush|Scansione
-Curtain close|Chiusura della tendina
-Curtain open|Apertura della tendina
-Curtain|Tendina
-Water reverse|Acqua inversa
-Water|Acqua
-Flow reverse|Flusso inverso
-Flow|Flusso
-Tail reverse|Scia inversa
-Tail|Scia
-Running reverse|Scorrimento inverso
-Running|Scorrimento
-Sunrise|Alba
-Sunset|Tramonto
-Birthday|Compleanno
-Candlelight|Luce di candela
-Fireworks|Fuochi d’artificio
-Party|Festa
-Destiny|Destino
-Starry sky|Cielo stellato
-Romantic|Romantico
-Disco|Discoteca
-Rainbow|Arcobaleno
-Movie|Film
-Christmas|Natale
-Flowing|Fluido
-Sleeping|Sonno
-Ocean|Oceano
-Forest|Foresta
-Reading|Lettura
-Working|Lavoro
-Dazzle|Abbagliante
-Gentle|Delicato
-Wedding|Matrimonio
-Snow|Neve
-Fire|Fuoco
-Lightning|Fulmine
-Valentine's Day|San Valentino
-Halloween|Halloween
-Warning|Avviso
-multicolor|multicolore
-six colors|sei colori
-red|rosso
-green|verde
-blue|blu
-yellow|giallo
-cyan|ciano
-purple|viola
-white|bianco
-reverse|inverso
-and|e
-to|a
-dot|punto
-on|su
-`)
-
-  addLocale('pt-BR', 'Português (Brasil)', `
-language|Idioma
-app.title|Controle da lâmpada JSK-P22
-nav.color|Cor
-nav.effects|Efeitos
-nav.music|Música
-nav.schedule|Programação
-nav.ambilight|Luz ambiente
-nav.settings|Configurações
-settings.title|Configurações
-settings.languageDescription|Escolha o idioma do aplicativo.
-settings.trayTitle|Manter na bandeja do sistema
-settings.trayDescription|Ao fechar a janela, o aplicativo fica oculto na bandeja do sistema. Use o menu para abrir o aplicativo, desconectar a lâmpada ou sair.
-settings.autoConnectTitle|Reconectar automaticamente à última lâmpada
-settings.autoConnectDescription|O aplicativo tentará reconectar ao iniciar e após uma desconexão inesperada. Conecte a lâmpada manualmente uma vez primeiro.
-tray.open|Abrir aplicativo
-tray.startSync|Iniciar sincronização
-tray.stopSync|Parar sincronização
-tray.disconnect|Desconectar da lâmpada
-tray.connect|Abrir para conectar
-tray.turnOn|Acender a lâmpada
-tray.turnOff|Apagar a lâmpada
-tray.quit|Sair
-connection.disconnected|Desconectado
-connection.connect|Conectar
-connection.reconnect|Reconectar
-connection.disconnect|Desconectar
-connection.connecting|Conectando…
-connection.connected|Conectado a {name}
-connection.disconnectedStatus|Desconectado
-connection.noBluetooth|O Web Bluetooth não está disponível neste navegador.
-connection.bluetoothOff|O Bluetooth está desligado. Ative-o nas configurações do Windows e tente novamente.
-connection.openBluetoothSettings|Abrir configurações de Bluetooth
-connection.settingsFailed|Não foi possível abrir as configurações de Bluetooth: {message}
-connection.noDevice|Nenhum dispositivo selecionado ou serviço 0xFFF0 indisponível. Verifique se o Bluetooth está ativado e se a lâmpada está ligada e próxima.
-connection.failed|Não foi possível conectar: {message}
-connection.autoConnectUnavailable|Este aplicativo não oferece reconexão automática. Use o botão Conectar para escolher a lâmpada.
-connection.autoConnectNoDevice|Conecte uma lâmpada manualmente uma vez para ativar a reconexão automática.
-connection.autoConnectNotAuthorized|A última lâmpada usada não está mais disponível. Use o botão Conectar para selecioná-la novamente.
-connection.autoConnectFailed|Não foi possível reconectar automaticamente: {message}
-connection.writeFailed|Falha ao gravar: {message}
-power.title|Energia
-power.description|Acenda ou apague a lâmpada. O status mostra o último comando enviado; a lâmpada não informa o próprio estado de energia.
-power.on|Ligar
-power.off|Desligar
-brightness.title|Brilho
-brightness.description|Nível de brilho da lâmpada
-color.pick|Escolher uma cor
-color.wheelLabel|Roda de cores: arraste para escolher o matiz e a saturação
-color.hexLabel|Código de cor hexadecimal
-effects.title|Efeitos
-effects.nowPlaying|Efeito atual
-effects.stop|Parar efeito
-effects.colorDisabled|O seletor de cores fica desativado enquanto um efeito está em execução.
-effects.none|nenhum
-effects.speed|Velocidade do efeito
-effects.speedDescription|Velocidade de reprodução do efeito
-effects.search|Buscar efeitos
-effects.categories|Categorias de efeitos
-effects.scrollLeft|Rolar categorias para a esquerda
-effects.scrollRight|Rolar categorias para a direita
-effects.colors|Filtrar por cor
-effects.all|Todos
-effects.noMatches|Nenhum efeito encontrado.
-effects.onlyColor|Somente efeitos na cor {color}
-effects.multicolor|Multicolorido
-music.title|Música
-music.sync|Sincronização com música
-music.description|A lâmpada reage aos sons captados pelo microfone integrado
-music.unknown|Desconhecido
-music.running|Em execução
-music.stopped|Parado
-music.start|Iniciar
-music.stop|Parar
-music.mode|Modo
-music.modeDescription|Como a lâmpada reage ao som
-music.eqEnergetic|Energético
-music.eqRhythm|Ritmo
-music.eqSpectrum|Espectro
-music.eqRolling|Rolante
-music.eqEnergetic2|Energético 2
-music.eqRhythm2|Ritmo 2
-music.eqSpectrum2|Espectro 2
-music.eqRolling2|Rolante 2
-music.sensitivity|Sensibilidade
-music.sensitivityDescription|Um valor mais alto faz a lâmpada reagir a sons mais baixos.
-music.noMicrophone|Este modelo não tem microfone.
-schedule.title|Programação
-schedule.timers|Temporizadores
-schedule.on|Programar para ligar
-schedule.off|Programar para desligar
-schedule.enabled|Ativado
-schedule.repeat|Repetir
-schedule.everyDay|todos os dias
-schedule.noDays|nenhum dia
-schedule.days|{count} dias
-schedule.oneDay|{count} dia
-schedule.connectFirst|Conecte a lâmpada primeiro.
-schedule.chooseTime|Escolha um horário e pelo menos um dia.
-schedule.sent|Enviado: {time}, {days}, {state}
-schedule.onState|ligada
-schedule.offState|desligada
-schedule.notSet|Não definido
-schedule.onLamp|Na lâmpada: {time}, {days}, {state}
-schedule.reading|Lendo da lâmpada…
-schedule.noReport|A lâmpada não informou uma programação.
-schedule.readFailed|Falha ao ler: {message}
-schedule.dayMon|Segunda-feira
-schedule.dayTue|Terça-feira
-schedule.dayWed|Quarta-feira
-schedule.dayThu|Quinta-feira
-schedule.dayFri|Sexta-feira
-schedule.daySat|Sábado
-schedule.daySun|Domingo
-schedule.shortMon|S
-schedule.shortTue|T
-schedule.shortWed|Q
-schedule.shortThu|Q
-schedule.shortFri|S
-schedule.shortSat|S
-schedule.shortSun|D
-category.special|Especial
-category.jump|Saltos e estroboscópio
-category.fade|Desvanecimento e transição
-category.marquee|Letreiro
-category.race|Corrida e onda
-category.flush|Varredura e cortina
-category.water|Água
-category.flow|Fluxo
-category.tail|Rastro
-category.running|Corrida
-category.runningReverse|Corrida inversa
-category.scenes|Cenas
-picker.title|Escolha sua lâmpada
-picker.searchingHint|Buscando. As lâmpadas geralmente se chamam MELK-.
-picker.pickHint|Escolha sua lâmpada na lista.
-picker.rangeHint|Verifique se a lâmpada está ligada e dentro do alcance.
-picker.cancel|Cancelar
-picker.unnamed|Dispositivo sem nome
-picker.searching|Buscando dispositivos próximos…
-`, `
-Auto play|Reprodução automática
-Magic reverse|Magia reversa
-Magic|Magia
-Energy|Energia
-Jump|Salto
-Strobe|Estroboscópio
-Fade|Desvanecimento
-Transition reverse|Transição reversa
-Transition|Transição
-Marquee|Letreiro
-Race reverse|Corrida reversa
-Race|Corrida
-Wave reverse|Onda reversa
-Wave|Onda
-Flush close|Varredura fechada
-Flush open|Varredura aberta
-Flush reverse|Varredura reversa
-Flush|Varredura
-Curtain close|Fechar cortina
-Curtain open|Abrir cortina
-Curtain|Cortina
-Water reverse|Água reversa
-Water|Água
-Flow reverse|Fluxo reverso
-Flow|Fluxo
-Tail reverse|Rastro reverso
-Tail|Rastro
-Running reverse|Corrida inversa
-Running|Corrida
-Sunrise|Nascer do sol
-Sunset|Pôr do sol
-Birthday|Aniversário
-Candlelight|Luz de vela
-Fireworks|Fogos de artifício
-Party|Festa
-Destiny|Destino
-Starry sky|Céu estrelado
-Romantic|Romântico
-Disco|Discoteca
-Rainbow|Arco-íris
-Movie|Filme
-Christmas|Natal
-Flowing|Fluido
-Sleeping|Sono
-Ocean|Oceano
-Forest|Floresta
-Reading|Leitura
-Working|Trabalho
-Dazzle|Deslumbrante
-Gentle|Suave
-Wedding|Casamento
-Snow|Neve
-Fire|Fogo
-Lightning|Relâmpago
-Valentine's Day|Dia dos Namorados
-Halloween|Halloween
-Warning|Aviso
-multicolor|multicolorido
-six colors|seis cores
-red|vermelho
-green|verde
-blue|azul
-yellow|amarelo
-cyan|ciano
-purple|roxo
-white|branco
-reverse|reverso
-and|e
-to|para
-dot|ponto
-on|em
-`)
-
+  const hasDOM = typeof document !== 'undefined'
   const languages = Object.keys(translations)
-  const stored = localStorage.getItem('lamp-language')
+  let stored = null
+  try {
+    stored = typeof localStorage !== 'undefined' ? localStorage.getItem('lamp-language') : null
+  } catch (error) {
+    stored = null
+  }
   let current = languages.includes(stored) ? stored : 'en'
 
-  function t(key, values) {
-    const dict = translations[current]
-    const translationKey = key === 'schedule.days' && Number(values && values.count) === 1
-      ? 'schedule.oneDay'
-      : key
-    let text = dict[translationKey] || translations.en[translationKey] || translationKey
-    if (values) {
-      text = text.replace(/\{(\w+)\}/g, (_, name) => values[name] === undefined ? '' : values[name])
+  function interpolate(text, values) {
+    return values ? text.replace(/\{(\w+)\}/g, (_, name) => (values[name] === undefined ? '' : values[name])) : text
+  }
+
+  function translate(key, values, language = current) {
+    const text = (translations[language] || {})[key] || translations.en[key] || key
+    return interpolate(text, values)
+  }
+
+  // Effect names are written like "Running reverse: red dot on white". The part before the colon is looked up
+  // as a whole; the color part is rebuilt with the language's own word order instead of swapping words one by one.
+  function translateSpec(spec, grammar) {
+    const color = (token, variant) => {
+      const map = (variant === 's' && grammar.colorsShort) || (variant === 'd' && grammar.colorsDot) || grammar.colors
+      return map[token] || grammar.colors[token] || token
     }
-    return text
+    const fill = (template, values) => template.replace(/\{(\w)(?::(\w))?\}/g, (_, name, variant) => color(values[name], variant))
+    let match
+    if ((match = /^six colors to (\w+)$/.exec(spec))) return fill(grammar.sixTo, { c: match[1] })
+    if ((match = /^(\w+) dot on (\w+)$/.exec(spec))) return fill(grammar.dotOn, { a: match[1], b: match[2] })
+    if ((match = /^(\w+) and (\w+)$/.exec(spec))) return fill(grammar.and, { a: match[1], b: match[2] })
+    if ((match = /^(\w+) on (\w+)$/.exec(spec))) return fill(grammar.on, { a: match[1], b: match[2] })
+    const parts = spec.split(', ')
+    if (parts.every((part) => part in grammar.colors)) return parts.map((part) => grammar.colors[part]).join(grammar.sep)
+    return null
   }
 
-  function effect(name) {
-    const words = translations[current].effectWords
-    if (!words) return name
-    return Object.keys(words).sort((a, b) => b.length - a.length).reduce((result, source) => {
-      const pattern = new RegExp(
-        '(^|[^A-Za-z])' + source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?=$|[^A-Za-z])',
-        'gi',
-      )
-      return result.replace(pattern, (_, prefix) => prefix + words[source])
-    }, name)
+  function translateEffect(name, language = current) {
+    const locale = translations[language]
+    if (!locale || language === 'en' || !locale.effectWords) return name
+    const alt = / \(alt\)$/.test(name)
+    const clean = name.replace(/ \(alt\)$/, '')
+    const split = clean.indexOf(':')
+    const base = (split < 0 ? clean : clean.slice(0, split)).trim()
+    const spec = split < 0 ? '' : clean.slice(split + 1).trim()
+    const translatedBase = locale.effectWords[base] || base
+    const translatedSpec = spec ? translateSpec(spec, locale.effectSpec) || spec : ''
+    const colon = (locale.effectSpec && locale.effectSpec.colon) || ': '
+    return translatedBase + (translatedSpec ? colon + translatedSpec : '') + (alt ? ' (alt)' : '')
   }
 
-  function apply() {
-    document.documentElement.lang = current
-    document.querySelectorAll('[data-i18n]').forEach((element) => {
-      element.textContent = t(element.dataset.i18n)
-    })
-    document.querySelectorAll('[data-i18n-attr]').forEach((element) => {
-      element.dataset.i18nAttr.split(';').forEach((entry) => {
-        const [attribute, key] = entry.split(':')
-        element.setAttribute(attribute, t(key))
-      })
-    })
-    const titleKey = document.querySelector('[data-i18n-title]')
-    if (titleKey) document.title = t(titleKey.dataset.i18nTitle)
-    const selector = document.getElementById('language')
-    if (selector) {
-      if (!selector.options.length) {
-        languages.forEach((language) => {
-          const option = document.createElement('option')
-          option.value = language
-          option.textContent = translations[language].languageName || language
-          selector.appendChild(option)
-        })
-      }
-      selector.value = current
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', apply)
-  document.addEventListener('change', (event) => {
-    if (event.target.id !== 'language') return
-    if (!languages.includes(event.target.value)) return
-    current = event.target.value
-    localStorage.setItem('lamp-language', current)
-    apply()
-    document.dispatchEvent(new Event('languagechange'))
-  })
-
-  window.i18n = {
-    t,
-    effect,
+  const api = {
+    t: (key, values) => translate(key, values),
+    effect: (name) => translateEffect(name),
     get language() {
       return current
     },
   }
-  if (document.readyState !== 'loading') apply()
-})()
+
+  if (hasDOM) {
+    const apply = () => {
+      document.documentElement.lang = current
+      document.querySelectorAll('[data-i18n]').forEach((element) => {
+        element.textContent = translate(element.dataset.i18n)
+      })
+      document.querySelectorAll('[data-ambi-i18n]').forEach((element) => {
+        element.textContent = translate('ambi.' + element.dataset.ambiI18n)
+      })
+      document.querySelectorAll('[data-ambi-i18n-aria-label]').forEach((element) => {
+        element.setAttribute('aria-label', translate('ambi.' + element.dataset.ambiI18nAriaLabel))
+      })
+      document.querySelectorAll('[data-i18n-attr]').forEach((element) => {
+        element.dataset.i18nAttr.split(';').forEach((entry) => {
+          const [attribute, key] = entry.split(':')
+          element.setAttribute(attribute, translate(key))
+        })
+      })
+      const titleKey = document.querySelector('[data-i18n-title]')
+      if (titleKey) document.title = translate(titleKey.dataset.i18nTitle)
+      const selector = document.getElementById('language')
+      if (selector) {
+        if (!selector.options.length) {
+          languages.forEach((language) => {
+            const option = document.createElement('option')
+            option.value = language
+            option.textContent = translations[language].languageName || language
+            selector.appendChild(option)
+          })
+        }
+        selector.value = current
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', apply)
+    document.addEventListener('change', (event) => {
+      if (event.target.id !== 'language') return
+      if (!languages.includes(event.target.value)) return
+      current = event.target.value
+      try {
+        localStorage.setItem('lamp-language', current)
+      } catch (error) {
+        // The language still changes for this session if it cannot be saved.
+      }
+      apply()
+      document.dispatchEvent(new Event('languagechange'))
+    })
+
+    root.i18n = api
+    // Ambilight code asks for its own keys without the "ambi." prefix; language changes are handled above.
+    root.ambiI18n = {
+      translate: (key, values) => translate('ambi.' + key, values),
+      setLanguage() {},
+      getLanguage: () => current,
+    }
+    if (document.readyState !== 'loading') apply()
+  }
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = { translations, translateEffect, interpolate }
+})(typeof window !== 'undefined' ? window : globalThis)
