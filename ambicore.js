@@ -1,11 +1,13 @@
-// Pure color and settings logic for Ambilight, kept free of DOM access so it can be unit-tested.
+// Pure color and settings logic for Ambilight, independent of the UI and screen-capture lifecycle.
 ;(function (root, factory) {
   const api = factory()
   if (typeof module !== 'undefined' && module.exports) module.exports = api
   else root.AmbiCore = api
 })(typeof self !== 'undefined' ? self : this, function () {
   const SETTINGS_VERSION = 2
-  const BAR_LEVEL = 24 // a pixel brighter than this (0-255) counts as picture, not letterbox
+  // A pixel brighter than this (0-255) counts as picture, not letterbox. Kept just above the black-scene
+  // exit level so a dark but real scene is never mistaken for bars (and then cropped or turned black).
+  const BAR_LEVEL = 10
   const NEUTRAL_SATURATION_THRESHOLD = 0.15
   const NEUTRAL_CHANNEL_SPREAD_THRESHOLD = 12
   const BLACK_ENTER_LEVEL = 3
@@ -67,10 +69,8 @@
     return { left, right, top, bottom }
   }
 
-  // Representative color of a captured frame (RGBA data, 0-255 per channel).
-  // Pixels are averaged in linear light, which is how light actually mixes. With dominant: true, vivid
-  // pixels count more than gray ones so the result is not a muddy average; the overall brightness still
-  // follows the plain average of the scene.
+  // Representative color of a captured frame (RGBA data, 0-255 per channel). The ordinary average is
+  // computed in screen RGB so each pixel has equal influence; dominant mode separately weights vivid pixels.
   function frameColor(data, width, height, options = {}) {
     let left = 0
     let right = width - 1
@@ -83,18 +83,22 @@
     }
 
     let plainR = 0, plainG = 0, plainB = 0
+    let linearR = 0, linearG = 0, linearB = 0
     let weightedR = 0, weightedG = 0, weightedB = 0, weightTotal = 0
     let count = 0
     for (let y = top; y <= bottom; y++) {
       for (let x = left; x <= right; x++) {
         const i = (y * width + x) * 4
         const r = data[i], g = data[i + 1], b = data[i + 2]
-        const lr = toLinear[r], lg = toLinear[g], lb = toLinear[b]
-        plainR += lr
-        plainG += lg
-        plainB += lb
+        plainR += r
+        plainG += g
+        plainB += b
         count++
         if (options.dominant) {
+          const lr = toLinear[r], lg = toLinear[g], lb = toLinear[b]
+          linearR += lr
+          linearG += lg
+          linearB += lb
           const max = Math.max(r, g, b)
           const saturation = max ? (max - Math.min(r, g, b)) / max : 0
           const weight = 0.1 + 0.9 * saturation * (max / 255)
@@ -108,12 +112,15 @@
     if (!count) return [0, 0, 0]
 
     const plain = [plainR / count, plainG / count, plainB / count]
-    let result = plain
-    if (options.dominant && weightTotal > 0) {
+    if (!options.dominant || weightTotal === 0) return plain
+
+    const linearPlain = [linearR / count, linearG / count, linearB / count]
+    let result = linearPlain
+    if (weightTotal > 0) {
       const weighted = [weightedR / weightTotal, weightedG / weightTotal, weightedB / weightTotal]
       const weightedLum = luminance(...weighted)
       if (weightedLum > 1e-6) {
-        let scale = luminance(...plain) / weightedLum
+        let scale = luminance(...linearPlain) / weightedLum
         const peak = Math.max(...weighted) * scale
         if (peak > 1) scale /= peak
         result = weighted.map((channel) => channel * scale)
@@ -122,15 +129,8 @@
     return result.map(toSrgb)
   }
 
-  function isNearNeutral(rgb) {
-    const maximum = Math.max(...rgb)
-    const minimum = Math.min(...rgb)
-    return maximum - minimum <= Math.max(NEUTRAL_CHANNEL_SPREAD_THRESHOLD, maximum * NEUTRAL_SATURATION_THRESHOLD)
-  }
-
-  // Raises HSV saturation by amount (0-100) while leaving near-gray colors alone. Input and output are 0-255.
+  // Raises HSV saturation smoothly, avoiding strong color shifts in near-gray scenes. Input and output are 0-255.
   function vividify(rgb, amount) {
-    if (isNearNeutral(rgb)) return [...rgb]
     const [red, green, blue] = rgb.map((channel) => channel / 255)
     const maximum = Math.max(red, green, blue)
     const minimum = Math.min(red, green, blue)
@@ -143,7 +143,23 @@
       hue /= 6
       if (hue < 0) hue += 1
     }
-    const saturation = Math.min(1, (maximum ? delta / maximum : 0) * (1 + amount / 50))
+    const originalSaturation = maximum ? delta / maximum : 0
+    const neutralThreshold = maximum
+      ? Math.max(NEUTRAL_CHANNEL_SPREAD_THRESHOLD / (maximum * 255), NEUTRAL_SATURATION_THRESHOLD)
+      : 1
+    const boostProgress = Math.max(0, Math.min(
+      1,
+      (originalSaturation - neutralThreshold) / 0.12
+    ))
+    // Dark colors are the least reliable: a few levels of tint are noise or UI accents, not scene color.
+    // Fade the boost in with brightness so dim scenes are never pushed towards orange or yellow.
+    const brightnessProgress = Math.max(0, Math.min(1, (maximum - 0.06) / 0.25))
+    const smoothBoost = boostProgress * boostProgress * (3 - 2 * boostProgress)
+      * brightnessProgress * brightnessProgress * (3 - 2 * brightnessProgress)
+    const saturation = Math.min(
+      1,
+      originalSaturation * (1 + (amount / 50) * smoothBoost)
+    )
     const value = maximum
     const hueSector = hue * 6
     const sector = Math.floor(hueSector)
@@ -171,11 +187,26 @@
     return vividify(corrected, 30 * strength)
   }
 
+  // Pulls near-gray colors to true gray. The pull is continuous (no threshold to flip across) and stronger
+  // for dark colors, where a few levels of channel difference are mostly noise or UI accents and would
+  // otherwise show up as a random warm tint on the lamp.
+  function grayGuard(rgb) {
+    const peak = Math.max(...rgb)
+    const chroma = peak - Math.min(...rgb)
+    const dark = Math.max(0, Math.min(1, (140 - peak) / 100))
+    const low = 4 + 6 * dark
+    const high = 12 + 18 * dark
+    const progress = Math.max(0, Math.min(1, (chroma - low) / (high - low)))
+    const keep = progress * progress * (3 - 2 * progress)
+    const mean = (rgb[0] + rgb[1] + rgb[2]) / 3
+    return rgb.map((channel) => mean + (channel - mean) * keep)
+  }
+
+  // Returns the sampled color with the median brightness. Unlike a per-channel median it never invents a
+  // hue that was not in any frame, while still ignoring a single odd frame.
   function medianColor(colors) {
-    return [0, 1, 2].map((channel) => {
-      const values = colors.map((color) => color[channel]).sort((a, b) => a - b)
-      return values[Math.floor(values.length / 2)]
-    })
+    const sorted = [...colors].sort((a, b) => luminance(...a) - luminance(...b))
+    return sorted[Math.floor(sorted.length / 2)]
   }
 
   function smoothColor(current, target, elapsedSeconds, amount) {
@@ -240,8 +271,8 @@
     SETTINGS_DEFAULTS,
     detectBars,
     frameColor,
-    isNearNeutral,
     vividify,
+    grayGuard,
     correctHdr,
     medianColor,
     smoothColor,

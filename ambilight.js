@@ -115,6 +115,9 @@ function bindSettings() {
         output.textContent = `${settings[id]}`;
       }
       saveSettings();
+      if (id === 'fps') {
+        applyCaptureFrameRate();
+      }
     };
 
     input.addEventListener('input', updateSetting);
@@ -267,6 +270,20 @@ let stream = null;
 
 const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
+// Capturing faster than the sync rate only costs GPU/CPU (noticeable in games), so follow the sync rate.
+function captureFrameRate() {
+  return Math.max(5, Math.min(30, Math.ceil(Number(settings.fps) || 20)));
+}
+
+function applyCaptureFrameRate() {
+  if (!stream) {
+    return;
+  }
+  for (const track of stream.getVideoTracks()) {
+    track.applyConstraints({ frameRate: { max: captureFrameRate() } }).catch(() => {});
+  }
+}
+
 function sendColor(rgb, brightness = null) {
   if (!window.lampControl.sendColor(rgb[0], rgb[1], rgb[2], brightness)) {
     setStatus('status.notConnected');
@@ -294,7 +311,7 @@ async function startCapture(generation) {
       mandatory: {
         chromeMediaSource: 'desktop',
         chromeMediaSourceId: sourceId,
-        maxFrameRate: 30
+        maxFrameRate: captureFrameRate()
       }
     }
   });
@@ -446,7 +463,7 @@ async function syncLoop() {
         sampledColor = core.correctHdr(sampledColor, settings.hdramt);
       }
 
-      const vividColor = core.vividify(sampledColor, settings.vivid);
+      const vividColor = core.grayGuard(core.vividify(sampledColor, settings.vivid));
       recentColors.push(vividColor);
       if (recentColors.length > GLITCH_FILTER_FRAMES) {
         recentColors.shift();

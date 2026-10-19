@@ -664,6 +664,8 @@
             send(cmd.color(red, green, blue))
           } else {
             const colorCommand = cmd.color(red, green, blue)
+            // Drop a queued older color so it cannot be written after this brightness + color pair.
+            pending = null
             gatt(async () => {
               await ch.writeValueWithoutResponse(new Uint8Array(cmd.bright(brightness)))
               await new Promise((resolve) => setTimeout(resolve, 40))
