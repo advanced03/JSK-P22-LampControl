@@ -10,6 +10,8 @@
   const BAR_LEVEL = 10
   const NEUTRAL_SATURATION_THRESHOLD = 0.15
   const NEUTRAL_CHANNEL_SPREAD_THRESHOLD = 12
+  const DOMINANT_COVERAGE_START = 0.03
+  const DOMINANT_COVERAGE_FULL = 0.15
   const BLACK_ENTER_LEVEL = 3
   const BLACK_EXIT_LEVEL = 8
 
@@ -85,6 +87,7 @@
     let plainR = 0, plainG = 0, plainB = 0
     let linearR = 0, linearG = 0, linearB = 0
     let weightedR = 0, weightedG = 0, weightedB = 0, weightTotal = 0
+    let chromaticCount = 0
     let count = 0
     for (let y = top; y <= bottom; y++) {
       for (let x = left; x <= right; x++) {
@@ -100,7 +103,14 @@
           linearG += lg
           linearB += lb
           const max = Math.max(r, g, b)
-          const saturation = max ? (max - Math.min(r, g, b)) / max : 0
+          const min = Math.min(r, g, b)
+          const saturation = max ? (max - min) / max : 0
+          if (
+            saturation > NEUTRAL_SATURATION_THRESHOLD
+            && max - min > NEUTRAL_CHANNEL_SPREAD_THRESHOLD
+          ) {
+            chromaticCount++
+          }
           const weight = 0.1 + 0.9 * saturation * (max / 255)
           weightedR += lr * weight
           weightedG += lg * weight
@@ -123,7 +133,17 @@
         let scale = luminance(...linearPlain) / weightedLum
         const peak = Math.max(...weighted) * scale
         if (peak > 1) scale /= peak
-        result = weighted.map((channel) => channel * scale)
+        const dominant = weighted.map((channel) => channel * scale)
+        const coverage = chromaticCount / count
+        const progress = Math.max(0, Math.min(
+          1,
+          (coverage - DOMINANT_COVERAGE_START)
+            / (DOMINANT_COVERAGE_FULL - DOMINANT_COVERAGE_START)
+        ))
+        const strength = progress * progress * (3 - 2 * progress)
+        result = linearPlain.map((channel, index) => (
+          channel + (dominant[index] - channel) * strength
+        ))
       }
     }
     return result.map(toSrgb)
@@ -251,10 +271,49 @@
     calBlue: 100,
   }
 
+  // Slider ranges, mirrored from control.html. Saved values outside these (hand-edited or corrupted storage)
+  // would otherwise reach the sync loop as NaN or as absurd delays.
+  const NUMERIC_LIMITS = {
+    fps: [1, 30],
+    smooth: [0, 100],
+    vivid: [0, 100],
+    bright: [5, 100],
+    hdramt: [0, 100],
+    calRed: [0, 100],
+    calGreen: [0, 100],
+    calBlue: [0, 100],
+  }
+  const BOOLEAN_SETTINGS = ['bars', 'dominant', 'allowTurnOff', 'hdr']
+
+  function toFiniteNumber(value) {
+    if (typeof value === 'number') return Number.isFinite(value) ? value : NaN
+    if (typeof value === 'string' && value.trim() !== '') return Number(value)
+    return NaN
+  }
+
+  // Forces every saved value into the type and range the sync loop expects, falling back to the default.
+  function sanitizeSettings(settings) {
+    const clean = { ...settings }
+    for (const [name, [minimum, maximum]] of Object.entries(NUMERIC_LIMITS)) {
+      const value = toFiniteNumber(clean[name])
+      clean[name] = Number.isFinite(value)
+        ? Math.max(minimum, Math.min(maximum, Math.round(value)))
+        : SETTINGS_DEFAULTS[name]
+    }
+    for (const name of BOOLEAN_SETTINGS) {
+      clean[name] = typeof clean[name] === 'boolean' ? clean[name] : SETTINGS_DEFAULTS[name]
+    }
+    // A screen is a capture source id (string), or a legacy numeric index that is converted on first use.
+    if (typeof clean.screen !== 'string' && !Number.isInteger(clean.screen)) {
+      clean.screen = SETTINGS_DEFAULTS.screen
+    }
+    return clean
+  }
+
   // One-time upgrade of saved settings. The old defaults (smooth 35, HDR 50) are replaced only while the
   // stored settings predate versioning, so a value chosen deliberately afterwards is never overwritten.
   function migrateSettings(saved) {
-    const settings = saved && typeof saved === 'object' ? { ...saved } : {}
+    const settings = saved && typeof saved === 'object' && !Array.isArray(saved) ? { ...saved } : {}
     if (!(Number(settings.version) >= 2)) {
       if (settings.smooth === 35) settings.smooth = SETTINGS_DEFAULTS.smooth
       if (settings.hdramt === 50) settings.hdramt = SETTINGS_DEFAULTS.hdramt
@@ -263,7 +322,7 @@
       delete settings[obsolete]
     }
     settings.version = SETTINGS_VERSION
-    return { ...SETTINGS_DEFAULTS, ...settings }
+    return sanitizeSettings({ ...SETTINGS_DEFAULTS, ...settings })
   }
 
   return {
@@ -277,6 +336,7 @@
     medianColor,
     smoothColor,
     createBlackDetector,
+    sanitizeSettings,
     migrateSettings,
     toLinear,
     toSrgb,

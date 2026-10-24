@@ -680,6 +680,20 @@
         }
         return true
       },
+      // Sets only the lamp brightness (used by Ambilight to undo its 1% black-scene state).
+      sendBrightness(level) {
+        if (!ch) return false
+        // A color still waiting in the queue is Ambilight's stale one (white for the black scene); drop it so
+        // it cannot be written after the brightness is restored.
+        pending = null
+        gatt(async () => {
+          await ch.writeValueWithoutResponse(new Uint8Array(cmd.bright(level)))
+          await new Promise((resolve) => setTimeout(resolve, 40))
+        }).catch((error) => {
+          reportConnectionError('connection.writeFailed', error)
+        })
+        return true
+      },
       onConnectionChange(callback) {
         ambilightConnectionListeners.add(callback)
         callback(!!ch, $('status').textContent)

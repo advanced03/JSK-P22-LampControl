@@ -324,14 +324,21 @@ app.whenReady().then(() => {
     })
   })
 
+  // Returns the source id plus the display's real pixel size, so the renderer can ask for a small capture
+  // with the same aspect ratio. selectedScreen is deliberately not overwritten with the fallback: if the
+  // chosen display is only missing for a moment, the next capture goes back to it.
   ipcMain.handle('capture-source', async () => {
     const sources = await getScreenSources()
     const source = sources.find(({ id }) => id === selectedScreen) || sources[0]
     if (!source) {
       throw new Error('No screen capture source is available.')
     }
-    selectedScreen = source.id
-    return source.id
+    const display = screen.getAllDisplays().find(({ id }) => String(id) === source.display_id)
+    return {
+      id: source.id,
+      width: display ? Math.round(display.bounds.width * display.scaleFactor) : 0,
+      height: display ? Math.round(display.bounds.height * display.scaleFactor) : 0,
+    }
   })
 
   // Silent reconnect: run the renderer's connect with a simulated user gesture (Web Bluetooth requires one)

@@ -43,8 +43,9 @@ and checks the Bluetooth protocol builders, the color processing, and the transl
 Open **Ambilight** in the sidebar, connect to the lamp with the app's shared **Connect** button, select a display, and
 choose **Start sync**. The app samples the selected screen and sends a representative color to the lamp. Colors are
 averaged in screen RGB so every pixel contributes evenly; **Favor dominant colors** (on by default) instead gives vivid
-areas more weight while preserving the scene's overall brightness. Near-gray colors are protected from strong vividness
-boosts. The preview shows the color before lamp calibration is applied.
+areas more weight while preserving the scene's overall brightness. That extra weight fades in with the amount of the
+screen covered by color, so small colored UI accents do not tint an otherwise monochrome screen. Near-gray colors are
+protected from strong vividness boosts. The preview shows the color before lamp calibration is applied.
 
 Ambilight settings let you:
 

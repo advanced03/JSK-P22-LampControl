@@ -6,6 +6,10 @@ const core = window.AmbiCore;
 const RECOVERY_ATTEMPTS = 6;
 const SYNC_FRAME_WIDTH = 192;
 const SYNC_FRAME_HEIGHT = 108;
+// The lamp color is averaged from a 192x108 sample, so there is no point in making Windows hand over (and the
+// renderer read back) a full 1440p/4K frame 20+ times per second; that readback is what costs frames in games.
+const CAPTURE_MAX_WIDTH = 640;
+const CAPTURE_MAX_HEIGHT = 360;
 
 function loadSettings() {
   try {
@@ -43,6 +47,20 @@ let wizardPreviousOutput = null;
 let lastOutputColor = null;
 let calibrationRevision = 0;
 let minimumWhiteActive = false;
+// Set when sync stopped while the lamp was parked at 1% brightness but the lamp could not be reached.
+let restoreBrightnessOnConnect = false;
+
+// Undoes the "white at 1%" black-scene state: sync changes the lamp brightness itself, so whenever it stops
+// (or is stopped by another command) the brightness the person chose has to be put back.
+function restoreLampBrightness() {
+  if (!minimumWhiteActive) {
+    return;
+  }
+  minimumWhiteActive = false;
+  if (!window.lampControl.sendBrightness(window.lampControl.brightness)) {
+    restoreBrightnessOnConnect = true;
+  }
+}
 
 function setStatus(key, values = {}) {
   statusKey = key;
@@ -299,22 +317,47 @@ const video = $('video');
 const canvas = $('cv');
 const context = canvas.getContext('2d', { willReadFrequently: true });
 
+// Largest capture size that keeps the display's aspect ratio (so no letterboxing is added) within the caps.
+function captureSizeLimits(source) {
+  const width = Number(source && source.width);
+  const height = Number(source && source.height);
+  if (!(width > 0 && height > 0)) {
+    return null;
+  }
+  const scale = Math.min(1, CAPTURE_MAX_WIDTH / width, CAPTURE_MAX_HEIGHT / height);
+  const even = value => Math.max(2, Math.round(value * scale / 2) * 2);
+  return { maxWidth: even(width), maxHeight: even(height) };
+}
+
 async function startCapture(generation) {
-  const sourceId = await window.api.captureSource();
+  const source = await window.api.captureSource();
+  const sourceId = typeof source === 'string' ? source : source.id;
   if (generation !== startGeneration) {
     return false;
   }
 
-  const nextStream = await navigator.mediaDevices.getUserMedia({
+  const openStream = sizeLimits => navigator.mediaDevices.getUserMedia({
     audio: false,
     video: {
       mandatory: {
         chromeMediaSource: 'desktop',
         chromeMediaSourceId: sourceId,
-        maxFrameRate: captureFrameRate()
+        maxFrameRate: captureFrameRate(),
+        ...sizeLimits
       }
     }
   });
+  const sizeLimits = typeof source === 'string' ? null : captureSizeLimits(source);
+  let nextStream;
+  try {
+    nextStream = await openStream(sizeLimits || {});
+  } catch (error) {
+    if (!sizeLimits) {
+      throw error;
+    }
+    // Some drivers refuse a size limit; capture at full size rather than not at all.
+    nextStream = await openStream({});
+  }
   if (generation !== startGeneration) {
     nextStream.getTracks().forEach(track => track.stop());
     return false;
@@ -405,7 +448,7 @@ function stopSync() {
   startGeneration++;
   starting = false;
   running = false;
-  minimumWhiteActive = false;
+  restoreLampBrightness();
   stopCapture();
   $('start').textContent = i18n.translate('button.startSync');
   $('start').disabled = !window.lampControl.connected;
@@ -447,6 +490,10 @@ async function syncLoop() {
     if (wizardActive) {
       previousFrameTime = frameStart;
       recentColors.length = 0;
+      // The wizard overwrites the lamp color with its test colors. Forget what was last sent so the first
+      // frame after the wizard closes always writes the scene color again, even if the scene never changed.
+      lastSentColor = null;
+      haveColor = false;
       await sleep(1000 / settings.fps);
       continue;
     }
@@ -602,8 +649,15 @@ function updateConnection(connected, status) {
       setStatus('status.stopped');
       refreshWizardColors();
     }
-    if (resumeAfterReconnect && window.lampControl.autoReconnect) {
-      resumeAfterReconnect = false;
+    if (restoreBrightnessOnConnect) {
+      restoreBrightnessOnConnect = false;
+      window.lampControl.sendBrightness(window.lampControl.brightness);
+    }
+    // This runs on every status change while connected; the resume request is single-use, so it cannot fire
+    // later (for example after auto-reconnect is switched on) for a drop that happened long ago.
+    const shouldResume = resumeAfterReconnect && window.lampControl.autoReconnect;
+    resumeAfterReconnect = false;
+    if (shouldResume) {
       setTimeout(() => {
         if (!running && !starting && window.lampControl.connected) {
           toggleSync();
@@ -627,15 +681,20 @@ async function refreshScreens() {
   }
 
   select.disabled = false;
-  const savedIndex = Number.isInteger(settings.screen)
+  const legacyIndex = Number.isInteger(settings.screen)
     ? Math.max(0, Math.min(settings.screen, screens.length - 1))
     : -1;
   const selectedScreen = screens.some(({ id }) => id === settings.screen)
     ? settings.screen
-    : screens[savedIndex >= 0 ? savedIndex : 0].id;
+    : screens[legacyIndex >= 0 ? legacyIndex : 0].id;
   select.value = selectedScreen;
-  settings.screen = selectedScreen;
-  saveSettings();
+  // Only a first run (nothing saved) or an old numeric index is pinned to a concrete screen. A saved screen
+  // that is missing right now (display asleep, unplugged, mode switch) stays the preference, so sync returns
+  // to it by itself instead of being moved to the first display for good.
+  if (typeof settings.screen !== 'string' || settings.screen === '') {
+    settings.screen = selectedScreen;
+    saveSettings();
+  }
   window.api.setScreen(selectedScreen);
 }
 
@@ -689,6 +748,9 @@ $('screen').addEventListener('change', async () => {
 
   if (running) {
     const generation = ++startGeneration;
+    // While the new capture opens there is briefly no stream; keep the 2-second watchdog from treating that
+    // gap as a dead stream (it would cancel this restart and make everything wait for a full recovery).
+    starting = true;
     stopCapture();
     try {
       await startCapture(generation);
@@ -698,6 +760,10 @@ $('screen').addEventListener('change', async () => {
       }
       stopSync();
       setStatus('status.captureFailed', { message: error.message });
+    } finally {
+      if (generation === startGeneration) {
+        starting = false;
+      }
     }
   }
 });
