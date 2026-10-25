@@ -206,14 +206,7 @@
             <div class="ctl"><input type="range" id="ambi-bright" min="5" max="100" aria-label="Brightness" data-ambi-i18n-aria-label="response.brightnessAria"><output for="ambi-bright"></output></div>
           </div>
           <div class="card sc">
-            <div>
-              <div class="t" data-ambi-i18n="response.allowTurnOff">Allow light to fully turn off</div>
-              <div class="d" data-ambi-i18n="response.allowTurnOffDescription">When unchecked, pure-black scenes keep the lamp on with white at its lowest brightness.</div>
-            </div>
-            <input type="checkbox" id="ambi-allowTurnOff" aria-label="Allow light to fully turn off" data-ambi-i18n-aria-label="response.allowTurnOff">
-          </div>
-          <div class="card sc">
-            <div><div class="t" data-ambi-i18n="response.minLevel">Minimum brightness</div><div class="d" data-ambi-i18n="response.minLevelDescription">The lowest brightness of the lamp in dark scenes when it may not turn off. Only used when the option above is unchecked.</div></div>
+            <div><div class="t" data-ambi-i18n="response.minLevel">Minimum brightness</div><div class="d" data-ambi-i18n="response.minLevelDescription">The lamp cannot show correct colors below about 15% brightness: white turns yellow or orange. So in dark scenes the lamp is held at this minimum and never turns fully off. Lower values show wrong colors.</div></div>
             <div class="ctl"><input type="range" id="ambi-minLevel" min="1" max="40" aria-label="Minimum brightness" data-ambi-i18n-aria-label="response.minLevel"><output for="ambi-minLevel"></output></div>
           </div>
         </section>
@@ -255,11 +248,14 @@
         <div><span class="d" data-ambi-i18n="wizard.reference">Reference color</span><div id="ambi-wizard-reference" class="wizard-swatch" role="img"></div><output id="ambi-wizard-reference-value"></output></div>
         <div><span class="d" data-ambi-i18n="wizard.sent">Color sent to lamp</span><div id="ambi-wizard-sent" class="wizard-swatch" role="img"></div><output id="ambi-wizard-sent-value"></output></div>
       </div>
-      <p class="d" data-ambi-i18n="wizard.adjustHint">Adjust the channel controls until the lamp looks as close as possible to the reference.</p>
-      <div class="wizard-calibration">
+      <p id="ambi-wizard-hint" class="d" data-ambi-i18n="wizard.adjustHint">Adjust the channel controls until the lamp looks as close as possible to the reference.</p>
+      <div id="ambi-wizard-channels" class="wizard-calibration">
         <label for="ambi-wizard-cal-red" data-ambi-i18n="calibration.red">Red output</label><div class="ctl"><input type="range" id="ambi-wizard-cal-red" min="0" max="100"><output for="ambi-wizard-cal-red"></output></div>
         <label for="ambi-wizard-cal-green" data-ambi-i18n="calibration.green">Green output</label><div class="ctl"><input type="range" id="ambi-wizard-cal-green" min="0" max="100"><output for="ambi-wizard-cal-green"></output></div>
         <label for="ambi-wizard-cal-blue" data-ambi-i18n="calibration.blue">Blue output</label><div class="ctl"><input type="range" id="ambi-wizard-cal-blue" min="0" max="100"><output for="ambi-wizard-cal-blue"></output></div>
+      </div>
+      <div id="ambi-wizard-minimum" class="wizard-calibration" hidden>
+        <label for="ambi-wizard-minLevel" data-ambi-i18n="response.minLevel">Minimum brightness</label><div class="ctl"><input type="range" id="ambi-wizard-minLevel" min="1" max="40"><output for="ambi-wizard-minLevel"></output></div>
       </div>
       <div class="wizard-actions"><button id="ambi-wizard-cancel" type="button" data-ambi-i18n="wizard.cancel">Cancel</button><div><button id="ambi-wizard-previous" type="button" data-ambi-i18n="wizard.previous">Previous</button><button id="ambi-wizard-next" class="accent" type="button" data-ambi-i18n="wizard.next">Next</button></div></div>
     </dialog>

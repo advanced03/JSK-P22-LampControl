@@ -56,20 +56,11 @@ Ambilight settings let you:
 - Calibrate red, green, and blue output independently; use the calibration wizard to compare test colors with the
   preview.
 - Tune update rate, smoothing, vividness, and brightness to balance responsiveness and appearance.
-- Choose whether a dark scene can turn the lamp fully off. If not, the lamp stays on at a dim, neutral white (using your
-  color calibration) at the level set by the Minimum brightness slider (1-40%, default 5%), instead of switching to the lamp's hardware brightness, which showed up as a red or yellow tint.
-  The scene color fades smoothly into and out of black; nothing jumps.
-
-Settings are saved locally. Ambilight uses the app's existing Bluetooth connection; it does not open a separate lamp
-connection. Other lamp commands stop active screen sync, and disconnecting the lamp stops capture. When system-tray
-mode is enabled, the tray menu can start or stop sync.
-
-Screen capture recovers by itself when the display changes, the PC wakes from sleep, or the capture stream ends. If the
-lamp connection drops unexpectedly (for example during sleep) and automatic reconnect is on, sync resumes once the lamp
-is back. A manual disconnect never restarts sync on its own.
-
-## Notes
-
+- Minimum brightness (default 15%). The lamp cannot show correct colors below about 15% brightness: even pure white turns
+  yellow or orange. So the lamp is never sent anything dimmer than this and never goes fully dark; in a black scene it
+  shows a neutral dim white (using your color calibration). Lower values are possible but show wrong colors. The scene
+  color fades smoothly into and out of dark scenes; nothing jumps. Everything is a plain color command; the lamp's
+  hardware brightness is never used. The last step of the calibration wizard lets you find the right minimum by eye: lower it until the lamp's white starts to look yellow or orange, then raise it again.
 - Change the language and optionally enable system-tray mode in Settings. With tray mode enabled, closing the window
   hides the app; use the tray menu to reopen it, disconnect, or quit.
 - Only one copy of the app can run at a time; starting a second one brings the first to the front.

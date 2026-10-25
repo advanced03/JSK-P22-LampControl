@@ -81,7 +81,7 @@ test('gray and black scenes never produce a color tint, also while fading', () =
 
 test('smoothing is gradual, scales with the setting, and 0 is instant', () => {
   const step = (smooth) => {
-    const out = simulate([[[200, 200, 200], 3], [[0, 0, 0], 3]], { smooth, allowTurnOff: true })
+    const out = simulate([[[200, 200, 200], 3], [[0, 0, 0], 3]], { smooth })
     let largest = 0
     for (let i = 1; i < out.length; i++) largest = Math.max(largest, Math.abs(out[i][0] - out[i - 1][0]))
     return largest
@@ -92,30 +92,17 @@ test('smoothing is gradual, scales with the setting, and 0 is instant', () => {
   assert.ok(core.smoothingTimeConstant(100) > core.smoothingTimeConstant(50))
 })
 
-test('fully off: black reaches 0 and a dark scene does not flicker at the default smoothing', () => {
-  const black = simulate([[[0, 0, 0], 2]], { allowTurnOff: true })
-  assert.deepEqual(black[black.length - 1], [0, 0, 0])
-  const settings = { ...core.SETTINGS_DEFAULTS, allowTurnOff: true }
-  const engine = core.createEngine()
-  let flips = 0
-  let previous = null
-  for (let i = 0; i < 400; i++) {
-    const v = 2 + Math.round(Math.sin(i) * 2)
-    const on = Math.max(...engine.step(solid([v, v, v]), W, H, settings, 0.05).output) > 0
-    if (previous !== null && on !== previous) flips++
-    previous = on
-  }
-  assert.ok(flips <= 2, `flipped ${flips} times`)
-})
-
-test('not fully off: the lamp stays at the minimum level, neutral and calibrated', () => {
-  const out = simulate([[[0, 0, 0], 2], [[3, 3, 3], 2], [[100, 100, 100], 1], [[0, 0, 0], 3]], { allowTurnOff: false })
-  for (const rgb of out) assert.ok(Math.max(...rgb) >= core.MIN_OUTPUT_LEVEL)
-  const higher = simulate([[[0, 0, 0], 2]], { allowTurnOff: false, minLevel: 20 })
-  assert.ok(Math.max(...higher[higher.length - 1]) >= 50)
-  const lowest = simulate([[[0, 0, 0], 2]], { allowTurnOff: false, minLevel: 1 })
+test('the lamp is never sent anything dimmer than the minimum brightness (default 15%)', () => {
+  assert.equal(core.SETTINGS_DEFAULTS.minLevel, 15)
+  const out = simulate([[[0, 0, 0], 2], [[3, 3, 3], 2], [[100, 100, 100], 1], [[0, 0, 0], 3]])
+  for (const rgb of out) assert.ok(Math.max(...rgb) >= core.MIN_OUTPUT_LEVEL, `too dim: ${rgb}`)
+  const black = out[out.length - 1]
+  assert.ok(spread(black) <= 1, 'black becomes a neutral dim white')
+  const higher = simulate([[[0, 0, 0], 2]], { minLevel: 30 })
+  assert.ok(Math.max(...higher[higher.length - 1]) >= 76)
+  const lowest = simulate([[[0, 0, 0], 2]], { minLevel: 1 })
   assert.ok(Math.max(...lowest[lowest.length - 1]) <= 3)
-  const calibrated = simulate([[[0, 0, 0], 1]], { allowTurnOff: false, calRed: 100, calGreen: 80, calBlue: 60 })
+  const calibrated = simulate([[[0, 0, 0], 1]], { calRed: 100, calGreen: 80, calBlue: 60 })
   const last = calibrated[calibrated.length - 1]
   assert.ok(last[0] > last[1] && last[1] > last[2])
 })
@@ -128,10 +115,19 @@ test('calibration and brightness limit apply to the output but not the preview',
 })
 
 test('damaged saved settings are repaired', () => {
-  const repaired = core.migrateSettings({ fps: 0, smooth: 'abc', bright: -5, hdramt: 500, allowTurnOff: 'yes', version: 2 })
+  const repaired = core.migrateSettings({ fps: 0, smooth: 'abc', bright: -5, hdramt: 500, version: 2 })
   assert.equal(repaired.fps, 1)
   assert.equal(repaired.smooth, core.SETTINGS_DEFAULTS.smooth)
   assert.equal(repaired.bright, 5)
   assert.equal(repaired.hdramt, 100)
-  assert.equal(repaired.allowTurnOff, true)
+  assert.equal(repaired.minLevel, 15)
+  assert.equal('allowTurnOff' in repaired, false)
 })
+
+test('a small bright panel on a black screen is not mistaken for a picture between black bars', () => {
+  const panel = frame((x, y) => (x > 140 && y > 80 && y < 100 ? [255, 255, 255] : [0, 0, 0]))
+  assert.equal(core.detectBars(panel, W, H), null)
+  const average = core.frameColor(panel, W, H, { ignoreBars: true })
+  assert.ok(Math.max(...average) < 40, `lamp would be ${average}`)
+})
+

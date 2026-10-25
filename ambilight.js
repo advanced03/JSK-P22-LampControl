@@ -36,7 +36,9 @@ const calibrationTests = [
   { color: 'orange', rgb: [255, 96, 32] },
   { color: 'yellow', rgb: [220, 190, 32] },
   { color: 'cyan', rgb: [32, 190, 220] },
-  { color: 'purple', rgb: [150, 48, 220] }
+  { color: 'purple', rgb: [150, 48, 220] },
+  // Last step: the dimmest white the lamp may be sent. The channel sliders are replaced by the minimum brightness slider.
+  { color: 'minimum', rgb: [255, 255, 255], minimum: true }
 ];
 let wizardActive = false;
 let wizardStep = 0;
@@ -56,6 +58,28 @@ function saveSettings() {
   } catch (error) {
     console.error('Could not save settings.', error);
   }
+}
+
+function setMinLevel(value) {
+  settings.minLevel = value;
+  calibrationRevision++;
+  for (const inputId of ['minLevel', 'wizard-minLevel']) {
+    const input = $(inputId);
+    if (!input) {
+      continue;
+    }
+    input.value = value;
+    const output = input.parentElement.querySelector('output');
+    if (output) {
+      output.textContent = `${value}%`;
+    }
+    input.style.setProperty(
+      '--p',
+      `${(value - Number(input.min)) / (Number(input.max) - Number(input.min)) * 100}%`
+    );
+  }
+  saveSettings();
+  refreshWizardColors();
 }
 
 function setCalibrationValue(settingName, value) {
@@ -86,16 +110,39 @@ function setCalibrationValue(settingName, value) {
   refreshWizardColors();
 }
 
+// While the minimum brightness slider moves, the lamp shows the dimmest white it will be sent, so the level can be
+// judged by eye; afterwards the lamp goes back to what it was doing.
+let dimPreviewUntil = 0;
+let dimPreviewTimer = null;
+function previewDimWhite() {
+  if (wizardActive || !window.lampControl.connected) {
+    return;
+  }
+  const dimWhite = core.createOutputStage().map([0, 0, 0], settings);
+  if (!sendColor(dimWhite.map(clampByte), true)) {
+    return;
+  }
+  dimPreviewUntil = performance.now() + 2500;
+  clearTimeout(dimPreviewTimer);
+  dimPreviewTimer = setTimeout(() => {
+    dimPreviewUntil = 0;
+    if (wizardActive || !window.lampControl.connected) {
+      return;
+    }
+    if (running) {
+      forceResend = true;
+    } else {
+      window.lampControl.restoreState();
+    }
+  }, 2600);
+}
+
 function bindSettings() {
   const settingIds = [
     'bars', 'dominant',
-    'fps', 'smooth', 'vivid', 'bright', 'allowTurnOff', 'minLevel', 'hdr', 'hdramt'
+    'fps', 'smooth', 'vivid', 'bright', 'minLevel', 'hdr', 'hdramt'
   ];
   const suffix = (id) => (id === 'minLevel' ? '%' : '');
-  // The minimum brightness only applies when the lamp may not turn off.
-  const updateMinLevelState = () => {
-    $('minLevel').disabled = settings.allowTurnOff;
-  };
 
   for (const id of settingIds) {
     const input = $(id);
@@ -119,8 +166,8 @@ function bindSettings() {
       if (output) {
         output.textContent = `${settings[id]}${suffix(id)}`;
       }
-      if (id === 'allowTurnOff') {
-        updateMinLevelState();
+      if (id === 'minLevel') {
+        previewDimWhite();
       }
       saveSettings();
       if (id === 'fps') {
@@ -131,8 +178,6 @@ function bindSettings() {
     input.addEventListener('input', updateSetting);
     input.addEventListener('change', updateSetting);
   }
-
-  updateMinLevelState();
 
   for (const [id, settingName] of calibrationControls) {
     const input = $(id);
@@ -152,7 +197,7 @@ function bindSettings() {
   });
 
   $('reset-response').addEventListener('click', () => {
-    for (const id of ['fps', 'smooth', 'vivid', 'bright', 'allowTurnOff', 'minLevel']) {
+    for (const id of ['fps', 'smooth', 'vivid', 'bright', 'minLevel']) {
       const input = $(id);
       const value = core.SETTINGS_DEFAULTS[id];
       settings[id] = value;
@@ -189,10 +234,19 @@ function refreshWizardColors() {
   }
 
   const test = calibrationTests[wizardStep];
-  const referenceColor = test.rgb.map(channel => clampByte(channel * settings.bright / 100));
-  const outputColor = calibrateColor(test.rgb).map(channel => (
-    clampByte(channel * settings.bright / 100)
-  ));
+  let referenceColor;
+  let outputColor;
+  if (test.minimum) {
+    // Reference: a neutral gray at the minimum level. Sent: what the lamp gets in a black scene.
+    const level = clampByte(settings.minLevel / 100 * 255);
+    referenceColor = [level, level, level];
+    outputColor = core.createOutputStage().map([0, 0, 0], settings).map(clampByte);
+  } else {
+    referenceColor = test.rgb.map(channel => clampByte(channel * settings.bright / 100));
+    outputColor = calibrateColor(test.rgb).map(channel => (
+      clampByte(channel * settings.bright / 100)
+    ));
+  }
 
   $('wizard-reference').style.background = `rgb(${referenceColor.join(', ')})`;
   $('wizard-sent').style.background = `rgb(${outputColor.join(', ')})`;
@@ -221,6 +275,9 @@ function renderWizardStep() {
   $('wizard-step-description').textContent = i18n.translate(
     `wizard.color.${test.color}Description`
   );
+  $('wizard-channels').hidden = Boolean(test.minimum);
+  $('wizard-minimum').hidden = !test.minimum;
+  $('wizard-hint').textContent = i18n.translate(test.minimum ? 'wizard.minimumHint' : 'wizard.adjustHint');
   $('wizard-previous').disabled = wizardStep === 0;
   $('wizard-next').textContent = i18n.translate(
     wizardStep === calibrationTests.length - 1 ? 'wizard.finish' : 'wizard.next'
@@ -248,6 +305,15 @@ function openCalibrationWizard() {
     input.oninput = () => setCalibrationValue(settingName, Number(input.value));
     input.onchange = () => setCalibrationValue(settingName, Number(input.value));
   }
+  const minimumInput = $('wizard-minLevel');
+  minimumInput.value = settings.minLevel;
+  minimumInput.parentElement.querySelector('output').textContent = `${settings.minLevel}%`;
+  minimumInput.style.setProperty(
+    '--p',
+    `${(settings.minLevel - Number(minimumInput.min)) / (Number(minimumInput.max) - Number(minimumInput.min)) * 100}%`
+  );
+  minimumInput.oninput = () => setMinLevel(Number(minimumInput.value));
+  minimumInput.onchange = () => setMinLevel(Number(minimumInput.value));
   $('calibration-wizard').showModal();
   renderWizardStep();
 }
@@ -454,7 +520,7 @@ async function syncLoop(id) {
 
   while (running && id === loopId) {
     const frameStart = performance.now();
-    if (wizardActive) {
+    if (wizardActive || performance.now() < dimPreviewUntil) {
       // The wizard owns the lamp; start over afterwards so the first frame is sent right away.
       previousFrameTime = frameStart;
       lastFrameTime = frameStart;

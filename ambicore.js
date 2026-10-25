@@ -4,7 +4,7 @@
   if (typeof module !== 'undefined' && module.exports) module.exports = api
   else root.AmbiCore = api
 })(typeof self !== 'undefined' ? self : this, function () {
-  const SETTINGS_VERSION = 2
+  const SETTINGS_VERSION = 3
   // A pixel brighter than this (0-255) counts as picture, not letterbox. Kept just above the black-scene
   // exit level so a dark but real scene is never mistaken for bars (and then cropped or turned black).
   const BAR_LEVEL = 10
@@ -68,6 +68,14 @@
     if (top < 0 || left < 0) return null
     const bottom = height - 1 - firstRun(height, rowIsPicture, rowRun, true)
     const right = width - 1 - firstRun(width, colIsPicture, colRun, true)
+    // Real black bars leave most of the frame as the picture. A small bright area on an otherwise black screen
+    // (a dialog, a HUD, a test pattern) is content, not a picture surrounded by bars; measuring only that area
+    // would make the lamp far brighter than the screen.
+    const pictureWidth = right - left + 1
+    const pictureHeight = bottom - top + 1
+    if (pictureWidth < width * 0.5 || pictureHeight < height * 0.5 || pictureWidth * pictureHeight < width * height * 0.4) {
+      return null
+    }
     return { left, right, top, bottom }
   }
 
@@ -263,36 +271,26 @@
   }
 
   const GLITCH_FILTER_FRAMES = 3
-  // Lowest output level (0-255 peak) that still lights the lamp visibly when "allow light to fully turn off"
-  // is unchecked. Below this the lamp would look off, and very low PWM values show uneven LED tints.
-  const MIN_OUTPUT_LEVEL = 12 // default of the minLevel setting (5%), kept for reference and tests
-  const minOutputLevel = (settings) => ((Number(settings.minLevel) || 0) / 100) * 255
-  const OFF_ENTER_LEVEL = 1.5
-  const OFF_EXIT_LEVEL = 4
+  // The lamp cannot show correct colors below roughly 15% brightness: at that level and lower even pure white turns
+  // yellow/orange. So the lamp is never sent anything dimmer than this, which also means it never goes fully dark.
+  const DEFAULT_MIN_LEVEL_PERCENT = 15
+  const MIN_OUTPUT_LEVEL = Math.floor((DEFAULT_MIN_LEVEL_PERCENT / 100) * 255)
+  const minOutputLevel = (settings) => ((Number(settings.minLevel) || DEFAULT_MIN_LEVEL_PERCENT) / 100) * 255
 
-  // Turns the smoothed screen color into what is sent to the lamp: calibration, brightness limit and the
-  // low-end behavior. Everything stays a plain color command; the lamp's hardware brightness is never used,
-  // because a very low hardware brightness quantizes the channels unevenly and shows up as a red/yellow tint.
+  // Turns the smoothed screen color into what is sent to the lamp: calibration, brightness limit and the minimum
+  // brightness. Everything stays a plain color command; the lamp's hardware brightness is never used.
   function createOutputStage() {
-    let off = false
     return {
-      reset() {
-        off = false
-      },
+      reset() {},
       map(color, settings) {
         const floor = Math.max(1, minOutputLevel(settings))
         const scale = (Number(settings.bright) || 0) / 100
         const cal = [settings.calRed, settings.calGreen, settings.calBlue].map((value) => (Number(value) || 0) / 100)
         const scaled = color.map((channel, index) => channel * cal[index] * scale)
         const peak = Math.max(...scaled)
-        if (settings.allowTurnOff) {
-          off = off ? peak < OFF_EXIT_LEVEL : peak < OFF_ENTER_LEVEL
-          return off ? [0, 0, 0] : scaled
-        }
-        off = false
         if (peak >= floor) return scaled
-        // Below the floor: blend from the calibrated neutral white (pure black) up to the scene color
-        // lifted to the floor, so there is no jump and noise in a dark scene cannot tint the lamp.
+        // Below the minimum: blend from the calibrated neutral white (pure black) up to the scene color lifted to the
+        // minimum, so there is no jump and noise in a dark scene cannot tint the lamp.
         const whitePeak = Math.max(...cal, 1e-6)
         const neutral = cal.map((value) => (value / whitePeak) * floor)
         if (peak <= 1e-6) return neutral
@@ -337,8 +335,7 @@
     smooth: 50,
     vivid: 40,
     bright: 100,
-    allowTurnOff: true,
-    minLevel: 5,
+    minLevel: DEFAULT_MIN_LEVEL_PERCENT,
     screen: '',
     display: '',
     hdr: false,
@@ -356,7 +353,13 @@
       if (settings.smooth === 35) settings.smooth = SETTINGS_DEFAULTS.smooth
       if (settings.hdramt === 50) settings.hdramt = SETTINGS_DEFAULTS.hdramt
     }
-    for (const obsolete of ['mode', 'captureMode', 'expressiveSensitivity', 'expressiveStrength', 'minimumBrightness']) {
+    // Version 3: the lamp can no longer be turned fully off by the sync (it cannot show correct colors that dim),
+    // and the minimum brightness setting starts at 15% for everyone.
+    if (!(Number(settings.version) >= 3)) delete settings.minLevel
+    for (const obsolete of [
+      'mode', 'captureMode', 'expressiveSensitivity', 'expressiveStrength', 'minimumBrightness',
+      'allowTurnOff', 'lowRed', 'lowGreen', 'lowBlue',
+    ]) {
       delete settings[obsolete]
     }
     settings.version = SETTINGS_VERSION
@@ -377,7 +380,7 @@
         ? Math.max(low, Math.min(high, value))
         : SETTINGS_DEFAULTS[name]
     }
-    for (const name of ['bars', 'dominant', 'allowTurnOff', 'hdr']) {
+    for (const name of ['bars', 'dominant', 'hdr']) {
       result[name] = typeof result[name] === 'boolean' ? result[name] : SETTINGS_DEFAULTS[name]
     }
     if (typeof result.screen !== 'string' && !Number.isInteger(result.screen)) result.screen = ''

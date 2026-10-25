@@ -152,3 +152,7 @@
     padding: 18px;
   }
 }
+
+#ambi-calibration-wizard .wizard-calibration[hidden] {
+  display: none;
+}
