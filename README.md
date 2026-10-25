@@ -57,7 +57,7 @@ Ambilight settings let you:
   preview.
 - Tune update rate, smoothing, vividness, and brightness to balance responsiveness and appearance.
 - Choose whether a dark scene can turn the lamp fully off. If not, the lamp stays on at a dim, neutral white (using your
-  color calibration) instead of switching to the lamp's hardware brightness, which showed up as a red or yellow tint.
+  color calibration) at the level set by the Minimum brightness slider (1-40%, default 5%), instead of switching to the lamp's hardware brightness, which showed up as a red or yellow tint.
   The scene color fades smoothly into and out of black; nothing jumps.
 
 Settings are saved locally. Ambilight uses the app's existing Bluetooth connection; it does not open a separate lamp

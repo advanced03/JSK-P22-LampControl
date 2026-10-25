@@ -340,6 +340,16 @@
       }
       busy = false
     }
+    // Settings that do not change what the lamp shows (the clock and the schedule) go through the same write queue,
+    // but neither stop screen sync nor can they be replaced by a newer color that is waiting to be sent.
+    function sendNow(bytes) {
+      if (!ch) return Promise.resolve()
+      return gatt(async () => {
+        if (!ch) throw new Error('The lamp disconnected')
+        await ch.writeValueWithoutResponse(new Uint8Array(bytes))
+        await new Promise((r) => setTimeout(r, 40))
+      }).catch((e) => reportConnectionError('connection.writeFailed', e))
+    }
     // Color wheel: angle = hue, distance from centre = saturation
     const cv = $('wheel'), R = 130
     function hsv2rgb(h, s, v) {
@@ -375,7 +385,7 @@
     cv.onpointermove = (e) => {
       if (drag && !activeEffect) pick(e)
     }
-    cv.onpointerup = () => drag = false
+    cv.onpointerup = cv.onpointercancel = cv.onlostpointercapture = () => drag = false
     function rgb2hsv(r, g, b) {
       r /= 255
       g /= 255
@@ -635,10 +645,19 @@
       renderMic()
     }
     function act(b) {
+      // Choosing a color or effect while the lamp is shown as off means the person wants light: switch it on first,
+      // otherwise the screen would say "Off" while the lamp lights up (or the choice silently does nothing).
+      const steps = []
+      if (powerState === 'off') {
+        steps.push(cmd.power(true))
+        setPower('on')
+      }
       if (micState === 'on') {
         setMic('off')
-        sendMany([micOnOff(false), b])
-      } else send(b)
+        steps.push(micOnOff(false))
+      }
+      if (steps.length) sendMany([...steps, b])
+      else send(b)
     }
     window.lampControl = {
       get connected() {
@@ -814,7 +833,7 @@
 
         if (!w) {
           enb.checked = false
-          send(P.timerWrite(h, m, mode, 0))
+          sendNow(P.timerWrite(h, m, mode, 0))
           say('schedule.notSet')
           return
         }
@@ -823,7 +842,7 @@
           say('schedule.chooseTime')
           return
         }
-        send(P.timerWrite(h, m, mode, w | (enb.checked ? P.WEEK_ENABLED : 0)))
+        sendNow(P.timerWrite(h, m, mode, w | (enb.checked ? P.WEEK_ENABLED : 0)))
         say('schedule.summary', { time: tm.value, weeks: w, enabled: enb.checked })
       }
       enb.onchange = () => {
@@ -896,7 +915,7 @@
       reading = false
     }
     function afterConnect() {
-      send(clk())
+      sendNow(clk())
       noMic = /^MELK-(OE|OB|TX)/i.test(dev.name || '')
       if (noMic) {
         document.querySelectorAll('.mic').forEach((x) => x.disabled = true)
@@ -949,7 +968,10 @@
     function watchDeviceDisconnect(device) {
       device.addEventListener('gattserverdisconnected', onDisconnected)
     }
+    let connecting = false
     async function connect(options = {}) {
+      if (connecting || ch) return !!ch
+      connecting = true
       const reconnecting = !!dev
       try {
         if (!await isBluetoothAvailable()) return false
@@ -993,6 +1015,8 @@
         reportConnectionError('connection.failed', e)
         setConnectionButton(reconnecting ? 'connection.reconnect' : 'connection.connect')
         return false
+      } finally {
+        connecting = false
       }
     }
     async function connectToLastDevice() {
@@ -1045,9 +1069,10 @@
       if (automaticConnectPending) return
       if (ch) {
         manualDisconnectRequested = true
-        dev.gatt.disconnect()
-      }
-      else connect()
+        // If the connection was already lost without an event, nothing would ever reset the screen.
+        if (dev.gatt.connected === false) onDisconnected()
+        else dev.gatt.disconnect()
+      } else connect()
     }
     $('bluetoothSettings').onclick = async () => {
       try {

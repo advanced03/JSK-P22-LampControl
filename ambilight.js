@@ -89,8 +89,13 @@ function setCalibrationValue(settingName, value) {
 function bindSettings() {
   const settingIds = [
     'bars', 'dominant',
-    'fps', 'smooth', 'vivid', 'bright', 'allowTurnOff', 'hdr', 'hdramt'
+    'fps', 'smooth', 'vivid', 'bright', 'allowTurnOff', 'minLevel', 'hdr', 'hdramt'
   ];
+  const suffix = (id) => (id === 'minLevel' ? '%' : '');
+  // The minimum brightness only applies when the lamp may not turn off.
+  const updateMinLevelState = () => {
+    $('minLevel').disabled = settings.allowTurnOff;
+  };
 
   for (const id of settingIds) {
     const input = $(id);
@@ -104,7 +109,7 @@ function bindSettings() {
     }
 
     if (output) {
-      output.textContent = `${settings[id]}`;
+      output.textContent = `${settings[id]}${suffix(id)}`;
     }
 
     const updateSetting = () => {
@@ -112,7 +117,10 @@ function bindSettings() {
         ? Number(input.value)
         : input.value;
       if (output) {
-        output.textContent = `${settings[id]}`;
+        output.textContent = `${settings[id]}${suffix(id)}`;
+      }
+      if (id === 'allowTurnOff') {
+        updateMinLevelState();
       }
       saveSettings();
       if (id === 'fps') {
@@ -123,6 +131,8 @@ function bindSettings() {
     input.addEventListener('input', updateSetting);
     input.addEventListener('change', updateSetting);
   }
+
+  updateMinLevelState();
 
   for (const [id, settingName] of calibrationControls) {
     const input = $(id);
@@ -142,7 +152,7 @@ function bindSettings() {
   });
 
   $('reset-response').addEventListener('click', () => {
-    for (const id of ['fps', 'smooth', 'vivid', 'bright', 'allowTurnOff']) {
+    for (const id of ['fps', 'smooth', 'vivid', 'bright', 'allowTurnOff', 'minLevel']) {
       const input = $(id);
       const value = core.SETTINGS_DEFAULTS[id];
       settings[id] = value;
@@ -547,7 +557,13 @@ function updateHdrControls() {
   $('hdramt').disabled = !settings.hdr;
 }
 
+let wasConnected = false;
+
+// Called on every connection status change (also for errors and language changes), so only a real change of the
+// connection may reset the sync status or touch the lamp; otherwise a failing write would retrigger itself.
 function updateConnection(connected, status) {
+  const justConnected = connected && !wasConnected;
+  wasConnected = connected;
   $('connection-status').textContent = status;
   $('start').disabled = !connected;
   if (!connected) {
@@ -561,7 +577,7 @@ function updateConnection(connected, status) {
     }
     setStatus('status.notConnected');
   } else {
-    if (!running) {
+    if (justConnected && !running && !starting) {
       setStatus('status.stopped');
       refreshWizardColors();
     }

@@ -212,6 +212,10 @@
             </div>
             <input type="checkbox" id="ambi-allowTurnOff" aria-label="Allow light to fully turn off" data-ambi-i18n-aria-label="response.allowTurnOff">
           </div>
+          <div class="card sc">
+            <div><div class="t" data-ambi-i18n="response.minLevel">Minimum brightness</div><div class="d" data-ambi-i18n="response.minLevelDescription">The lowest brightness of the lamp in dark scenes when it may not turn off. Only used when the option above is unchecked.</div></div>
+            <div class="ctl"><input type="range" id="ambi-minLevel" min="1" max="40" aria-label="Minimum brightness" data-ambi-i18n-aria-label="response.minLevel"><output for="ambi-minLevel"></output></div>
+          </div>
         </section>
 
         <section class="page" id="pSettings">

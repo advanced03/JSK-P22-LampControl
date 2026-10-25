@@ -265,7 +265,8 @@
   const GLITCH_FILTER_FRAMES = 3
   // Lowest output level (0-255 peak) that still lights the lamp visibly when "allow light to fully turn off"
   // is unchecked. Below this the lamp would look off, and very low PWM values show uneven LED tints.
-  const MIN_OUTPUT_LEVEL = 12
+  const MIN_OUTPUT_LEVEL = 12 // default of the minLevel setting (5%), kept for reference and tests
+  const minOutputLevel = (settings) => ((Number(settings.minLevel) || 0) / 100) * 255
   const OFF_ENTER_LEVEL = 1.5
   const OFF_EXIT_LEVEL = 4
 
@@ -279,6 +280,7 @@
         off = false
       },
       map(color, settings) {
+        const floor = Math.max(1, minOutputLevel(settings))
         const scale = (Number(settings.bright) || 0) / 100
         const cal = [settings.calRed, settings.calGreen, settings.calBlue].map((value) => (Number(value) || 0) / 100)
         const scaled = color.map((channel, index) => channel * cal[index] * scale)
@@ -288,14 +290,14 @@
           return off ? [0, 0, 0] : scaled
         }
         off = false
-        if (peak >= MIN_OUTPUT_LEVEL) return scaled
+        if (peak >= floor) return scaled
         // Below the floor: blend from the calibrated neutral white (pure black) up to the scene color
         // lifted to the floor, so there is no jump and noise in a dark scene cannot tint the lamp.
         const whitePeak = Math.max(...cal, 1e-6)
-        const neutral = cal.map((value) => (value / whitePeak) * MIN_OUTPUT_LEVEL)
+        const neutral = cal.map((value) => (value / whitePeak) * floor)
         if (peak <= 1e-6) return neutral
-        const lifted = scaled.map((channel) => channel * (MIN_OUTPUT_LEVEL / peak))
-        const mix = peak / MIN_OUTPUT_LEVEL
+        const lifted = scaled.map((channel) => channel * (floor / peak))
+        const mix = peak / floor
         return neutral.map((channel, index) => channel + (lifted[index] - channel) * mix)
       },
     }
@@ -336,6 +338,7 @@
     vivid: 40,
     bright: 100,
     allowTurnOff: true,
+    minLevel: 5,
     screen: '',
     display: '',
     hdr: false,
@@ -365,7 +368,7 @@
   function sanitizeSettings(settings) {
     const ranges = {
       fps: [1, 30], smooth: [0, 100], vivid: [0, 100], bright: [5, 100], hdramt: [0, 100],
-      calRed: [0, 100], calGreen: [0, 100], calBlue: [0, 100],
+      calRed: [0, 100], calGreen: [0, 100], calBlue: [0, 100], minLevel: [1, 40],
     }
     const result = { ...settings }
     for (const [name, [low, high]] of Object.entries(ranges)) {

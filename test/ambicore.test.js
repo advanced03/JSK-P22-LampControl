@@ -111,6 +111,10 @@ test('fully off: black reaches 0 and a dark scene does not flicker at the defaul
 test('not fully off: the lamp stays at the minimum level, neutral and calibrated', () => {
   const out = simulate([[[0, 0, 0], 2], [[3, 3, 3], 2], [[100, 100, 100], 1], [[0, 0, 0], 3]], { allowTurnOff: false })
   for (const rgb of out) assert.ok(Math.max(...rgb) >= core.MIN_OUTPUT_LEVEL)
+  const higher = simulate([[[0, 0, 0], 2]], { allowTurnOff: false, minLevel: 20 })
+  assert.ok(Math.max(...higher[higher.length - 1]) >= 50)
+  const lowest = simulate([[[0, 0, 0], 2]], { allowTurnOff: false, minLevel: 1 })
+  assert.ok(Math.max(...lowest[lowest.length - 1]) <= 3)
   const calibrated = simulate([[[0, 0, 0], 1]], { allowTurnOff: false, calRed: 100, calGreen: 80, calBlue: 60 })
   const last = calibrated[calibrated.length - 1]
   assert.ok(last[0] > last[1] && last[1] > last[2])
