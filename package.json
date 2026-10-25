@@ -6,7 +6,7 @@
   "author": "lamp",
   "scripts": {
     "start": "electron .",
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test test/*.test.js",
     "build": "electron-builder --win portable --x64",
     "build:installer": "electron-builder --win nsis --x64"
   },

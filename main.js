@@ -198,6 +198,10 @@ let picker = null
 let pickCb = null
 let lastList = []
 let selectedScreen = ''
+let selectedDisplay = ''
+// Set when a silent reconnect gave up; a chooser that still shows up afterwards belongs to that dead request
+// and is cancelled instead of popping up a window, until a real Connect click asks for one again.
+let staleAutoRequest = false
 
 function sendDevices() {
   if (!picker) return
@@ -242,6 +246,10 @@ function createWindow() {
     title: 'JSK-P22 Lamp Control',
     icon: path.join(__dirname, 'icon.png'),
   }))
+  // Without this, hiding to the tray would block Windows from shutting down or signing out.
+  win.on('session-end', () => {
+    quitting = true
+  })
   win.on('close', (event) => {
     if (trayOn && !quitting) {
       event.preventDefault()
@@ -252,6 +260,10 @@ function createWindow() {
   win.webContents.on('select-bluetooth-device', (event, devices, callback) => {
     event.preventDefault()
     lastList = devices
+    if (!autoPick && staleAutoRequest) {
+      callback('')
+      return
+    }
     if (autoPick) {
       const wanted = autoPick.id
       if (devices.some((device) => device.deviceId === wanted)) {
@@ -315,30 +327,25 @@ app.whenReady().then(() => {
       const name = (source.name || `Display ${index + 1}`)
         .replace(/:\s*\d+\s*x\s*\d+\s*$/i, '')
       if (!display) {
-        return { id: source.id, label: name }
+        return { id: source.id, displayId: source.display_id || '', label: name }
       }
 
       const width = Math.round(display.bounds.width * display.scaleFactor)
       const height = Math.round(display.bounds.height * display.scaleFactor)
-      return { id: source.id, label: `${name} (${width} × ${height})` }
+      return { id: source.id, displayId: source.display_id || '', label: `${name} (${width} × ${height})` }
     })
   })
 
-  // Returns the source id plus the display's real pixel size, so the renderer can ask for a small capture
-  // with the same aspect ratio. selectedScreen is deliberately not overwritten with the fallback: if the
-  // chosen display is only missing for a moment, the next capture goes back to it.
   ipcMain.handle('capture-source', async () => {
     const sources = await getScreenSources()
-    const source = sources.find(({ id }) => id === selectedScreen) || sources[0]
+    const source = (selectedDisplay && sources.find(({ display_id: displayId }) => displayId === selectedDisplay))
+      || sources.find(({ id }) => id === selectedScreen)
+      || sources[0]
     if (!source) {
       throw new Error('No screen capture source is available.')
     }
-    const display = screen.getAllDisplays().find(({ id }) => String(id) === source.display_id)
-    return {
-      id: source.id,
-      width: display ? Math.round(display.bounds.width * display.scaleFactor) : 0,
-      height: display ? Math.round(display.bounds.height * display.scaleFactor) : 0,
-    }
+    selectedScreen = source.id
+    return source.id
   })
 
   // Silent reconnect: run the renderer's connect with a simulated user gesture (Web Bluetooth requires one)
@@ -346,6 +353,7 @@ app.whenReady().then(() => {
   ipcMain.handle('auto-connect', async () => {
     const id = loadLastLamp()
     if (!id || !win || autoPick) return { attempted: false, connected: false }
+    staleAutoRequest = false
     autoPick = {
       id,
       callback: null,
@@ -366,6 +374,8 @@ app.whenReady().then(() => {
       return { attempted: true, connected: false }
     } finally {
       if (autoPick) {
+        // Gave up without the lamp being picked: remember that a late chooser must not open a window.
+        staleAutoRequest = true
         clearTimeout(autoPick.timer)
         autoPick = null
       }
@@ -385,12 +395,16 @@ app.whenReady().then(() => {
     appState = state
     if (tray) buildTray()
   })
-  ipcMain.on('setScreen', (_event, screenId) => {
+  ipcMain.on('setScreen', (_event, screenId, displayId) => {
     if (typeof screenId !== 'string') {
       console.warn('Ignored an invalid screen selection.')
       return
     }
     selectedScreen = screenId
+    selectedDisplay = typeof displayId === 'string' ? displayId : ''
+  })
+  ipcMain.on('manual-pick', () => {
+    staleAutoRequest = false
   })
 
   createWindow()
@@ -400,6 +414,8 @@ app.whenReady().then(() => {
     if (win && !win.isDestroyed()) win.webContents.send(channel)
   }
   powerMonitor.on('resume', () => toWindow('resume'))
+  powerMonitor.on('lock-screen', () => toWindow('lock'))
+  powerMonitor.on('unlock-screen', () => toWindow('unlock'))
   screen.on('display-added', () => toWindow('display-changed'))
   screen.on('display-removed', () => toWindow('display-changed'))
   screen.on('display-metrics-changed', (_event, _display, changedMetrics) => {

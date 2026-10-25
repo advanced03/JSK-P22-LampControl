@@ -16,8 +16,17 @@ contextBridge.exposeInMainWorld('api', {
   captureSource() {
     return ipcRenderer.invoke('capture-source')
   },
-  setScreen(index) {
-    ipcRenderer.send('setScreen', index)
+  setScreen(screenId, displayId) {
+    ipcRenderer.send('setScreen', screenId, displayId)
+  },
+  manualPick() {
+    ipcRenderer.send('manual-pick')
+  },
+  onLock(callback) {
+    ipcRenderer.on('lock', () => callback())
+  },
+  onUnlock(callback) {
+    ipcRenderer.on('unlock', () => callback())
   },
   setTray(enabled) {
     ipcRenderer.send('tray', enabled)

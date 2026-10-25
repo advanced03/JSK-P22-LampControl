@@ -23,7 +23,8 @@ npm run build:installer
 `npm run build` creates a portable Windows x64 executable in `dist/`; `npm run build:installer` creates an NSIS
 installer instead, which starts faster because nothing has to be unpacked on every launch. Electron Builder embeds the
 app icon; neither is digitally signed, so Windows SmartScreen may warn on first run. `npm test` needs no dependencies
-and checks the Bluetooth protocol builders, the color processing, and the translations.
+and checks the Bluetooth protocol builders, the Ambilight color pipeline (black bars, dominant colors, HDR, smoothing,
+the dim-scene behavior, settings repair), and that every language has every translation.
 
 ## Screenshots
 
@@ -55,8 +56,9 @@ Ambilight settings let you:
 - Calibrate red, green, and blue output independently; use the calibration wizard to compare test colors with the
   preview.
 - Tune update rate, smoothing, vividness, and brightness to balance responsiveness and appearance.
-- Choose whether a black scene can turn the lamp fully off. If not, the app sets the lamp to white at 1% brightness.
-  Entering and leaving a black scene uses separate thresholds, so fades and noise do not make the lamp flicker.
+- Choose whether a dark scene can turn the lamp fully off. If not, the lamp stays on at a dim, neutral white (using your
+  color calibration) instead of switching to the lamp's hardware brightness, which showed up as a red or yellow tint.
+  The scene color fades smoothly into and out of black; nothing jumps.
 
 Settings are saved locally. Ambilight uses the app's existing Bluetooth connection; it does not open a separate lamp
 connection. Other lamp commands stop active screen sync, and disconnecting the lamp stops capture. When system-tray
@@ -85,7 +87,7 @@ is back. A manual disconnect never restarts sync on its own.
   fire on the wrong day, flip `CLOCK_WEEKDAY_ISO` in `protocol.js`.
 - Effect names are translated from their structure (name, then colors) using each language's own word order, not by
   swapping words. To add or change a language, edit `i18n.js`; `npm test` fails if a language is missing a key, has
-  different placeholders, mixes formal and informal German, or if two effects end up with the same translated name.
+  different placeholders, or if two effects end up with the same translated name.
 
 ## Bluetooth protocol
 

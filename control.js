@@ -317,17 +317,22 @@
       return result
     }
     async function send(bytes) {
+      // Nothing can be sent without a connection, and a command that goes nowhere must not stop screen sync.
+      if (!ch) return
       if (!ambilightSending && window.ambilight) {
         window.ambilight.stop()
       }
       pending = bytes
-      if (busy || !ch) return
+      if (busy) return
       busy = true
       try {
-        while (pending) {
+        while (pending && ch) {
           const b = pending
           pending = null
-          await gatt(() => ch.writeValueWithoutResponse(new Uint8Array(b)))
+          await gatt(() => {
+            if (!ch) throw new Error('The lamp disconnected')
+            return ch.writeValueWithoutResponse(new Uint8Array(b))
+          })
           await new Promise((r) => setTimeout(r, 40))
         }
       } catch (e) {
@@ -474,7 +479,7 @@
     })
     requestAnimationFrame(updateCategoryArrows)
     $('q').oninput = () => render()
-    let curKey = null, colF = null
+    let curKey = null, curCmd = null, colF = null
     const colOK = (n) => {
       if (!colF) return true
       n = n.toLowerCase()
@@ -519,6 +524,7 @@
     }
     function setActive() {
       curKey = null
+      curCmd = null
       activeEffect = false
       $('cur').textContent = i18n.t('effects.none')
       $('fx').querySelectorAll('.on').forEach((x) => x.classList.remove('on'))
@@ -542,7 +548,9 @@
         b.textContent = i18n.effect(e.n)
         if (key === curKey) b.className = 'on'
         b.onclick = () => {
-          act(e.sc ? cmd.scene(e.id) : cmd.mode(e.id))
+          if (!ch) return
+          curCmd = e.sc ? cmd.scene(e.id) : cmd.mode(e.id)
+          act(curCmd)
           box.querySelectorAll('.on').forEach((x) => x.classList.remove('on'))
           b.classList.add('on')
           curKey = key
@@ -602,6 +610,7 @@
       renderPower()
     }
     function power(v) {
+      if (!ch) return
       send(cmd.power(v))
       setPower(v ? 'on' : 'off')
       if (!v) setActive()
@@ -651,11 +660,13 @@
       connectAuto() {
         return connect({ auto: true })
       },
-      sendColor(red, green, blue, brightness = null) {
+      // testColor: a temporary color (calibration wizard) that must not change what the interface shows.
+      sendColor(red, green, blue, brightness = null, testColor = false) {
         if (!ch) return false
         ambilightSending = true
         try {
-          setActive(null)
+          // Screen sync calls this up to 30 times a second; only touch the interface when there is something to reset.
+          if (!testColor && (activeEffect || curKey)) setActive(null)
           if (micState === 'on') {
             setMic('off')
             send(micOnOff(false))
@@ -680,18 +691,16 @@
         }
         return true
       },
-      // Sets only the lamp brightness (used by Ambilight to undo its 1% black-scene state).
-      sendBrightness(level) {
+      // Puts the lamp back to what the interface shows (running effect or selected color), for example after
+      // the calibration wizard changed it.
+      restoreState() {
         if (!ch) return false
-        // A color still waiting in the queue is Ambilight's stale one (white for the black scene); drop it so
-        // it cannot be written after the brightness is restored.
-        pending = null
-        gatt(async () => {
-          await ch.writeValueWithoutResponse(new Uint8Array(cmd.bright(level)))
-          await new Promise((resolve) => setTimeout(resolve, 40))
-        }).catch((error) => {
-          reportConnectionError('connection.writeFailed', error)
-        })
+        ambilightSending = true
+        try {
+          send(activeEffect && curCmd ? curCmd : cmd.color(...selectedColor))
+        } finally {
+          ambilightSending = false
+        }
         return true
       },
       onConnectionChange(callback) {
@@ -945,6 +954,7 @@
       try {
         if (!await isBluetoothAvailable()) return false
         if (!dev) {
+          if (!options.auto) window.api.manualPick()
           dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [SERVICE] })
           watchDeviceDisconnect(dev)
           rememberDevice(dev)
@@ -1116,4 +1126,4 @@
       timers.forEach((timer) => timer.refresh())
     })
     if ($('autoConnect').checked) connectToLastDevice()
-    
+    

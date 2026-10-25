@@ -6,10 +6,7 @@ const core = window.AmbiCore;
 const RECOVERY_ATTEMPTS = 6;
 const SYNC_FRAME_WIDTH = 192;
 const SYNC_FRAME_HEIGHT = 108;
-// The lamp color is averaged from a 192x108 sample, so there is no point in making Windows hand over (and the
-// renderer read back) a full 1440p/4K frame 20+ times per second; that readback is what costs frames in games.
-const CAPTURE_MAX_WIDTH = 640;
-const CAPTURE_MAX_HEIGHT = 360;
+const NO_FRAME_TIMEOUT = 6000;
 
 function loadSettings() {
   try {
@@ -43,24 +40,9 @@ const calibrationTests = [
 ];
 let wizardActive = false;
 let wizardStep = 0;
-let wizardPreviousOutput = null;
-let lastOutputColor = null;
+let forceResend = false;
 let calibrationRevision = 0;
-let minimumWhiteActive = false;
-// Set when sync stopped while the lamp was parked at 1% brightness but the lamp could not be reached.
-let restoreBrightnessOnConnect = false;
-
-// Undoes the "white at 1%" black-scene state: sync changes the lamp brightness itself, so whenever it stops
-// (or is stopped by another command) the brightness the person chose has to be put back.
-function restoreLampBrightness() {
-  if (!minimumWhiteActive) {
-    return;
-  }
-  minimumWhiteActive = false;
-  if (!window.lampControl.sendBrightness(window.lampControl.brightness)) {
-    restoreBrightnessOnConnect = true;
-  }
-}
+let screenLocked = false;
 
 function setStatus(key, values = {}) {
   statusKey = key;
@@ -216,7 +198,7 @@ function refreshWizardColors() {
     'aria-label',
     `${i18n.translate('wizard.sent')}: ${outputHex}`
   );
-  sendColor(outputColor, minimumWhiteActive ? window.lampControl.brightness : null);
+  sendColor(outputColor, true);
 }
 
 function renderWizardStep() {
@@ -245,7 +227,6 @@ function openCalibrationWizard() {
   wizardActive = true;
   wizardStep = 0;
   $('wizard-status').textContent = '';
-  wizardPreviousOutput = lastOutputColor ? [...lastOutputColor] : null;
   for (const [id, settingName] of calibrationControls) {
     const input = $(`wizard-${id}`);
     input.value = settings[settingName];
@@ -267,18 +248,15 @@ function closeCalibrationWizard() {
   }
 
   wizardActive = false;
-  minimumWhiteActive = false;
-  if (!running && wizardPreviousOutput && window.lampControl.connected) {
-    sendColor(wizardPreviousOutput);
+  if (running) {
+    // The sync loop sends the current scene color again on its next frame.
+    forceResend = true;
+  } else if (window.lampControl.connected) {
+    window.lampControl.restoreState();
   }
-  wizardPreviousOutput = null;
 }
 
-// A single odd frame (a black capture hiccup, a one-frame flash) should not move the lamp,
-// so the target is the per-channel median of the last few sampled colors. Cost: about one
-// frame of extra delay on a real scene change.
-const GLITCH_FILTER_FRAMES = 3;
-
+let loopId = 0;
 let running = false;
 let starting = false;
 let recovering = false;
@@ -302,62 +280,40 @@ function applyCaptureFrameRate() {
   }
 }
 
-function sendColor(rgb, brightness = null) {
-  if (!window.lampControl.sendColor(rgb[0], rgb[1], rgb[2], brightness)) {
+function sendColor(rgb, testColor = false) {
+  if (!window.lampControl.sendColor(rgb[0], rgb[1], rgb[2], null, testColor)) {
     setStatus('status.notConnected');
-    return;
+    return false;
   }
-  lastOutputColor = [...rgb];
   if (wizardActive) {
     $('wizard-status').textContent = '';
   }
+  return true;
 }
 
 const video = $('video');
 const canvas = $('cv');
 const context = canvas.getContext('2d', { willReadFrequently: true });
 
-// Largest capture size that keeps the display's aspect ratio (so no letterboxing is added) within the caps.
-function captureSizeLimits(source) {
-  const width = Number(source && source.width);
-  const height = Number(source && source.height);
-  if (!(width > 0 && height > 0)) {
-    return null;
-  }
-  const scale = Math.min(1, CAPTURE_MAX_WIDTH / width, CAPTURE_MAX_HEIGHT / height);
-  const even = value => Math.max(2, Math.round(value * scale / 2) * 2);
-  return { maxWidth: even(width), maxHeight: even(height) };
-}
-
 async function startCapture(generation) {
-  const source = await window.api.captureSource();
-  const sourceId = typeof source === 'string' ? source : source.id;
+  const sourceId = await window.api.captureSource();
   if (generation !== startGeneration) {
     return false;
   }
 
-  const openStream = sizeLimits => navigator.mediaDevices.getUserMedia({
+  const nextStream = await navigator.mediaDevices.getUserMedia({
     audio: false,
     video: {
       mandatory: {
         chromeMediaSource: 'desktop',
         chromeMediaSourceId: sourceId,
-        maxFrameRate: captureFrameRate(),
-        ...sizeLimits
+        // The sync only needs a tiny picture; asking for a small capture keeps the load on the GPU/CPU low.
+        maxWidth: 480,
+        maxHeight: 270,
+        maxFrameRate: captureFrameRate()
       }
     }
   });
-  const sizeLimits = typeof source === 'string' ? null : captureSizeLimits(source);
-  let nextStream;
-  try {
-    nextStream = await openStream(sizeLimits || {});
-  } catch (error) {
-    if (!sizeLimits) {
-      throw error;
-    }
-    // Some drivers refuse a size limit; capture at full size rather than not at all.
-    nextStream = await openStream({});
-  }
   if (generation !== startGeneration) {
     nextStream.getTracks().forEach(track => track.stop());
     return false;
@@ -406,6 +362,10 @@ async function recoverCapture() {
   try {
     for (let attempt = 0; attempt < RECOVERY_ATTEMPTS; attempt++) {
       await sleep(Math.min(1000 * 2 ** attempt, 8000));
+      // Capture cannot work while Windows is locked; wait for the unlock instead of using up the attempts.
+      while (screenLocked && running && generation === startGeneration) {
+        await sleep(1000);
+      }
       if (!running || generation !== startGeneration) {
         return;
       }
@@ -446,9 +406,9 @@ function stopSync() {
   }
 
   startGeneration++;
+  loopId++;
   starting = false;
   running = false;
-  restoreLampBrightness();
   stopCapture();
   $('start').textContent = i18n.translate('button.startSync');
   $('start').disabled = !window.lampControl.connected;
@@ -471,91 +431,43 @@ function beginSync() {
   $('start').textContent = i18n.translate('button.stopSync');
   window.lampControl.setAmbilightRunning(true);
   setStatus('status.syncing');
-  syncLoop();
+  syncLoop(++loopId);
 }
 
-async function syncLoop() {
-  let currentColor = [0, 0, 0];
+async function syncLoop(id) {
+  const engine = core.createEngine();
   let lastSentColor = null;
   let lastSendTime = 0;
   let lastCalibrationRevision = calibrationRevision;
   let previousFrameTime = performance.now();
-  let wasBlack = false;
-  let haveColor = false;
-  const blackDetector = core.createBlackDetector();
-  const recentColors = [];
+  let lastFrameTime = performance.now();
 
-  while (running) {
+  while (running && id === loopId) {
     const frameStart = performance.now();
     if (wizardActive) {
+      // The wizard owns the lamp; start over afterwards so the first frame is sent right away.
       previousFrameTime = frameStart;
-      recentColors.length = 0;
-      // The wizard overwrites the lamp color with its test colors. Forget what was last sent so the first
-      // frame after the wizard closes always writes the scene color again, even if the scene never changed.
+      lastFrameTime = frameStart;
       lastSentColor = null;
-      haveColor = false;
+      engine.reset();
       await sleep(1000 / settings.fps);
       continue;
     }
 
-    if (video.readyState >= 2) {
+    if (video.readyState >= 2 && video.videoWidth > 0) {
+      lastFrameTime = frameStart;
       context.drawImage(video, 0, 0, SYNC_FRAME_WIDTH, SYNC_FRAME_HEIGHT);
       const image = context.getImageData(0, 0, SYNC_FRAME_WIDTH, SYNC_FRAME_HEIGHT);
-      let sampledColor = core.frameColor(image.data, SYNC_FRAME_WIDTH, SYNC_FRAME_HEIGHT, {
-        ignoreBars: settings.bars,
-        dominant: settings.dominant
-      });
-
-      if (settings.hdr) {
-        sampledColor = core.correctHdr(sampledColor, settings.hdramt);
-      }
-
-      const vividColor = core.grayGuard(core.vividify(sampledColor, settings.vivid));
-      recentColors.push(vividColor);
-      if (recentColors.length > GLITCH_FILTER_FRAMES) {
-        recentColors.shift();
-      }
-      const targetColor = core.medianColor(recentColors);
-      const isBlack = blackDetector.update(targetColor);
-      if (isBlack) {
-        currentColor = [0, 0, 0];
-      } else if (wasBlack || !haveColor) {
-        // First frame (or leaving a black scene): jump straight to the scene color instead of fading up from black.
-        currentColor = targetColor;
-      } else {
-        currentColor = core.smoothColor(
-          currentColor,
-          targetColor,
-          (frameStart - previousFrameTime) / 1000,
-          settings.smooth
-        );
-      }
-      wasBlack = isBlack;
-      haveColor = true;
+      const elapsed = Math.min((frameStart - previousFrameTime) / 1000, 1);
       previousFrameTime = frameStart;
+      const result = engine.step(image.data, SYNC_FRAME_WIDTH, SYNC_FRAME_HEIGHT, settings, elapsed);
 
-      const previewColor = currentColor.map(channel => clampByte(channel * settings.bright / 100));
-      let outputColor = calibrateColor(currentColor).map(channel => (
-        clampByte(channel * settings.bright / 100)
-      ));
-      let outputBrightness = null;
-      const keepWhiteAtBlack = !settings.allowTurnOff && isBlack;
-      if (keepWhiteAtBlack) {
-        outputColor = [255, 255, 255];
-        if (!minimumWhiteActive) {
-          outputBrightness = 1;
-          minimumWhiteActive = true;
-        }
-      } else if (minimumWhiteActive) {
-        outputBrightness = window.lampControl.brightness;
-        minimumWhiteActive = false;
-      }
+      const previewColor = result.preview.map(clampByte);
+      const outputColor = result.output.map(clampByte);
       $('sw').style.background = `rgb(${previewColor[0]}, ${previewColor[1]}, ${previewColor[2]})`;
 
       const changedEnough = !lastSentColor || outputColor.reduce(
-        (difference, channel, index) => (
-          difference + Math.abs(channel - lastSentColor[index])
-        ),
+        (difference, channel, index) => difference + Math.abs(channel - lastSentColor[index]),
         0
       ) >= 3;
       const needsRefresh = lastSentColor
@@ -563,14 +475,18 @@ async function syncLoop() {
         && frameStart - lastSendTime > 1500;
       const calibrationChanged = calibrationRevision !== lastCalibrationRevision;
 
-      if (window.lampControl.connected && (
-        changedEnough || needsRefresh || calibrationChanged || outputBrightness !== null
-      )) {
-        sendColor(outputColor, outputBrightness);
-        lastSentColor = outputColor;
-        lastSendTime = frameStart;
-        lastCalibrationRevision = calibrationRevision;
+      if (window.lampControl.connected && (changedEnough || needsRefresh || calibrationChanged || forceResend)) {
+        if (sendColor(outputColor)) {
+          lastSentColor = outputColor;
+          lastSendTime = frameStart;
+          lastCalibrationRevision = calibrationRevision;
+          forceResend = false;
+        }
       }
+    } else if (frameStart - lastFrameTime > NO_FRAME_TIMEOUT && !recovering && !starting) {
+      // The capture stream is alive but delivers nothing; restart it.
+      lastFrameTime = frameStart;
+      recoverCapture();
     }
 
     const frameDuration = performance.now() - frameStart;
@@ -649,15 +565,8 @@ function updateConnection(connected, status) {
       setStatus('status.stopped');
       refreshWizardColors();
     }
-    if (restoreBrightnessOnConnect) {
-      restoreBrightnessOnConnect = false;
-      window.lampControl.sendBrightness(window.lampControl.brightness);
-    }
-    // This runs on every status change while connected; the resume request is single-use, so it cannot fire
-    // later (for example after auto-reconnect is switched on) for a drop that happened long ago.
-    const shouldResume = resumeAfterReconnect && window.lampControl.autoReconnect;
-    resumeAfterReconnect = false;
-    if (shouldResume) {
+    if (resumeAfterReconnect && window.lampControl.autoReconnect) {
+      resumeAfterReconnect = false;
       setTimeout(() => {
         if (!running && !starting && window.lampControl.connected) {
           toggleSync();
@@ -671,9 +580,12 @@ async function refreshScreens() {
   const screens = await window.api.screens();
   const select = $('screen');
   select.replaceChildren();
-  screens.forEach(({ label, id }) => {
-    select.add(new Option(label, id));
+  screens.forEach(({ label, id, displayId }) => {
+    const option = new Option(label, id);
+    option.dataset.display = displayId || '';
+    select.add(option);
   });
+  const displayOf = (id) => (screens.find((screen) => screen.id === id) || {}).displayId || '';
 
   if (screens.length === 0) {
     select.disabled = true;
@@ -681,21 +593,22 @@ async function refreshScreens() {
   }
 
   select.disabled = false;
-  const legacyIndex = Number.isInteger(settings.screen)
+  // Screen ids are positions that can shift when displays change, so the display itself is matched first.
+  // The saved choice is only overwritten when the person picks a screen, so a monitor that is unplugged for
+  // a while is chosen again when it comes back.
+  const savedIndex = Number.isInteger(settings.screen)
     ? Math.max(0, Math.min(settings.screen, screens.length - 1))
     : -1;
-  const selectedScreen = screens.some(({ id }) => id === settings.screen)
-    ? settings.screen
-    : screens[legacyIndex >= 0 ? legacyIndex : 0].id;
-  select.value = selectedScreen;
-  // Only a first run (nothing saved) or an old numeric index is pinned to a concrete screen. A saved screen
-  // that is missing right now (display asleep, unplugged, mode switch) stays the preference, so sync returns
-  // to it by itself instead of being moved to the first display for good.
-  if (typeof settings.screen !== 'string' || settings.screen === '') {
-    settings.screen = selectedScreen;
+  const match = (settings.display && screens.find(({ displayId }) => displayId === settings.display))
+    || screens.find(({ id }) => id === settings.screen)
+    || screens[savedIndex >= 0 ? savedIndex : 0];
+  select.value = match.id;
+  if (!settings.screen || !settings.display) {
+    settings.screen = match.id;
+    settings.display = displayOf(match.id);
     saveSettings();
   }
-  window.api.setScreen(selectedScreen);
+  window.api.setScreen(match.id, displayOf(match.id));
 }
 
 async function populateScreens() {
@@ -743,14 +656,12 @@ document.addEventListener('languagechange', () => {
 
 $('screen').addEventListener('change', async () => {
   settings.screen = $('screen').value;
+  settings.display = ($('screen').selectedOptions[0] || {}).dataset?.display || '';
   saveSettings();
-  window.api.setScreen(settings.screen);
+  window.api.setScreen(settings.screen, settings.display);
 
   if (running) {
     const generation = ++startGeneration;
-    // While the new capture opens there is briefly no stream; keep the 2-second watchdog from treating that
-    // gap as a dead stream (it would cancel this restart and make everything wait for a full recovery).
-    starting = true;
     stopCapture();
     try {
       await startCapture(generation);
@@ -760,10 +671,6 @@ $('screen').addEventListener('change', async () => {
       }
       stopSync();
       setStatus('status.captureFailed', { message: error.message });
-    } finally {
-      if (generation === startGeneration) {
-        starting = false;
-      }
     }
   }
 });
@@ -780,6 +687,15 @@ window.api.onDisplayChange(() => {
 window.api.onResume(() => {
   refreshScreens().catch(() => {});
   setTimeout(recoverCapture, 2000);
+});
+// Locking Windows interrupts screen capture; pause recovery while locked and restart after unlocking.
+window.api.onLock(() => {
+  screenLocked = true;
+});
+window.api.onUnlock(() => {
+  screenLocked = false;
+  refreshScreens().catch(() => {});
+  setTimeout(recoverCapture, 1500);
 });
 
 populateScreens();

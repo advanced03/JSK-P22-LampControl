@@ -79,9 +79,10 @@
     let top = 0
     let bottom = height - 1
     if (options.ignoreBars) {
+      // No clear picture area (very dark scene or nothing but bars): use the whole frame, which is then
+      // simply dark, instead of forcing pure black.
       const bars = detectBars(data, width, height)
-      if (!bars) return [0, 0, 0]
-      ;({ left, right, top, bottom } = bars)
+      if (bars) ({ left, right, top, bottom } = bars)
     }
 
     let plainR = 0, plainG = 0, plainB = 0
@@ -229,9 +230,16 @@
     return sorted[Math.floor(sorted.length / 2)]
   }
 
+  // Time constant (seconds) of the exponential smoothing for a 0-100 setting: 0 = no smoothing,
+  // 50 is about 1.1 s, 100 is about 3 s. Based on elapsed time, so it does not depend on the frame rate.
+  function smoothingTimeConstant(amount) {
+    const fraction = Math.max(0, Math.min(100, Number(amount) || 0)) / 100
+    return fraction <= 0 ? 0 : 0.08 + Math.pow(fraction, 1.5) * 3
+  }
+
   function smoothColor(current, target, elapsedSeconds, amount) {
-    const timeConstant = (amount / 100) * 1.2
-    const blend = timeConstant < 1e-3 ? 1 : 1 - Math.exp(-elapsedSeconds / timeConstant)
+    const timeConstant = smoothingTimeConstant(amount)
+    const blend = timeConstant < 1e-3 ? 1 : 1 - Math.exp(-Math.max(0, elapsedSeconds) / timeConstant)
     return current.map((channel, index) => channel + (target[index] - channel) * blend)
   }
 
@@ -254,6 +262,71 @@
     }
   }
 
+  const GLITCH_FILTER_FRAMES = 3
+  // Lowest output level (0-255 peak) that still lights the lamp visibly when "allow light to fully turn off"
+  // is unchecked. Below this the lamp would look off, and very low PWM values show uneven LED tints.
+  const MIN_OUTPUT_LEVEL = 12
+  const OFF_ENTER_LEVEL = 1.5
+  const OFF_EXIT_LEVEL = 4
+
+  // Turns the smoothed screen color into what is sent to the lamp: calibration, brightness limit and the
+  // low-end behavior. Everything stays a plain color command; the lamp's hardware brightness is never used,
+  // because a very low hardware brightness quantizes the channels unevenly and shows up as a red/yellow tint.
+  function createOutputStage() {
+    let off = false
+    return {
+      reset() {
+        off = false
+      },
+      map(color, settings) {
+        const scale = (Number(settings.bright) || 0) / 100
+        const cal = [settings.calRed, settings.calGreen, settings.calBlue].map((value) => (Number(value) || 0) / 100)
+        const scaled = color.map((channel, index) => channel * cal[index] * scale)
+        const peak = Math.max(...scaled)
+        if (settings.allowTurnOff) {
+          off = off ? peak < OFF_EXIT_LEVEL : peak < OFF_ENTER_LEVEL
+          return off ? [0, 0, 0] : scaled
+        }
+        off = false
+        if (peak >= MIN_OUTPUT_LEVEL) return scaled
+        // Below the floor: blend from the calibrated neutral white (pure black) up to the scene color
+        // lifted to the floor, so there is no jump and noise in a dark scene cannot tint the lamp.
+        const whitePeak = Math.max(...cal, 1e-6)
+        const neutral = cal.map((value) => (value / whitePeak) * MIN_OUTPUT_LEVEL)
+        if (peak <= 1e-6) return neutral
+        const lifted = scaled.map((channel) => channel * (MIN_OUTPUT_LEVEL / peak))
+        const mix = peak / MIN_OUTPUT_LEVEL
+        return neutral.map((channel, index) => channel + (lifted[index] - channel) * mix)
+      },
+    }
+  }
+
+  // Complete frame-to-lamp pipeline with its state (glitch filter, smoothing, output stage).
+  function createEngine() {
+    let current = null
+    const recent = []
+    const output = createOutputStage()
+    return {
+      reset() {
+        current = null
+        recent.length = 0
+        output.reset()
+      },
+      // data: RGBA frame. Returns { preview, output } with channels in 0-255 (not yet rounded).
+      step(data, width, height, settings, elapsedSeconds) {
+        let sampled = frameColor(data, width, height, { ignoreBars: settings.bars, dominant: settings.dominant })
+        if (settings.hdr) sampled = correctHdr(sampled, settings.hdramt)
+        recent.push(grayGuard(vividify(sampled, settings.vivid)))
+        if (recent.length > GLITCH_FILTER_FRAMES) recent.shift()
+        const target = medianColor(recent)
+        current = current
+          ? smoothColor(current, target, elapsedSeconds, settings.smooth)
+          : [...target]
+        return { preview: current, output: output.map(current, settings) }
+      },
+    }
+  }
+
   const SETTINGS_DEFAULTS = {
     version: SETTINGS_VERSION,
     bars: false,
@@ -264,6 +337,7 @@
     bright: 100,
     allowTurnOff: true,
     screen: '',
+    display: '',
     hdr: false,
     hdramt: 10,
     calRed: 100,
@@ -271,49 +345,10 @@
     calBlue: 100,
   }
 
-  // Slider ranges, mirrored from control.html. Saved values outside these (hand-edited or corrupted storage)
-  // would otherwise reach the sync loop as NaN or as absurd delays.
-  const NUMERIC_LIMITS = {
-    fps: [1, 30],
-    smooth: [0, 100],
-    vivid: [0, 100],
-    bright: [5, 100],
-    hdramt: [0, 100],
-    calRed: [0, 100],
-    calGreen: [0, 100],
-    calBlue: [0, 100],
-  }
-  const BOOLEAN_SETTINGS = ['bars', 'dominant', 'allowTurnOff', 'hdr']
-
-  function toFiniteNumber(value) {
-    if (typeof value === 'number') return Number.isFinite(value) ? value : NaN
-    if (typeof value === 'string' && value.trim() !== '') return Number(value)
-    return NaN
-  }
-
-  // Forces every saved value into the type and range the sync loop expects, falling back to the default.
-  function sanitizeSettings(settings) {
-    const clean = { ...settings }
-    for (const [name, [minimum, maximum]] of Object.entries(NUMERIC_LIMITS)) {
-      const value = toFiniteNumber(clean[name])
-      clean[name] = Number.isFinite(value)
-        ? Math.max(minimum, Math.min(maximum, Math.round(value)))
-        : SETTINGS_DEFAULTS[name]
-    }
-    for (const name of BOOLEAN_SETTINGS) {
-      clean[name] = typeof clean[name] === 'boolean' ? clean[name] : SETTINGS_DEFAULTS[name]
-    }
-    // A screen is a capture source id (string), or a legacy numeric index that is converted on first use.
-    if (typeof clean.screen !== 'string' && !Number.isInteger(clean.screen)) {
-      clean.screen = SETTINGS_DEFAULTS.screen
-    }
-    return clean
-  }
-
   // One-time upgrade of saved settings. The old defaults (smooth 35, HDR 50) are replaced only while the
   // stored settings predate versioning, so a value chosen deliberately afterwards is never overwritten.
   function migrateSettings(saved) {
-    const settings = saved && typeof saved === 'object' && !Array.isArray(saved) ? { ...saved } : {}
+    const settings = saved && typeof saved === 'object' ? { ...saved } : {}
     if (!(Number(settings.version) >= 2)) {
       if (settings.smooth === 35) settings.smooth = SETTINGS_DEFAULTS.smooth
       if (settings.hdramt === 50) settings.hdramt = SETTINGS_DEFAULTS.hdramt
@@ -323,6 +358,28 @@
     }
     settings.version = SETTINGS_VERSION
     return sanitizeSettings({ ...SETTINGS_DEFAULTS, ...settings })
+  }
+
+  // Forces every value into its valid range and type, so a damaged or hand-edited saved setting (for example
+  // an update rate of 0) can never make the sync loop spin or send invalid colors.
+  function sanitizeSettings(settings) {
+    const ranges = {
+      fps: [1, 30], smooth: [0, 100], vivid: [0, 100], bright: [5, 100], hdramt: [0, 100],
+      calRed: [0, 100], calGreen: [0, 100], calBlue: [0, 100],
+    }
+    const result = { ...settings }
+    for (const [name, [low, high]] of Object.entries(ranges)) {
+      const value = Number(result[name])
+      result[name] = Number.isFinite(value)
+        ? Math.max(low, Math.min(high, value))
+        : SETTINGS_DEFAULTS[name]
+    }
+    for (const name of ['bars', 'dominant', 'allowTurnOff', 'hdr']) {
+      result[name] = typeof result[name] === 'boolean' ? result[name] : SETTINGS_DEFAULTS[name]
+    }
+    if (typeof result.screen !== 'string' && !Number.isInteger(result.screen)) result.screen = ''
+    if (typeof result.display !== 'string') result.display = ''
+    return result
   }
 
   return {
@@ -335,8 +392,12 @@
     correctHdr,
     medianColor,
     smoothColor,
+    smoothingTimeConstant,
     createBlackDetector,
+    createOutputStage,
+    createEngine,
     sanitizeSettings,
+    MIN_OUTPUT_LEVEL,
     migrateSettings,
     toLinear,
     toSrgb,
