@@ -145,25 +145,6 @@
             <input type="checkbox" id="ambi-dominant" aria-label="Favor dominant colors" data-ambi-i18n-aria-label="capture.dominant">
           </div>
 
-          <h2 data-ambi-i18n="section.hdr">HDR</h2>
-          <div class="card sc">
-            <div>
-              <div class="t" data-ambi-i18n="hdr.display">Apply HDR correction</div>
-              <div class="d" id="ambi-hdrnote"></div>
-            </div>
-            <input type="checkbox" id="ambi-hdr" aria-label="Apply HDR correction" data-ambi-i18n-aria-label="hdr.displayAria">
-          </div>
-          <div class="card sc">
-            <div>
-              <div class="t" data-ambi-i18n="hdr.correction">Correction strength</div>
-              <div class="d" data-ambi-i18n="hdr.correctionDescription">Adjusts gamma and color to counter washed-out HDR capture.</div>
-            </div>
-            <div class="ctl">
-              <input type="range" id="ambi-hdramt" min="0" max="100" aria-label="HDR correction strength" data-ambi-i18n-aria-label="hdr.correctionAria">
-              <output for="ambi-hdramt"></output>
-            </div>
-          </div>
-
           <div class="ambi-section-heading">
             <h2 data-ambi-i18n="section.calibration">Color calibration</h2>
             <div class="ambi-actions">
@@ -203,11 +184,11 @@
           </div>
           <div class="card sc">
             <div><div class="t" data-ambi-i18n="response.brightness">Brightness</div><div class="d" data-ambi-i18n="response.brightnessDescription">Limits the lamp brightness. The preview stays the same.</div></div>
-            <div class="ctl"><input type="range" id="ambi-bright" min="5" max="100" aria-label="Brightness" data-ambi-i18n-aria-label="response.brightnessAria"><output for="ambi-bright"></output></div>
+            <div class="ctl"><input type="range" id="ambi-bright" min="0" max="100" aria-label="Maximum brightness" data-ambi-i18n-aria-label="response.brightnessAria"><output for="ambi-bright"></output></div>
           </div>
           <div class="card sc">
             <div><div class="t" data-ambi-i18n="response.minLevel">Minimum brightness</div><div class="d" data-ambi-i18n="response.minLevelDescription">The lamp cannot show correct colors below about 15% brightness: white turns yellow or orange. So in dark scenes the lamp is held at this minimum and never turns fully off. Lower values show wrong colors.</div></div>
-            <div class="ctl"><input type="range" id="ambi-minLevel" min="1" max="40" aria-label="Minimum brightness" data-ambi-i18n-aria-label="response.minLevel"><output for="ambi-minLevel"></output></div>
+            <div class="ctl"><input type="range" id="ambi-minLevel" min="0" max="100" aria-label="Minimum brightness" data-ambi-i18n-aria-label="response.minLevel"><output for="ambi-minLevel"></output></div>
           </div>
         </section>
 
@@ -255,7 +236,7 @@
         <label for="ambi-wizard-cal-blue" data-ambi-i18n="calibration.blue">Blue output</label><div class="ctl"><input type="range" id="ambi-wizard-cal-blue" min="0" max="100"><output for="ambi-wizard-cal-blue"></output></div>
       </div>
       <div id="ambi-wizard-minimum" class="wizard-calibration" hidden>
-        <label for="ambi-wizard-minLevel" data-ambi-i18n="response.minLevel">Minimum brightness</label><div class="ctl"><input type="range" id="ambi-wizard-minLevel" min="1" max="40"><output for="ambi-wizard-minLevel"></output></div>
+        <label for="ambi-wizard-minLevel" data-ambi-i18n="response.minLevel">Minimum brightness</label><div class="ctl"><input type="range" id="ambi-wizard-minLevel" min="0" max="100"><output for="ambi-wizard-minLevel"></output></div>
       </div>
       <div class="wizard-actions"><button id="ambi-wizard-cancel" type="button" data-ambi-i18n="wizard.cancel">Cancel</button><div><button id="ambi-wizard-previous" type="button" data-ambi-i18n="wizard.previous">Previous</button><button id="ambi-wizard-next" class="accent" type="button" data-ambi-i18n="wizard.next">Next</button></div></div>
     </dialog>

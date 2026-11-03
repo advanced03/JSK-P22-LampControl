@@ -207,15 +207,6 @@
     return table[sector % 6].map((channel) => channel * 255)
   }
 
-  // Windows hands over a simplified SDR version of HDR content, which can look washed out.
-  // This is a hand-tuned gamma and saturation adjustment, not a real tone-mapping inverse.
-  function correctHdr(rgb, amount) {
-    const strength = amount / 100
-    const gamma = 1 + 0.8 * strength
-    const corrected = rgb.map((channel) => 255 * Math.pow(Math.max(0, Math.min(255, channel)) / 255, gamma))
-    return vividify(corrected, 30 * strength)
-  }
-
   // Pulls near-gray colors to true gray. The pull is continuous (no threshold to flip across) and stronger
   // for dark colors, where a few levels of channel difference are mostly noise or UI accents and would
   // otherwise show up as a random warm tint on the lamp.
@@ -275,7 +266,6 @@
   // yellow/orange. So the lamp is never sent anything dimmer than this, which also means it never goes fully dark.
   const DEFAULT_MIN_LEVEL_PERCENT = 15
   const MIN_OUTPUT_LEVEL = Math.floor((DEFAULT_MIN_LEVEL_PERCENT / 100) * 255)
-  const minOutputLevel = (settings) => ((Number(settings.minLevel) || DEFAULT_MIN_LEVEL_PERCENT) / 100) * 255
 
   // Turns the smoothed screen color into what is sent to the lamp: calibration, brightness limit and the minimum
   // brightness. Everything stays a plain color command; the lamp's hardware brightness is never used.
@@ -283,12 +273,12 @@
     return {
       reset() {},
       map(color, settings) {
-        const floor = Math.max(1, minOutputLevel(settings))
+        const floor = (Math.min(Number(settings.minLevel), Number(settings.bright)) / 100) * 255
         const scale = (Number(settings.bright) || 0) / 100
         const cal = [settings.calRed, settings.calGreen, settings.calBlue].map((value) => (Number(value) || 0) / 100)
         const scaled = color.map((channel, index) => channel * cal[index] * scale)
         const peak = Math.max(...scaled)
-        if (peak >= floor) return scaled
+        if (!(floor > 0.5) || peak >= floor) return scaled
         // Below the minimum: blend from the calibrated neutral white (pure black) up to the scene color lifted to the
         // minimum, so there is no jump and noise in a dark scene cannot tint the lamp.
         const whitePeak = Math.max(...cal, 1e-6)
@@ -314,8 +304,7 @@
       },
       // data: RGBA frame. Returns { preview, output } with channels in 0-255 (not yet rounded).
       step(data, width, height, settings, elapsedSeconds) {
-        let sampled = frameColor(data, width, height, { ignoreBars: settings.bars, dominant: settings.dominant })
-        if (settings.hdr) sampled = correctHdr(sampled, settings.hdramt)
+        const sampled = frameColor(data, width, height, { ignoreBars: settings.bars, dominant: settings.dominant })
         recent.push(grayGuard(vividify(sampled, settings.vivid)))
         if (recent.length > GLITCH_FILTER_FRAMES) recent.shift()
         const target = medianColor(recent)
@@ -338,27 +327,24 @@
     minLevel: DEFAULT_MIN_LEVEL_PERCENT,
     screen: '',
     display: '',
-    hdr: false,
-    hdramt: 10,
     calRed: 100,
     calGreen: 100,
     calBlue: 100,
   }
 
-  // One-time upgrade of saved settings. The old defaults (smooth 35, HDR 50) are replaced only while the
-  // stored settings predate versioning, so a value chosen deliberately afterwards is never overwritten.
+  // One-time upgrade of saved settings. The old default (smooth 35) is replaced only while the stored settings
+  // predate versioning, so a value chosen deliberately afterwards is never overwritten.
   function migrateSettings(saved) {
     const settings = saved && typeof saved === 'object' ? { ...saved } : {}
     if (!(Number(settings.version) >= 2)) {
       if (settings.smooth === 35) settings.smooth = SETTINGS_DEFAULTS.smooth
-      if (settings.hdramt === 50) settings.hdramt = SETTINGS_DEFAULTS.hdramt
     }
     // Version 3: the lamp can no longer be turned fully off by the sync (it cannot show correct colors that dim),
     // and the minimum brightness setting starts at 15% for everyone.
     if (!(Number(settings.version) >= 3)) delete settings.minLevel
     for (const obsolete of [
       'mode', 'captureMode', 'expressiveSensitivity', 'expressiveStrength', 'minimumBrightness',
-      'allowTurnOff', 'lowRed', 'lowGreen', 'lowBlue',
+      'allowTurnOff', 'lowRed', 'lowGreen', 'lowBlue', 'hdr', 'hdramt',
     ]) {
       delete settings[obsolete]
     }
@@ -370,8 +356,8 @@
   // an update rate of 0) can never make the sync loop spin or send invalid colors.
   function sanitizeSettings(settings) {
     const ranges = {
-      fps: [1, 30], smooth: [0, 100], vivid: [0, 100], bright: [5, 100], hdramt: [0, 100],
-      calRed: [0, 100], calGreen: [0, 100], calBlue: [0, 100], minLevel: [1, 40],
+      fps: [1, 30], smooth: [0, 100], vivid: [0, 100], bright: [0, 100],
+      calRed: [0, 100], calGreen: [0, 100], calBlue: [0, 100], minLevel: [0, 100],
     }
     const result = { ...settings }
     for (const [name, [low, high]] of Object.entries(ranges)) {
@@ -380,9 +366,11 @@
         ? Math.max(low, Math.min(high, value))
         : SETTINGS_DEFAULTS[name]
     }
-    for (const name of ['bars', 'dominant', 'hdr']) {
+    for (const name of ['bars', 'dominant']) {
       result[name] = typeof result[name] === 'boolean' ? result[name] : SETTINGS_DEFAULTS[name]
     }
+    // The minimum brightness can never be above the maximum.
+    if (result.minLevel > result.bright) result.minLevel = result.bright
     if (typeof result.screen !== 'string' && !Number.isInteger(result.screen)) result.screen = ''
     if (typeof result.display !== 'string') result.display = ''
     return result
@@ -395,7 +383,6 @@
     frameColor,
     vividify,
     grayGuard,
-    correctHdr,
     medianColor,
     smoothColor,
     smoothingTimeConstant,

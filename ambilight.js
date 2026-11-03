@@ -62,6 +62,9 @@ function saveSettings() {
 
 function setMinLevel(value) {
   settings.minLevel = value;
+  if (value > settings.bright) {
+    showRange('bright', value);
+  }
   calibrationRevision++;
   for (const inputId of ['minLevel', 'wizard-minLevel']) {
     const input = $(inputId);
@@ -137,10 +140,22 @@ function previewDimWhite() {
   }, 2600);
 }
 
+// Sets a range slider (and its value text and fill) and the matching setting.
+function showRange(id, value) {
+  const input = $(id);
+  settings[id] = value;
+  input.value = value;
+  const output = input.parentElement.querySelector('output');
+  if (output) {
+    output.textContent = `${value}${id === 'minLevel' ? '%' : ''}`;
+  }
+  input.style.setProperty('--p', `${(value - Number(input.min)) / (Number(input.max) - Number(input.min)) * 100}%`);
+}
+
 function bindSettings() {
   const settingIds = [
     'bars', 'dominant',
-    'fps', 'smooth', 'vivid', 'bright', 'minLevel', 'hdr', 'hdramt'
+    'fps', 'smooth', 'vivid', 'bright', 'minLevel'
   ];
   const suffix = (id) => (id === 'minLevel' ? '%' : '');
 
@@ -165,6 +180,12 @@ function bindSettings() {
         : input.value;
       if (output) {
         output.textContent = `${settings[id]}${suffix(id)}`;
+      }
+      // The minimum brightness can never be above the maximum: the slider that was not touched follows.
+      if (id === 'minLevel' && settings.minLevel > settings.bright) {
+        showRange('bright', settings.minLevel);
+      } else if (id === 'bright' && settings.bright < settings.minLevel) {
+        showRange('minLevel', settings.bright);
       }
       if (id === 'minLevel') {
         previewDimWhite();
@@ -619,10 +640,6 @@ async function toggleSync() {
   beginSync();
 }
 
-function updateHdrControls() {
-  $('hdramt').disabled = !settings.hdr;
-}
-
 let wasConnected = false;
 
 // Called on every connection status change (also for errors and language changes), so only a real change of the
@@ -702,9 +719,6 @@ async function populateScreens() {
 }
 
 bindSettings();
-updateHdrControls();
-$('hdr').addEventListener('change', updateHdrControls);
-$('hdrnote').textContent = i18n.translate('hdr.manualNote');
 
 $('start').addEventListener('click', toggleSync);
 $('open-calibration-wizard').addEventListener('click', openCalibrationWizard);
@@ -732,7 +746,6 @@ document.addEventListener('languagechange', () => {
   if (wizardActive) {
     renderWizardStep();
   }
-  $('hdrnote').textContent = i18n.translate('hdr.manualNote');
   $('start').textContent = i18n.translate(running ? 'button.stopSync' : 'button.startSync');
 });
 

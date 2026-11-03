@@ -63,17 +63,6 @@ test('dominant colors: small accent barely tints a gray screen, large vivid area
   assert.ok(spread(dominant) > spread(plain))
 })
 
-test('HDR correction keeps gray neutral and is monotonic', () => {
-  let previous = -1
-  for (let v = 0; v <= 255; v += 15) {
-    const out = core.correctHdr([v, v, v], 60)
-    assert.ok(spread(out) < 0.01)
-    assert.ok(out[0] >= previous)
-    previous = out[0]
-  }
-  assert.deepEqual(core.correctHdr([120, 80, 60], 0).map(Math.round), [120, 80, 60])
-})
-
 test('gray and black scenes never produce a color tint, also while fading', () => {
   const out = simulate([[[0, 0, 0], 2], [[90, 90, 90], 2], [[0, 0, 0], 2], [[200, 200, 200], 2], [[6, 5, 4], 2]], { smooth: 50 })
   for (const rgb of out) assert.ok(spread(rgb) <= 1, `tinted output ${rgb}`)
@@ -115,12 +104,12 @@ test('calibration and brightness limit apply to the output but not the preview',
 })
 
 test('damaged saved settings are repaired', () => {
-  const repaired = core.migrateSettings({ fps: 0, smooth: 'abc', bright: -5, hdramt: 500, version: 2 })
+  const repaired = core.migrateSettings({ fps: 0, smooth: 'abc', bright: -5, version: 2 })
   assert.equal(repaired.fps, 1)
   assert.equal(repaired.smooth, core.SETTINGS_DEFAULTS.smooth)
-  assert.equal(repaired.bright, 5)
-  assert.equal(repaired.hdramt, 100)
-  assert.equal(repaired.minLevel, 15)
+  assert.equal(repaired.bright, 0)
+  assert.equal(repaired.minLevel, 0)
+  assert.equal('hdr' in repaired, false)
   assert.equal('allowTurnOff' in repaired, false)
 })
 
@@ -131,3 +120,15 @@ test('a small bright panel on a black screen is not mistaken for a picture betwe
   assert.ok(Math.max(...average) < 40, `lamp would be ${average}`)
 })
 
+
+test('minimum and maximum brightness both span 0-100 and the minimum never exceeds the maximum', () => {
+  const clamped = core.sanitizeSettings({ ...core.SETTINGS_DEFAULTS, minLevel: 80, bright: 50 })
+  assert.equal(clamped.minLevel, 50)
+  assert.equal(core.sanitizeSettings({ ...core.SETTINGS_DEFAULTS, minLevel: 100, bright: 100 }).minLevel, 100)
+  const constant = simulate([[[0, 0, 0], 2], [[200, 30, 30], 2]], { minLevel: 100, bright: 100 })
+  for (const rgb of constant) assert.ok(Math.max(...rgb) >= 250, `not constant: ${rgb}`)
+  const black = simulate([[[0, 0, 0], 2]], { minLevel: 0 })
+  assert.deepEqual(black[black.length - 1], [0, 0, 0])
+  const capped = simulate([[[255, 255, 255], 2]], { minLevel: 10, bright: 40 })
+  assert.ok(Math.max(...capped[capped.length - 1]) <= 103)
+})

@@ -23,7 +23,7 @@ npm run build:installer
 `npm run build` creates a portable Windows x64 executable in `dist/`; `npm run build:installer` creates an NSIS
 installer instead, which starts faster because nothing has to be unpacked on every launch. Electron Builder embeds the
 app icon; neither is digitally signed, so Windows SmartScreen may warn on first run. `npm test` needs no dependencies
-and checks the Bluetooth protocol builders, the Ambilight color pipeline (black bars, dominant colors, HDR, smoothing,
+and checks the Bluetooth protocol builders, the Ambilight color pipeline (black bars, dominant colors, smoothing,
 the dim-scene behavior, settings repair), and that every language has every translation.
 
 ## Screenshots
@@ -52,11 +52,10 @@ Ambilight settings let you:
 
 - Ignore black letterbox and pillarbox bars when working out the screen color. Subtitles or logos inside a bar do not
   defeat the detection.
-- Apply optional HDR correction for washed-out colors.
 - Calibrate red, green, and blue output independently; use the calibration wizard to compare test colors with the
   preview.
 - Tune update rate, smoothing, vividness, and brightness to balance responsiveness and appearance.
-- Minimum brightness (default 15%). The lamp cannot show correct colors below about 15% brightness: even pure white turns
+- Minimum and maximum brightness (both 0-100%; the minimum can never be above the maximum). Minimum brightness defaults to 15%. The lamp cannot show correct colors below about 15% brightness: even pure white turns
   yellow or orange. So the lamp is never sent anything dimmer than this and never goes fully dark; in a black scene it
   shows a neutral dim white (using your color calibration). Lower values are possible but show wrong colors. The scene
   color fades smoothly into and out of dark scenes; nothing jumps. Everything is a plain color command; the lamp's
