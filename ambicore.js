@@ -262,6 +262,70 @@
   }
 
   const GLITCH_FILTER_FRAMES = 3
+
+  // Smoothing that irons out flicker instead of only slowing everything down.
+  //  - "reference" is the color the lamp is heading for. It follows the scene slowly, so a color that keeps
+  //    flipping back and forth (flashes, flicker, fast animation) averages out to its middle instead of passing through.
+  //  - A real scene change is recognized when the new color stays put (within CUT_DISTANCE of itself) for a short
+  //    confirmation time. Then the reference jumps to it and the lamp glides over faster than usual.
+  //  - The shown color glides to the reference with an exponential curve, so changes start and end softly.
+  // The "smoothing" setting scales all the times: 0 sends the raw color, 100 is the calmest.
+  const CUT_DISTANCE = 0.2
+  const colorDistance = (a, b) => Math.max(...a.map((channel, index) => Math.abs(channel - b[index]))) / 255
+  const approach = (from, to, seconds, timeConstant) => {
+    const blend = timeConstant < 1e-3 ? 1 : 1 - Math.exp(-Math.max(0, seconds) / timeConstant)
+    return from.map((channel, index) => channel + (to[index] - channel) * blend)
+  }
+
+  function createSmoother() {
+    let current = null
+    let reference = null
+    let pending = null
+    let pendingTime = 0
+    return {
+      reset() {
+        current = null
+        reference = null
+        pending = null
+        pendingTime = 0
+      },
+      step(target, elapsedSeconds, amount) {
+        const timeConstant = smoothingTimeConstant(amount)
+        if (!current || timeConstant < 1e-3) {
+          current = [...target]
+          reference = [...target]
+          pending = null
+          pendingTime = 0
+          return current
+        }
+        const seconds = Math.max(0, elapsedSeconds)
+        const fraction = Math.max(0, Math.min(1, (Number(amount) || 0) / 100))
+        const confirmTime = 0.2 + 0.8 * fraction
+        let jumped = false
+        if (colorDistance(target, reference) > CUT_DISTANCE) {
+          if (!pending || colorDistance(target, pending) > CUT_DISTANCE * 0.6) {
+            pending = [...target]
+            pendingTime = 0
+          } else {
+            pendingTime += seconds
+          }
+          if (pendingTime >= confirmTime) {
+            reference = [...target]
+            pending = null
+            pendingTime = 0
+            jumped = true
+          }
+        } else {
+          pending = null
+          pendingTime = 0
+        }
+        if (!jumped) reference = approach(reference, target, seconds, timeConstant * 2)
+        const glide = colorDistance(current, reference) > 0.25 ? timeConstant * 0.6 : timeConstant
+        current = approach(current, reference, seconds, glide)
+        return current
+      },
+    }
+  }
   // The lamp cannot show correct colors below roughly 15% brightness: at that level and lower even pure white turns
   // yellow/orange. So the lamp is never sent anything dimmer than this, which also means it never goes fully dark.
   const DEFAULT_MIN_LEVEL_PERCENT = 15
@@ -293,12 +357,12 @@
 
   // Complete frame-to-lamp pipeline with its state (glitch filter, smoothing, output stage).
   function createEngine() {
-    let current = null
+    const smoother = createSmoother()
     const recent = []
     const output = createOutputStage()
     return {
       reset() {
-        current = null
+        smoother.reset()
         recent.length = 0
         output.reset()
       },
@@ -308,9 +372,7 @@
         recent.push(grayGuard(vividify(sampled, settings.vivid)))
         if (recent.length > GLITCH_FILTER_FRAMES) recent.shift()
         const target = medianColor(recent)
-        current = current
-          ? smoothColor(current, target, elapsedSeconds, settings.smooth)
-          : [...target]
+        const current = smoother.step(target, elapsedSeconds, settings.smooth)
         return { preview: current, output: output.map(current, settings) }
       },
     }
@@ -385,6 +447,7 @@
     grayGuard,
     medianColor,
     smoothColor,
+    createSmoother,
     smoothingTimeConstant,
     createBlackDetector,
     createOutputStage,

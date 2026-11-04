@@ -132,3 +132,35 @@ test('minimum and maximum brightness both span 0-100 and the minimum never excee
   const capped = simulate([[[255, 255, 255], 2]], { minLevel: 10, bright: 40 })
   assert.ok(Math.max(...capped[capped.length - 1]) <= 103)
 })
+
+function smootherRun(values, amount, dt = 0.05) {
+  const smoother = core.createSmoother()
+  return values.map((value) => smoother.step([value, value, value], dt, amount)[0])
+}
+const range = (list, from = 0) => Math.max(...list.slice(from)) - Math.min(...list.slice(from))
+
+test('smoothing irons out fast flicker instead of passing it through', () => {
+  const flicker = Array.from({ length: 400 }, (_, i) => (Math.floor(i * 0.05 * 4) % 2 ? 200 : 60)) // 2 Hz
+  assert.ok(range(smootherRun(flicker, 50), 200) < 6, 'a 60<->200 flicker must stay almost still')
+  assert.ok(range(smootherRun(flicker, 0), 200) > 100, 'smoothing 0 stays raw')
+})
+
+test('a short flash is mostly ignored, a real scene change still comes through', () => {
+  const flash = Array.from({ length: 160 }, (_, i) => (i >= 40 && i < 43 ? 255 : 40)) // 0.15 s
+  assert.ok(Math.max(...smootherRun(flash, 50)) < 60)
+  const cut = Array.from({ length: 400 }, (_, i) => (i < 40 ? 20 : 220))
+  const out = smootherRun(cut, 50)
+  assert.ok(out[out.length - 1] > 215, 'reaches the new scene color')
+  assert.ok(out[40 + 20] < 150, 'but glides, it does not jump')
+  const monotonic = out.every((value, i) => i === 0 || value >= out[i - 1] - 0.001)
+  assert.ok(monotonic, 'no overshoot or wobble')
+})
+
+test('smoothing a scene change is not slower than a plain exponential filter', () => {
+  const cut = Array.from({ length: 400 }, (_, i) => (i < 40 ? 20 : 220))
+  const adaptive = smootherRun(cut, 50)
+  let plain = [20, 20, 20]
+  const exponential = cut.map((value) => (plain = core.smoothColor(plain, [value, value, value], 0.05, 50))[0])
+  const reach = (list) => list.findIndex((value, i) => i >= 40 && value >= 20 + 200 * 0.9)
+  assert.ok(reach(adaptive) <= reach(exponential) + 4)
+})

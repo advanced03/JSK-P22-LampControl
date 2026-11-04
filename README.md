@@ -55,6 +55,9 @@ Ambilight settings let you:
 - Calibrate red, green, and blue output independently; use the calibration wizard to compare test colors with the
   preview.
 - Tune update rate, smoothing, vividness, and brightness to balance responsiveness and appearance.
+- Smoothing averages out fast flicker (flashes, strobing, quickly changing scenes) instead of passing it on. A real scene
+  change is recognized after a short confirmation time and then glides over smoothly. Higher values wait longer and glide
+  slower; 0 sends the raw color.
 - Minimum and maximum brightness (both 0-100%; the minimum can never be above the maximum). Minimum brightness defaults to 15%. The lamp cannot show correct colors below about 15% brightness: even pure white turns
   yellow or orange. So the lamp is never sent anything dimmer than this and never goes fully dark; in a black scene it
   shows a neutral dim white (using your color calibration). Lower values are possible but show wrong colors. The scene
