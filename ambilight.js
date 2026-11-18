@@ -140,6 +140,11 @@ function previewDimWhite() {
   }, 2600);
 }
 
+// Sliders that are percentages show a % sign; the update rate is a plain number.
+function valueSuffix(id) {
+  return ['smooth', 'vivid', 'bright', 'minLevel'].includes(id) ? '%' : '';
+}
+
 // Sets a range slider (and its value text and fill) and the matching setting.
 function showRange(id, value) {
   const input = $(id);
@@ -147,7 +152,7 @@ function showRange(id, value) {
   input.value = value;
   const output = input.parentElement.querySelector('output');
   if (output) {
-    output.textContent = `${value}${id === 'minLevel' ? '%' : ''}`;
+    output.textContent = `${value}${valueSuffix(id)}`;
   }
   input.style.setProperty('--p', `${(value - Number(input.min)) / (Number(input.max) - Number(input.min)) * 100}%`);
 }
@@ -155,9 +160,10 @@ function showRange(id, value) {
 function bindSettings() {
   const settingIds = [
     'bars', 'dominant',
-    'fps', 'smooth', 'vivid', 'bright', 'minLevel'
+    'fps', 'smooth', 'vivid', 'bright', 'minLevel',
+    'streamColor'
   ];
-  const suffix = (id) => (id === 'minLevel' ? '%' : '');
+  const suffix = valueSuffix;
 
   for (const id of settingIds) {
     const input = $(id);
@@ -378,7 +384,7 @@ function applyCaptureFrameRate() {
 }
 
 function sendColor(rgb, testColor = false) {
-  if (!window.lampControl.sendColor(rgb[0], rgb[1], rgb[2], null, testColor)) {
+  if (!window.lampControl.sendColor(rgb[0], rgb[1], rgb[2], null, testColor, settings.streamColor)) {
     setStatus('status.notConnected');
     return false;
   }

@@ -680,7 +680,7 @@
         return connect({ auto: true })
       },
       // testColor: a temporary color (calibration wizard) that must not change what the interface shows.
-      sendColor(red, green, blue, brightness = null, testColor = false) {
+      sendColor(red, green, blue, brightness = null, testColor = false, streaming = false) {
         if (!ch) return false
         ambilightSending = true
         try {
@@ -691,9 +691,9 @@
             send(micOnOff(false))
           }
           if (brightness === null) {
-            send(cmd.color(red, green, blue))
+            send(cmd.color(red, green, blue, streaming))
           } else {
-            const colorCommand = cmd.color(red, green, blue)
+            const colorCommand = cmd.color(red, green, blue, streaming)
             // Drop a queued older color so it cannot be written after this brightness + color pair.
             pending = null
             gatt(async () => {

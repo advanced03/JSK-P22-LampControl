@@ -18,7 +18,9 @@
     WEEK_ENABLED,
     clampByte,
     power: (on) => [0x7e, 4, 4, +!!on, 0, +!!on, 0xff, 0, 0xef],
-    color: (r, g, b) => [0x7e, 7, 5, 3, clampByte(r), clampByte(g), clampByte(b), 0x10, 0xef],
+    // The last data byte is 0x10 for a normal color. The original app sends 0x20 instead for the fast, continuously
+    // changing colors of its music mode; "streaming" selects that variant (experimental, not verified on the lamp).
+    color: (r, g, b, streaming = false) => [0x7e, 7, 5, 3, clampByte(r), clampByte(g), clampByte(b), streaming ? 0x20 : 0x10, 0xef],
     brightness: (level) => [0x7e, 4, 1, clampByte(level), 0xff, 0xff, 0xff, 0, 0xef],
     mode: (id) => [0x7e, 5, 3, clampByte(id), 6, 0xff, 0xff, 0, 0xef],
     scene: (id) => [0x7e, 5, 0x31, clampByte(id), 7, 0xff, 0xff, 1, 0xef],

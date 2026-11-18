@@ -190,6 +190,13 @@
             <div><div class="t" data-ambi-i18n="response.minLevel">Minimum brightness</div><div class="d" data-ambi-i18n="response.minLevelDescription">The lamp cannot show correct colors below about 15% brightness: white turns yellow or orange. So in dark scenes the lamp is held at this minimum and never turns fully off. Lower values show wrong colors.</div></div>
             <div class="ctl"><input type="range" id="ambi-minLevel" min="0" max="100" aria-label="Minimum brightness" data-ambi-i18n-aria-label="response.minLevel"><output for="ambi-minLevel"></output></div>
           </div>
+          <div class="card sc">
+            <div>
+              <div class="t" data-ambi-i18n="response.streamColor">Experimental: fast color command</div>
+              <div class="d" data-ambi-i18n="response.streamColorDescription">Sends colors the way the original app does in its music mode. This may reduce delay or fading, but it is untested and may not work on every lamp. Turn it off if colors look wrong.</div>
+            </div>
+            <input type="checkbox" id="ambi-streamColor" aria-label="Experimental: fast color command" data-ambi-i18n-aria-label="response.streamColor">
+          </div>
         </section>
 
         <section class="page" id="pSettings">

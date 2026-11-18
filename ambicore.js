@@ -328,7 +328,9 @@
   }
   // The lamp cannot show correct colors below roughly 15% brightness: at that level and lower even pure white turns
   // yellow/orange. So the lamp is never sent anything dimmer than this, which also means it never goes fully dark.
-  const DEFAULT_MIN_LEVEL_PERCENT = 15
+  // Below this raw peak (0-255) the color of a scene is mostly capture noise, so it is blended to neutral white.
+  const NEUTRAL_BELOW = 16
+  const DEFAULT_MIN_LEVEL_PERCENT = 50
   const MIN_OUTPUT_LEVEL = Math.floor((DEFAULT_MIN_LEVEL_PERCENT / 100) * 255)
 
   // Turns the smoothed screen color into what is sent to the lamp: calibration, brightness limit and the minimum
@@ -343,13 +345,14 @@
         const scaled = color.map((channel, index) => channel * cal[index] * scale)
         const peak = Math.max(...scaled)
         if (!(floor > 0.5) || peak >= floor) return scaled
-        // Below the minimum: blend from the calibrated neutral white (pure black) up to the scene color lifted to the
-        // minimum, so there is no jump and noise in a dark scene cannot tint the lamp.
+        // Below the minimum the scene color is lifted to the minimum. Only the brightness changes: hue and saturation stay.
+        // The calibrated neutral white is blended in only for scenes that are almost black, where the color is mostly
+        // noise. That blend must not depend on the minimum itself, or a high minimum would wash out every dark color.
         const whitePeak = Math.max(...cal, 1e-6)
         const neutral = cal.map((value) => (value / whitePeak) * floor)
         if (peak <= 1e-6) return neutral
         const lifted = scaled.map((channel) => channel * (floor / peak))
-        const mix = peak / floor
+        const mix = Math.min(1, Math.max(...color) / NEUTRAL_BELOW)
         return neutral.map((channel, index) => channel + (lifted[index] - channel) * mix)
       },
     }
@@ -382,11 +385,12 @@
     version: SETTINGS_VERSION,
     bars: false,
     dominant: true,
-    fps: 20,
-    smooth: 50,
-    vivid: 40,
+    fps: 30,
+    smooth: 30,
+    vivid: 60,
     bright: 100,
     minLevel: DEFAULT_MIN_LEVEL_PERCENT,
+    streamColor: false,
     screen: '',
     display: '',
     calRed: 100,
@@ -402,7 +406,7 @@
       if (settings.smooth === 35) settings.smooth = SETTINGS_DEFAULTS.smooth
     }
     // Version 3: the lamp can no longer be turned fully off by the sync (it cannot show correct colors that dim),
-    // and the minimum brightness setting starts at 15% for everyone.
+    // and the minimum brightness setting starts at 50% for everyone.
     if (!(Number(settings.version) >= 3)) delete settings.minLevel
     for (const obsolete of [
       'mode', 'captureMode', 'expressiveSensitivity', 'expressiveStrength', 'minimumBrightness',
@@ -428,7 +432,7 @@
         ? Math.max(low, Math.min(high, value))
         : SETTINGS_DEFAULTS[name]
     }
-    for (const name of ['bars', 'dominant']) {
+    for (const name of ['bars', 'dominant', 'streamColor']) {
       result[name] = typeof result[name] === 'boolean' ? result[name] : SETTINGS_DEFAULTS[name]
     }
     // The minimum brightness can never be above the maximum.
