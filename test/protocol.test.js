@@ -31,8 +31,3 @@ test('timer report parsing', () => {
   assert.equal(P.parseTimerReport(report, 0), null)
   assert.equal(P.parseTimerReport([1, 2, 3], 0), null)
 })
-
-test('streaming color variant only changes the flag byte (experimental)', () => {
-  assert.deepEqual(P.color(10, 20, 30), [0x7e, 7, 5, 3, 10, 20, 30, 0x10, 0xef])
-  assert.deepEqual(P.color(10, 20, 30, true), [0x7e, 7, 5, 3, 10, 20, 30, 0x20, 0xef])
-})

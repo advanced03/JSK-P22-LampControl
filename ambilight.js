@@ -160,8 +160,7 @@ function showRange(id, value) {
 function bindSettings() {
   const settingIds = [
     'bars', 'dominant',
-    'fps', 'smooth', 'vivid', 'bright', 'minLevel',
-    'streamColor'
+    'fps', 'smooth', 'vivid', 'bright', 'minLevel'
   ];
   const suffix = valueSuffix;
 
@@ -384,7 +383,7 @@ function applyCaptureFrameRate() {
 }
 
 function sendColor(rgb, testColor = false) {
-  if (!window.lampControl.sendColor(rgb[0], rgb[1], rgb[2], null, testColor, settings.streamColor)) {
+  if (!window.lampControl.sendColor(rgb[0], rgb[1], rgb[2], null, testColor)) {
     setStatus('status.notConnected');
     return false;
   }

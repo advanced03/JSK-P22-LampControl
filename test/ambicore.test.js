@@ -55,7 +55,7 @@ test('a very dark scene with bar detection on is not forced to black', () => {
 
 test('dominant colors: small accent barely tints a gray screen, large vivid area wins', () => {
   const accent = frame((x, y) => (x < 30 && y < 10 ? [217, 119, 87] : [38, 37, 34]))
-  const settings = { ...core.SETTINGS_DEFAULTS, smooth: 0, vivid: 0, minLevel: 0, dominant: true }
+  const settings = { ...core.SETTINGS_DEFAULTS, smooth: 0, dominant: true }
   assert.ok(spread(core.createEngine().step(accent, W, H, settings, 0.05).output) <= 2)
   const mostly = frame((x) => (x < 100 ? [220, 30, 30] : [120, 120, 120]))
   const plain = core.frameColor(mostly, W, H, {})
@@ -70,7 +70,7 @@ test('gray and black scenes never produce a color tint, also while fading', () =
 
 test('smoothing is gradual, scales with the setting, and 0 is instant', () => {
   const step = (smooth) => {
-    const out = simulate([[[200, 200, 200], 3], [[0, 0, 0], 3]], { smooth, minLevel: 0 })
+    const out = simulate([[[200, 200, 200], 3], [[0, 0, 0], 3]], { smooth })
     let largest = 0
     for (let i = 1; i < out.length; i++) largest = Math.max(largest, Math.abs(out[i][0] - out[i - 1][0]))
     return largest
@@ -81,8 +81,8 @@ test('smoothing is gradual, scales with the setting, and 0 is instant', () => {
   assert.ok(core.smoothingTimeConstant(100) > core.smoothingTimeConstant(50))
 })
 
-test('the lamp is never sent anything dimmer than the minimum brightness (default 50%)', () => {
-  assert.equal(core.SETTINGS_DEFAULTS.minLevel, 50)
+test('the lamp is never sent anything dimmer than the minimum brightness (default 15%)', () => {
+  assert.equal(core.SETTINGS_DEFAULTS.minLevel, 15)
   const out = simulate([[[0, 0, 0], 2], [[3, 3, 3], 2], [[100, 100, 100], 1], [[0, 0, 0], 3]])
   for (const rgb of out) assert.ok(Math.max(...rgb) >= core.MIN_OUTPUT_LEVEL, `too dim: ${rgb}`)
   const black = out[out.length - 1]
@@ -97,7 +97,7 @@ test('the lamp is never sent anything dimmer than the minimum brightness (defaul
 })
 
 test('calibration and brightness limit apply to the output but not the preview', () => {
-  const settings = { ...core.SETTINGS_DEFAULTS, smooth: 0, vivid: 0, dominant: false, calRed: 50, bright: 50, minLevel: 0 }
+  const settings = { ...core.SETTINGS_DEFAULTS, smooth: 0, vivid: 0, dominant: false, calRed: 50, bright: 50 }
   const result = core.createEngine().step(solid([200, 100, 100]), W, H, settings, 0.05)
   assert.deepEqual(result.preview.map(Math.round), [200, 100, 100])
   assert.deepEqual(result.output.map(Math.round), [50, 50, 50])
@@ -175,10 +175,4 @@ test('a high minimum brightness keeps dark colors saturated', () => {
       assert.ok(Math.max(...result.output) >= (minLevel / 100) * 255 - 1)
     }
   }
-})
-
-test('the experimental fast color command is off by default and always a boolean', () => {
-  assert.equal(core.SETTINGS_DEFAULTS.streamColor, false)
-  assert.equal(core.sanitizeSettings({ ...core.SETTINGS_DEFAULTS, streamColor: 'yes' }).streamColor, false)
-  assert.equal(core.sanitizeSettings({ ...core.SETTINGS_DEFAULTS, streamColor: true }).streamColor, true)
 })

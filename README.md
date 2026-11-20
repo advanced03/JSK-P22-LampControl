@@ -55,9 +55,6 @@ Ambilight settings let you:
 - Calibrate red, green, and blue output independently; use the calibration wizard to compare test colors with the
   preview.
 - Tune update rate, smoothing, vividness, and brightness to balance responsiveness and appearance.
-- Experimental: fast color command (off by default). The original Magic Lantern app sends the color of its music mode with a
-  different flag byte (`0x20` instead of `0x10` at the end of the color command). With this option on, Ambilight uses that
-  variant. It may reduce delay or fading, but it is untested on the lamp and only applies to screen sync.
 - Smoothing averages out fast flicker (flashes, strobing, quickly changing scenes) instead of passing it on. A real scene
   change is recognized after a short confirmation time and then glides over smoothly. Higher values wait longer and glide
   slower; 0 sends the raw color.
